@@ -9,26 +9,23 @@ using TwitchLib.Communication.Models;
 
 namespace _26tack_rewritten.src;
 
-public static class BotClient
+public static class MainClient
 {
     public static List<string> JLChannels { get; private set; } = new List<string>();
-    public static List<string> JoinedChannels { get; } = new List<string>();
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
 
     private static bool Running { get; set; } = true;
+    private static bool Errored { get; set; } = false;
     private static HttpClient HttpClient { get; } = new HttpClient();
 
     public static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
         
-        await Initialize();
-        while (Running)
-        {
-            Console.Read();
-        }
-        return -1;
+        if (Running) await Initialize();
+        while (Running) Console.Read();
+        return 0;
     }
 
     private static async Task Initialize()
@@ -37,8 +34,8 @@ public static class BotClient
         options.MessagesAllowedInPeriod = 150;
         options.ThrottlingPeriod = TimeSpan.FromSeconds(30);
 
-        ReconnectionPolicy policy = new ReconnectionPolicy();
-        policy.SetMaxAttempts(5);
+        ReconnectionPolicy policy = new ReconnectionPolicy(10);
+        policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
         WebSocketClient webSocketClient = new WebSocketClient(options);
@@ -51,16 +48,26 @@ public static class BotClient
         Stream jlcl = await HttpClient.GetStreamAsync(Config.JLChannelListLink);
         JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
         JLChannels = deserialized.channels.Select(c => c.name).ToList();
+
+        await Connect();
     }
 
     private static async Task Connect()
     {
         Client.Connect();
-        Client.OnConnectionError += ConnectionErrorEvent;
+        Client.OnConnectionError += (s, e) => Errored = true;
+        Client.OnConnected += ClientConnectedEvent;
     }
 
-    private static async void ConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
+    private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
-        throw new NotImplementedException();
+        if (Errored) await Reconnect();
+    }
+
+    private static async Task Reconnect()
+    {
+        Client.JoinChannel(Config.RelayChannel);
+        Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnected");
+        Errored = false;
     }
 }

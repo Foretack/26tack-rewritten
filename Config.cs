@@ -1,4 +1,4 @@
-﻿namespace _26tack_rewritten.src;
+﻿namespace _26tack_rewritten;
 public static class Config
 {
     public const string RelayChannel = "";
