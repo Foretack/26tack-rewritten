@@ -5,6 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace _26tack_rewritten.interfaces;
-internalclass Commands
+internal class Commands
 {
 }

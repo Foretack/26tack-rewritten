@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Npgsql;
+using NpgsqlTypes;
 
 namespace _26tack_rewritten.database;
-internal class DbConnection
+internal abstract class DbConnection
 {
+    
 }

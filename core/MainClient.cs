@@ -6,8 +6,9 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
+using _26tack_rewritten.handlers;
 
-namespace _26tack_rewritten.src;
+namespace _26tack_rewritten.core;
 
 public static class MainClient
 {
@@ -17,7 +18,7 @@ public static class MainClient
 
     private static bool Running { get; set; } = true;
     private static bool Errored { get; set; } = false;
-    private static HttpClient HttpClient { get; } = new HttpClient();
+    private static readonly HttpClient HttpClient = new HttpClient();
 
     public static async Task<int> Main(string[] args)
     {
@@ -61,7 +62,8 @@ public static class MainClient
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
-        if (Errored) await Reconnect();
+        if (!Errored) return;
+        
     }
 
     private static async Task Reconnect()
