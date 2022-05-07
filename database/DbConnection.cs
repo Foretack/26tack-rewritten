@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using Serilog;
 using System.Text;
+using Dasync.Collections;
 
 namespace _26tack_rewritten.database;
 internal abstract class DbConnection
@@ -32,12 +33,62 @@ internal abstract class DbConnection
     protected DbConnection Where(string[] where) { Conditions = where; return this; }
     protected DbConnection Limit(int limit) { SelectionLimit = limit; return this; }
     protected DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
-    
-    //protected async Task<ExecutionResult> TryExecute(bool logErrors = true)
-    //{
-    //    string? query = BuildQueryString();
-    //    if (query is null) return new ExecutionResult(false, null);
-    //}
+
+    protected async Task<ExecutionResult> TryExecute(bool logErrors = true)
+    {
+        string? query = BuildQueryString();
+        if (query is null) return new ExecutionResult(false, null);
+        NpgsqlCommand cmd = new NpgsqlCommand(query, Connection);
+
+        if (QueryType == QueryTypes.Insert || QueryType == QueryTypes.Update || QueryType == QueryTypes.Delete)
+        {
+            try
+            {
+                await cmd.ExecuteNonQueryAsync();
+                return new ExecutionResult(true, null);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Exception was thrown during {QueryType} query");
+            }
+        }
+        if (QueryType == QueryTypes.Select)
+        {
+            try
+            {
+                NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
+                IAsyncEnumerable<int> ordinals = new AsyncEnumerable<int>(async y =>
+                {
+                    int i = 0;
+                    while (await r.ReadAsync())
+                    {
+                        await y.ReturnAsync(r.GetOrdinal(ValuesSchema![i]));
+                        i++;
+                    }
+                    await r.CloseAsync();
+                });
+
+                List<object[]> values = new List<object[]>();
+                await ordinals.ForEachAsync(async i =>
+                {
+                    List<object> valuesInner = new List<object>();
+                    while (await r.ReadAsync())
+                    {
+                        valuesInner.Add(r.GetValue(i));
+                    }
+                    await r.CloseAsync();
+                    values.Add(valuesInner.ToArray());
+                });
+
+                return new ExecutionResult(true, values.ToArray());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Exception was thrown during {QueryType} query");
+            }
+        }
+        return new ExecutionResult(false, null);
+    }
 
     private string? BuildQueryString()
     {
@@ -91,5 +142,5 @@ internal abstract class DbConnection
     }
 
     private enum QueryTypes { Insert, Update, Delete, Select }
-    private sealed record ExecutionResult(bool Success, string[]? Results);
+    protected record ExecutionResult(bool Success, object[][]? Results);
 }
