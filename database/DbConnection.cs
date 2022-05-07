@@ -22,19 +22,19 @@ internal abstract class DbConnection
 
     protected DbConnection() { Connection.Open(); }
 
-    protected DbConnection Insert() { QueryType = QueryTypes.Insert; return this; }
-    protected DbConnection Update() { QueryType = QueryTypes.Update; return this; }
-    protected DbConnection Delete() { QueryType = QueryTypes.Delete; return this; }
-    protected DbConnection Select() { QueryType = QueryTypes.Select; return this; }
-    protected DbConnection Table(string table) { TableName = table; return this; }
-    protected DbConnection Sort(string sortingMethod) { SortMethod = sortingMethod; return this; }
-    protected DbConnection Values(string[] values) { SelectedValues = values; return this; }
-    protected DbConnection Schema(string[] schema) { ValuesSchema = schema; return this; }
-    protected DbConnection Where(string[] where) { Conditions = where; return this; }
-    protected DbConnection Limit(int limit) { SelectionLimit = limit; return this; }
-    protected DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
+    public DbConnection Insert() { QueryType = QueryTypes.Insert; return this; }
+    public DbConnection Update() { QueryType = QueryTypes.Update; return this; }
+    public DbConnection Delete() { QueryType = QueryTypes.Delete; return this; }
+    public DbConnection Select() { QueryType = QueryTypes.Select; return this; }
+    public DbConnection Table(string table) { TableName = table; return this; }
+    public DbConnection Sort(string sortingMethod) { SortMethod = sortingMethod; return this; }
+    public DbConnection Values(string[] values) { SelectedValues = values; return this; }
+    public DbConnection Schema(string[] schema) { ValuesSchema = schema; return this; }
+    public DbConnection Where(string[] where) { Conditions = where; return this; }
+    public DbConnection Limit(int limit) { SelectionLimit = limit; return this; }
+    public DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
 
-    protected async Task<ExecutionResult> TryExecute(bool logErrors = true)
+    public async Task<ExecutionResult> TryExecute()
     {
         string? query = BuildQueryString();
         if (query is null) return new ExecutionResult(false, null);
@@ -142,5 +142,12 @@ internal abstract class DbConnection
     }
 
     private enum QueryTypes { Insert, Update, Delete, Select }
-    protected record ExecutionResult(bool Success, object[][]? Results);
+    public record ExecutionResult(bool Success, object[][]? Results);
+
+    ~DbConnection()
+    {
+        Connection.Close();
+        Connection.Dispose();
+        Requests.Dispose();
+    }
 }

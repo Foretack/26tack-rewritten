@@ -23,22 +23,22 @@ internal static class ChannelHandler
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
         });
-        await c.ForEachAsync(async x =>
+        await c.ForEachAsync((Func<Channel, Task>)(async x =>
         {
-            if (x.priority >= 50)
+            if (x.Priority >= 50)
             {
-                MainClient.Client.JoinChannel(x.name);
-                Log.Debug($"[Main] Joined: {x.name} (JustLog:{MainClient.JLChannels.Contains(x.name)})");
+                MainClient.Client.JoinChannel(x.Name);
+                Log.Debug($"[Main] Joined: {x.Name} (JustLog:{MainClient.JLChannels.Contains(x.Name)})");
             }
             // TODO: Anon client
-            Log.Debug($"[Anon] Joined: {x.name}");
+            Log.Debug($"[Anon] Joined: {x.Name}");
             await Task.Delay(550);
-        });
+        }));
 
         MainClient.Client.OnFailureToReceiveJoinConfirmation += (s, e) =>
         {
             Log.Warning($"[Main] Failed to join: {e.Exception.Channel}, {e.Exception.Details}");
-            JoinFailureChannels.Add(FetchedChannels.First(x => x.name == e.Exception.Channel));
+            JoinFailureChannels.Add(FetchedChannels.First(x => x.Name == e.Exception.Channel));
         };
         MainClient.Client.OnJoinedChannel += (s, e) => MainJoinedChannels.Add(e.Channel);
         MainClient.Client.OnLeftChannel += (s, e) => MainJoinedChannels.Remove(e.Channel);
@@ -51,5 +51,5 @@ internal static class ChannelHandler
         return false;
     }
 
-    private sealed record Channel(string name, string id, int priority, bool logged);
+    public record Channel(string Name, string ID, int Priority, bool Logged);
 }
