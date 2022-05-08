@@ -1,4 +1,5 @@
 ﻿using _26tack_rewritten.handlers;
+using _26tack_rewritten.utils;
 using Serilog;
 
 namespace _26tack_rewritten.database;
@@ -10,10 +11,7 @@ internal class Database : DbConnection
             Insert()
             .Table("errors")
             .Schema("data", "time")
-            .Values(
-                $"'{exception}'", // TODO: Format exception method
-                $"CURRENT_TIMESTAMP"
-            )
+            .Values($"'{Formatting.FormatException(exception)}'", $"CURRENT_TIMESTAMP")
             .TryExecute();
 
         if (!q.Success)
@@ -35,7 +33,7 @@ internal class Database : DbConnection
 
         if (!q.Success)
         {
-            // TODO: MainClient message
+            // TODO: MainClient message (MessageHandler)
             return false;
         }
         return true;
