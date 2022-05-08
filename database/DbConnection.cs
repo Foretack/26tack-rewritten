@@ -28,9 +28,9 @@ internal abstract class DbConnection
     public DbConnection Select() { QueryType = QueryTypes.Select; return this; }
     public DbConnection Table(string table) { TableName = table; return this; }
     public DbConnection Sort(string sortingMethod) { SortMethod = sortingMethod; return this; }
-    public DbConnection Values(string[] values) { SelectedValues = values; return this; }
-    public DbConnection Schema(string[] schema) { ValuesSchema = schema; return this; }
-    public DbConnection Where(string[] where) { Conditions = where; return this; }
+    public DbConnection Values(params string[] values) { SelectedValues = values; return this; }
+    public DbConnection Schema(params string[] schema) { ValuesSchema = schema; return this; }
+    public DbConnection Where(params string[] where) { Conditions = where; return this; }
     public DbConnection Limit(int limit) { SelectionLimit = limit; return this; }
     public DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
 
