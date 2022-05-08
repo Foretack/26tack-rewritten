@@ -58,18 +58,20 @@ public static class MainClient
         Client.Connect();
         Client.OnConnectionError += (s, e) => Errored = true;
         Client.OnConnected += ClientConnectedEvent;
+        await ChannelHandler.Connect(Errored);
     }
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         if (!Errored) return;
-        
+        await Reconnect();
     }
 
     private static async Task Reconnect()
     {
         Client.JoinChannel(Config.RelayChannel);
-        Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnected");
+        Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnecting...");
+        await ChannelHandler.Connect(Errored);
         Errored = false;
     }
 }

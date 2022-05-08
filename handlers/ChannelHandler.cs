@@ -23,14 +23,14 @@ internal static class ChannelHandler
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
         });
-        await c.ForEachAsync((Func<Channel, Task>)(async x =>
+        await c.ForEachAsync((async x =>
         {
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Name);
                 Log.Debug($"[Main] Joined: {x.Name} (JustLog:{MainClient.JLChannels.Contains(x.Name)})");
             }
-            // TODO: Anon client
+            // TODO: Anonymous client
             Log.Debug($"[Anon] Joined: {x.Name}");
             await Task.Delay(550);
         }));
@@ -46,7 +46,7 @@ internal static class ChannelHandler
 
     public static async Task<bool> JoinChannel(string channel, bool highPriority = false)
     {
-
+        // TODO: Anonymous client
         await Task.Delay(-1);
         return false;
     }
