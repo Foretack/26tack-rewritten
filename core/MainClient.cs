@@ -56,15 +56,22 @@ public static class MainClient
     private static async Task Connect()
     {
         Client.Connect();
-        Client.OnConnectionError += (s, e) => Errored = true;
+        Client.OnConnectionError += (s, e) =>
+        {
+            Errored = true;
+            Log.Fatal($"MainClient encountered a connection error: {e.Error.Message}");
+        };
         Client.OnConnected += ClientConnectedEvent;
+        AnonymousClient.Initialize();
         await ChannelHandler.Connect(Errored);
     }
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
+        Log.Debug($"MainClient connected");
         if (!Errored) return;
         await Reconnect();
+        Errored = false;
     }
 
     private static async Task Reconnect()
