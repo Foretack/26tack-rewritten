@@ -6,8 +6,8 @@ using Serilog;
 namespace _26tack_rewritten.handlers;
 internal static class ChannelHandler
 {
-    public static List<string> MainJoinedChannels { get; } = new List<string>();
-    public static List<string> AnonJoinedChannels { get; } = new List<string>();
+    public static List<Channel> MainJoinedChannels { get; } = new List<string>();
+    public static List<Channel> AnonJoinedChannels { get; } = new List<string>();
 
     private static readonly List<Channel> FetchedChannels = new List<Channel>();
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
@@ -41,14 +41,14 @@ internal static class ChannelHandler
             Log.Warning($"[Main] Failed to join: {e.Exception.Channel}, {e.Exception.Details}");
             JoinFailureChannels.Add(FetchedChannels.First(x => x.Name == e.Exception.Channel));
         };
-        MainClient.Client.OnJoinedChannel += (s, e) => MainJoinedChannels.Add(e.Channel);
-        MainClient.Client.OnLeftChannel += (s, e) => MainJoinedChannels.Remove(e.Channel);
+        MainClient.Client.OnJoinedChannel += (s, e) => MainJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
+        MainClient.Client.OnLeftChannel += (s, e) => MainJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
         AnonymousClient.Client.OnFailureToReceiveJoinConfirmation += (s, e) =>
         {
             Log.Warning($"[Anon] Failed to join: {e.Exception.Channel}, {e.Exception.Details}");
         };
-        AnonymousClient.Client.OnJoinedChannel += (s, e) => AnonJoinedChannels.Add(e.Channel);
-        AnonymousClient.Client.OnLeftChannel += (s, e) => AnonJoinedChannels.Remove(e.Channel);
+        AnonymousClient.Client.OnJoinedChannel += (s, e) => AnonJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
+        AnonymousClient.Client.OnLeftChannel += (s, e) => AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
     }
 
     public static async Task<bool> JoinChannel(string channel, bool highPriority = false, bool logged = true)
