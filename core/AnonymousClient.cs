@@ -26,7 +26,7 @@ internal static class AnonymousClient
         Client.AutoReListenOnException = true;
 
         ConnectionCredentials credentials = new ConnectionCredentials("justinfan5432", "XD");
-        Client.Initialize(credentials);
+        Client.Initialize(credentials, Config.Username);
 
         Connect();
     }

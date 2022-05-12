@@ -28,7 +28,7 @@ internal class Database : DbConnection
         var q = await
             Insert()
             .Table("channels")
-            .Schema("display_name", "name", "id", "avatar_url", "priority", "logged", "date_joined")
+            .Schema("display_name", "username", "id", "avatar_url", "priority", "is_logged", "date_joined")
             .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.logged}", "CURRENT_DATE")
             .TryExecute();
 
@@ -41,7 +41,7 @@ internal class Database : DbConnection
         var q = await
             Select()
             .Table("channels")
-            .Schema("name", "priority", "logged")
+            .Schema("username", "priority", "is_logged")
             .TryExecute();
 
         if (!q.Success)
@@ -64,7 +64,7 @@ internal class Database : DbConnection
         var q = await
             Select()
             .Table("whitelisted_users")
-            .Schema("name")
+            .Schema("username")
             .TryExecute();
 
         if (!q.Success)
@@ -82,7 +82,7 @@ internal class Database : DbConnection
         var q = await
             Select()
             .Table("blacklisted_users")
-            .Schema("name")
+            .Schema("username")
             .TryExecute();
 
         if (!q.Success)

@@ -1,10 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using _26tack_rewritten.database;
+using Newtonsoft.Json;
+using TwitchLib.Client.Models;
 
 namespace _26tack_rewritten.models;
-internal class Permission
+public class Permission
 {
+    public int Level { get; set; } // forsenLevel
+    public string Username { get; set; }
+
+    private bool IsBroadcaster { get; set; }
+    private bool IsModerator { get; set; }
+    private bool IsVIP { get; set; }
+    private bool IsSubscriber { get; set; }
+
+    private static readonly Database Db = new Database();
+    private static readonly List<string> BlacklistedUsers = Db.GetBlacklistedUsers().Result.ToList();
+    private static readonly List<string> WhitelistedUsers = Db.GetWhitelistedUsers().Result.ToList();
+
+    public Permission(ChatMessage ircMessage)
+    {
+        Username = ircMessage.Username;
+        IsBroadcaster = ircMessage.IsBroadcaster;
+        IsModerator = ircMessage.IsModerator;
+        IsVIP = ircMessage.IsVip;
+        IsSubscriber = ircMessage.IsSubscriber;
+        Level = EvaluateLevel();
+    }
+
+    private int EvaluateLevel()
+    {
+        int level = 0;
+
+        if (WhitelistedUsers.Contains(Username)) { level = (int)PermissionLevels.Whitelisted; return level; }
+        if (BlacklistedUsers.Contains(Username)) { level = (int)PermissionLevels.EveryonePlusBlacklisted; return level; }
+        if (IsBroadcaster) { level = (int)PermissionLevels.Broadcaster; return level; }
+        if (IsModerator) { level = (int)PermissionLevels.Moderator; return level; } 
+        if (IsVIP) { level = (int)PermissionLevels.VIP; return level; }
+        if (IsSubscriber) { level = (int)PermissionLevels.Subscriber; return level; }
+
+        return level;
+    }
+
+    public static void BlacklistUser(string username) { BlacklistedUsers.Add(username); }
+    public static void UnBlacklistUser(string username) { BlacklistedUsers.Remove(username); }
+    public static void WhitelistUser(string username) { WhitelistedUsers.Add(username); }
+    public static void UnWhitelistUser(string username) { WhitelistedUsers.Remove(username); }
+}
+
+public enum PermissionLevels
+{
+    EveryonePlusBlacklisted = -10,
+    Everyone = 0,
+    Subscriber = 1,
+    VIP = 2,
+    Moderator = 3,
+    Broadcaster = 4,
+    Whitelisted = 5
 }

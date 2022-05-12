@@ -44,7 +44,7 @@ public static class MainClient
         Client.AutoReListenOnException = true;
 
         ConnectionCredentials credentials = new ConnectionCredentials(Config.Username, Config.AccessToken);
-        Client.Initialize(credentials);
+        Client.Initialize(credentials, Config.Username);
 
         Stream jlcl = await HttpClient.GetStreamAsync(Config.JLChannelListLink);
         JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
