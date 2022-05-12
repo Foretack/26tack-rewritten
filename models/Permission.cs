@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using _26tack_rewritten.database;
-using Newtonsoft.Json;
+﻿using _26tack_rewritten.database;
 using TwitchLib.Client.Models;
 
 namespace _26tack_rewritten.models;
@@ -40,7 +33,7 @@ public class Permission
         if (WhitelistedUsers.Contains(Username)) { level = (int)PermissionLevels.Whitelisted; return level; }
         if (BlacklistedUsers.Contains(Username)) { level = (int)PermissionLevels.EveryonePlusBlacklisted; return level; }
         if (IsBroadcaster) { level = (int)PermissionLevels.Broadcaster; return level; }
-        if (IsModerator) { level = (int)PermissionLevels.Moderator; return level; } 
+        if (IsModerator) { level = (int)PermissionLevels.Moderator; return level; }
         if (IsVIP) { level = (int)PermissionLevels.VIP; return level; }
         if (IsSubscriber) { level = (int)PermissionLevels.Subscriber; return level; }
 

@@ -1,4 +1,4 @@
-﻿namespace _26tack_rewritten.Misc;
+﻿namespace _26tack_rewritten.misc;
 internal static class RandomReplies
 {
     public static readonly string[] PajbotReplies = new string[]
@@ -28,6 +28,15 @@ internal static class RandomReplies
         "🕳 susLada🚨EMERGENCY MEETING!",
         "ApuApustaja Slapp🚨",
         "dankWave🚨pajbot",
-        "🕳 susLada🚨vented!"
+        "🕳 susLada🚨vented!",
+        "FeelsOkayMan🚨 @pajbot Speed up mission loading and trim wasted hard drive space?",
+        "ApuApustaja🚨this is an alert"
+    };
+    public static readonly string[][] PingReplies = new string[][]
+    {
+        new string[] { "FeelsDankMan 🏓 💥", "PONG!" },
+        new string[] { "FeelsDankMan 🤜 🩸", "🔔"},
+        new string[] { "hi", "ppL"},
+        new string[] { "ApuApustaja", "PETPET" }
     };
 }

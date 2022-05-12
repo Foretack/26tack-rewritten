@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using _26tack_rewritten.core;
+﻿using _26tack_rewritten.core;
+using _26tack_rewritten.misc;
 using _26tack_rewritten.models;
-using TwitchLib.Client.Events;
-using TwitchLib.Communication.Events;
 using Serilog;
+using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
+using TwitchLib.Communication.Events;
 
 namespace _26tack_rewritten.handlers;
 internal static class MessageHandler
 {
     private static ChatColor CurrentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    private static readonly HttpClient Requests = new HttpClient();
 
-    internal static void Initialize() 
+    internal static void Initialize()
     {
         AnonymousClient.Client.OnMessageReceived += OnMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
@@ -51,6 +48,7 @@ internal static class MessageHandler
     private static async Task HandleMessage(ChatMessage ircMessage)
     {
         string message = ircMessage.Message;
+        string channel = ircMessage.Channel;
         string prefix = Config.Prefix;
         string[] splitMessage = message.Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
@@ -60,7 +58,18 @@ internal static class MessageHandler
             string commandName = splitMessage[0].Replace(prefix, string.Empty);
             Permission permission = new Permission(ircMessage);
             CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
-            await CommandHandler.HandleCommand(ctx);
+            CommandHandler.HandleCommand(ctx);
+        }
+        if (channel == "pajlada"
+        && ircMessage.Username == "pajbot"
+        && ircMessage.IsMe
+        && message.StartsWith("pajaS🚨ALERT"))
+        {
+            SendMessage("pajlada", utils.Random.Choice(RandomReplies.PajbotReplies));
+        }
+        if (Regexes.Mention.IsMatch(message))
+        {
+            // TODO: Discord JSON stuff
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using _26tack_rewritten.handlers;
 using _26tack_rewritten.json;
 using Serilog;
 using TwitchLib.Client;
@@ -6,7 +7,6 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
-using _26tack_rewritten.handlers;
 
 namespace _26tack_rewritten.core;
 
@@ -23,7 +23,7 @@ public static class MainClient
     public static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
-        
+
         if (Running) await Initialize();
         while (Running) Console.Read();
         return 0;
