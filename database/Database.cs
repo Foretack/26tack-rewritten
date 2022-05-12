@@ -1,4 +1,5 @@
 ﻿using _26tack_rewritten.handlers;
+using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 using Serilog;
 
@@ -22,20 +23,16 @@ internal class Database : DbConnection
         return true;
     }
 
-    public async Task<bool> AddChannel(ChannelHandler.Channel channel)
+    public async Task<bool> AddChannel(ExtendedChannel channel)
     {
         var q = await
             Insert()
             .Table("channels")
-            .Schema("name", "id", "priority", "logged", "date_joined")
-            .Values($"'{channel.Name}'", $"{channel.ID}", $"{channel.Priority}", "CURRENT_DATE")
+            .Schema("display_name", "name", "id", "avatar_url", "priority", "logged", "date_joined")
+            .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.logged}", "CURRENT_DATE")
             .TryExecute();
 
-        if (!q.Success)
-        {
-            // TODO: MainClient message (MessageHandler)
-            return false;
-        }
+        if (!q.Success) return false;
         return true;
     }
 
@@ -44,7 +41,7 @@ internal class Database : DbConnection
         var q = await
             Select()
             .Table("channels")
-            .Schema("name", "id", "priority", "logged")
+            .Schema("name", "priority", "logged")
             .TryExecute();
 
         if (!q.Success)
@@ -56,7 +53,7 @@ internal class Database : DbConnection
         List<ChannelHandler.Channel> channels = new List<ChannelHandler.Channel>();
         foreach (object[] row in q.Results!)
         {
-            channels.Add(new ChannelHandler.Channel((string)row[0], (string)row[1], (int)row[2], (bool)row[3]));
+            channels.Add(new ChannelHandler.Channel((string)row[1], (int)row[4], (bool)row[5]));
         }
 
         return channels.ToArray();
@@ -98,4 +95,3 @@ internal class Database : DbConnection
         return users;
     }
 }
-

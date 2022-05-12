@@ -1,13 +1,14 @@
 ﻿using _26tack_rewritten.core;
 using _26tack_rewritten.database;
+using _26tack_rewritten.models;
 using Dasync.Collections;
 using Serilog;
 
 namespace _26tack_rewritten.handlers;
 internal static class ChannelHandler
 {
-    public static List<Channel> MainJoinedChannels { get; } = new List<string>();
-    public static List<Channel> AnonJoinedChannels { get; } = new List<string>();
+    public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
+    public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
 
     private static readonly List<Channel> FetchedChannels = new List<Channel>();
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
@@ -24,7 +25,7 @@ internal static class ChannelHandler
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
         });
-        await c.ForEachAsync((async x =>
+        await c.ForEachAsync(async x =>
         {
             if (x.Priority >= 50)
             {
@@ -34,7 +35,7 @@ internal static class ChannelHandler
             AnonymousClient.Client.JoinChannel(x.Name);
             Log.Debug($"[Anon] Joined: {x.Name}");
             await Task.Delay(550);
-        }));
+        });
 
         MainClient.Client.OnFailureToReceiveJoinConfirmation += (s, e) =>
         {
@@ -53,6 +54,7 @@ internal static class ChannelHandler
 
     public static async Task<bool> JoinChannel(string channel, bool highPriority = false, bool logged = true)
     {
+        Channel c = new Channel(channel, highPriority ? 50 : 0, logged);
         bool x = false;
         bool y = false;
         if (highPriority)
@@ -60,18 +62,18 @@ internal static class ChannelHandler
             MainClient.Client.JoinChannel(channel);
         }
         AnonymousClient.Client.JoinChannel(channel);
-        MainClient.Client.OnJoinedChannel += (s, e) => { if (e.Channel == channel) x = true; };
-        AnonymousClient.Client.OnJoinedChannel += (s, e) => { if (e.Channel == channel) y = true; };
+        MainClient.Client.OnJoinedChannel += (s, e) => { if (e.Channel == channel) { x = true; MainJoinedChannels.Add(c); } };
+        AnonymousClient.Client.OnJoinedChannel += (s, e) => { if (e.Channel == channel) { y = true; AnonJoinedChannels.Add(c); } };
         await Task.Delay(250);
         
         if (!(x && y)) return false;
         Database db = new Database();
-        Channel c = new Channel(channel, "0", highPriority ? 50 : 0, logged); // TODO: Fetch channel ID
-        await db.AddChannel(c);
-        
-        await Task.Delay(-1);
-        return false;
+        UserFactory uf = new UserFactory();
+        ExtendedChannel? ec = await uf.CreateChannelProfile(channel);
+        if (ec is null) return false;
+        await db.AddChannel(ec);
+        return true;
     }
 
-    public record Channel(string Name, string ID, int Priority, bool Logged);
+    public record Channel(string Name, int Priority, bool Logged);
 }
