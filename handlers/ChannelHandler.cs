@@ -5,12 +5,13 @@ using Dasync.Collections;
 using Serilog;
 
 namespace _26tack_rewritten.handlers;
-internal static class ChannelHandler
+internal static class ChannelHandler // TODO: This is bad
 {
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
 
-    private static readonly List<Channel> FetchedChannels = new List<Channel>();
+    private static readonly Database Db = new Database();
+    private static readonly List<Channel> FetchedChannels = new List<Channel>(Db.GetChannels().Result);
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
 
     internal static async Task Connect(bool isReconnect)
