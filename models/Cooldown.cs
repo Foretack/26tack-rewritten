@@ -1,7 +1,7 @@
 ﻿namespace _26tack_rewritten.models;
 public class Cooldown
 {
-    private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>();
+    private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>(); // TODO: This is terrible, maybe use a dict?
     private static readonly List<Cooldown> ChannelCooldownPool = new List<Cooldown>();
 
     public string User { get; set; }

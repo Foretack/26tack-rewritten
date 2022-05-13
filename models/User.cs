@@ -10,7 +10,14 @@ internal class UserFactory : DataCacher<User>
         var c = GetCachedPiece(username);
         if (c is not null) return c.Object;
         var call = await TwitchAPIHandler.GetUsers(username);
-        if (call is null) return null;
+        if (call is null)
+        {
+            var call2 = await ExternalAPIHandler.GetIvrUser(username);
+            if (call2 is null) return null;
+            CachePiece(username, call2, 86400);
+            CachePiece(call2.ID, call2, 86400);
+            return call2;
+        }
         User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
         CachePiece(username, u, 86400);
         CachePiece(u.ID, u, 86400);

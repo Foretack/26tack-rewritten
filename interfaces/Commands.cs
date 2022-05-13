@@ -11,7 +11,7 @@ public interface IChatCommand
 
 public interface ISubCommand
 {
-    // TODO
+    // TODO: ISubCommand && SubCommandHandler
 }
 
 public abstract class OptionsParser
