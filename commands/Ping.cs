@@ -2,6 +2,7 @@
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.misc;
 using _26tack_rewritten.models;
+using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands;
 internal class Ping : IChatCommand
@@ -20,6 +21,6 @@ internal class Ping : IChatCommand
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
 
-        MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", utils.Random.Choice(RandomReplies.PingReplies))} {latency}ms");
+        MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} {latency}ms");
     }
 }

@@ -18,13 +18,15 @@ internal static class CommandHandler
     {
         List<string> keys = new List<string>(command.Info().Aliases);
         keys.Add(command.Info().Name);
-        Commands.Add(keys.ToArray(), command); // TODO: Cooldowns
+        Commands.Add(keys.ToArray(), command);
     }
 
     public static void HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
         IChatCommand command = Commands.First(x => x.Key.Contains(cmdName)).Value;
+        Cooldown cd = new Cooldown(ctx.IrcMessage.Username, ctx.IrcMessage.Channel, command.Info());
+        if (!Cooldown.CheckAndHandleCooldown(cd)) return;
         command.Run(ctx).SafeFireAndForget(onException: ex => Log.Error(ex, "Command execution failed"));
     }
 }

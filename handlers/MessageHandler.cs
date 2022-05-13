@@ -1,6 +1,7 @@
 ﻿using _26tack_rewritten.core;
 using _26tack_rewritten.misc;
 using _26tack_rewritten.models;
+using _26tack_rewritten.utils;
 using Serilog;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -53,7 +54,8 @@ internal static class MessageHandler
         string[] splitMessage = message.Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
-        if (message.StartsWith(prefix))
+        if (message.StartsWith(prefix) 
+        && ChannelHandler.MainJoinedChannels.Select(x => x.Name).Contains(channel))
         {
             string commandName = splitMessage[0].Replace(prefix, string.Empty);
             Permission permission = new Permission(ircMessage);
@@ -65,11 +67,15 @@ internal static class MessageHandler
         && ircMessage.IsMe
         && message.StartsWith("pajaS🚨ALERT"))
         {
-            SendMessage("pajlada", utils.Random.Choice(RandomReplies.PajbotReplies));
+            SendMessage("pajlada", RandomReplies.PajbotReplies.Choice());
         }
         if (Regexes.Mention.IsMatch(message))
         {
             // TODO: Discord JSON stuff
+        }
+        if (Regexes.Racism.IsMatch(message))
+        {
+            //
         }
     }
 }

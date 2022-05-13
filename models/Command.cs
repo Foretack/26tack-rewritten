@@ -1,6 +1,6 @@
 ﻿namespace _26tack_rewritten.models;
 
-public class Command
+public class Command : ICooldownOptions
 {
     public string Name { get; set; }
     public string Description { get; set; }
