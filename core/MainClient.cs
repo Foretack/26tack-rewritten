@@ -2,6 +2,7 @@
 using _26tack_rewritten.handlers;
 using _26tack_rewritten.json;
 using Serilog;
+using Serilog.Core;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -22,7 +23,10 @@ public static class MainClient
 
     public static async Task<int> Main(string[] args)
     {
-        Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+        LoggingLevelSwitch levelSwitch = new LoggingLevelSwitch();
+        levelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+
+        Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(levelSwitch).WriteTo.Console().CreateLogger();
 
         if (Running) await Initialize();
         while (Running) Console.Read();
@@ -44,16 +48,16 @@ public static class MainClient
         Client.AutoReListenOnException = true;
 
         ConnectionCredentials credentials = new ConnectionCredentials(Config.Username, Config.AccessToken);
-        Client.Initialize(credentials, Config.Username);
+        Client.Initialize(credentials);
 
         Stream jlcl = await HttpClient.GetStreamAsync(Config.JLChannelListLink);
         JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
         JLChannels = deserialized.channels.Select(c => c.name).ToList();
 
-        await Connect();
+        Connect();
     }
 
-    private static async Task Connect()
+    private static void Connect()
     {
         Client.Connect();
         Client.OnConnectionError += (s, e) =>
@@ -62,13 +66,12 @@ public static class MainClient
             Log.Fatal($"MainClient encountered a connection error: {e.Error.Message}");
         };
         Client.OnConnected += ClientConnectedEvent;
-        AnonymousClient.Initialize();
-        await ChannelHandler.Connect(Errored);
     }
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         Log.Debug($"MainClient connected");
+        AnonymousClient.Initialize();
         if (!Errored) return;
         await Reconnect();
         Errored = false;

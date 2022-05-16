@@ -1,4 +1,5 @@
-﻿using _26tack_rewritten.interfaces;
+﻿using _26tack_rewritten.commands;
+using _26tack_rewritten.interfaces;
 using _26tack_rewritten.models;
 using AsyncAwaitBestPractices;
 using Serilog;
@@ -11,7 +12,7 @@ internal static class CommandHandler
 
     public static void Initialize()
     {
-        //
+        AddCommand(new Ping());
     }
 
     public static void AddCommand(IChatCommand command)

@@ -1,4 +1,6 @@
-﻿namespace _26tack_rewritten.models;
+﻿using Serilog;
+
+namespace _26tack_rewritten.models;
 public class Cooldown
 {
     private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>(); // TODO: This is terrible, maybe use a dict?
@@ -51,6 +53,7 @@ public class Cooldown
             return true;
         }
 
+        Log.Information($"{cd.User} tried using the command \"{cd.CooldownOptions.Name}\" while on cooldown!");
         return false;
     }
 

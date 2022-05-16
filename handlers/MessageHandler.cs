@@ -43,6 +43,7 @@ internal static class MessageHandler
 
     private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
+        Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
         await HandleMessage(e.ChatMessage);
     }
 
@@ -55,7 +56,7 @@ internal static class MessageHandler
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
         if (message.StartsWith(prefix) 
-        && ChannelHandler.MainJoinedChannels.Select(x => x.Name).Contains(channel))
+        && ChannelHandler.MainJoinedChannelNames.Contains(channel))
         {
             string commandName = splitMessage[0].Replace(prefix, string.Empty);
             Permission permission = new Permission(ircMessage);

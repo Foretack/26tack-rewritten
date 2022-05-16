@@ -53,7 +53,7 @@ internal class Database : DbConnection
         List<ChannelHandler.Channel> channels = new List<ChannelHandler.Channel>();
         foreach (object[] row in q.Results!)
         {
-            channels.Add(new ChannelHandler.Channel((string)row[1], (int)row[4], (bool)row[5]));
+            channels.Add(new ChannelHandler.Channel((string)row[0], (int)row[1], (bool)row[2]));
         }
 
         return channels.ToArray();

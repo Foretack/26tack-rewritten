@@ -8,7 +8,7 @@ internal abstract class DbConnection
 {
     public HttpClient Requests { get; } = new HttpClient();
 
-    private const string ConnectionString = $"Host={Config.Host};Username={Config.Username};Password={Config.Password};Database={Config.DatabaseName}";
+    private const string ConnectionString = $"Host={Config.Host};Username={Config.DbUsername};Password={Config.Password};Database={Config.DatabaseName}";
     private NpgsqlConnection Connection { get; } = new NpgsqlConnection(ConnectionString);
 
     private QueryTypes? QueryType { get; set; } = null;
@@ -37,6 +37,7 @@ internal abstract class DbConnection
     public async Task<ExecutionResult> TryExecute()
     {
         string? query = BuildQueryString();
+        Log.Verbose(query ?? "null query");
         if (query is null) return new ExecutionResult(false, null);
         NpgsqlCommand cmd = new NpgsqlCommand(query, Connection);
 
@@ -57,28 +58,24 @@ internal abstract class DbConnection
             try
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
-                IAsyncEnumerable<int> ordinals = new AsyncEnumerable<int>(async y =>
+                List<int> ordinals = new List<int>();
+                while (await r.ReadAsync())
                 {
-                    int i = 0;
-                    while (await r.ReadAsync())
-                    {
-                        await y.ReturnAsync(r.GetOrdinal(ValuesSchema![i]));
-                        i++;
-                    }
-                    await r.CloseAsync();
-                });
-
+                    foreach (var column in ValuesSchema!) { ordinals.Add(r.GetOrdinal(column)); }
+                    break;
+                }
+                await r.CloseAsync();
+                
+                NpgsqlDataReader r2 = await cmd.ExecuteReaderAsync();
                 List<object[]> values = new List<object[]>();
-                await ordinals.ForEachAsync(async i =>
+                List<object> valuesInner = new List<object>();
+                while (await r2.ReadAsync())
                 {
-                    List<object> valuesInner = new List<object>();
-                    while (await r.ReadAsync())
-                    {
-                        valuesInner.Add(r.GetValue(i));
-                    }
-                    await r.CloseAsync();
+                    foreach (int o in ordinals) { valuesInner.Add(r.GetValue(o)); }
                     values.Add(valuesInner.ToArray());
-                });
+                    valuesInner.Clear();
+                }
+                await r2.CloseAsync();
 
                 return new ExecutionResult(true, values.ToArray());
             }
