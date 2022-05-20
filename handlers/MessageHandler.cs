@@ -2,6 +2,9 @@
 using _26tack_rewritten.misc;
 using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using Serilog;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -11,7 +14,6 @@ namespace _26tack_rewritten.handlers;
 internal static class MessageHandler
 {
     private static ChatColor CurrentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
-    private static readonly HttpClient Requests = new HttpClient();
 
     internal static void Initialize()
     {
@@ -30,6 +32,10 @@ internal static class MessageHandler
         }
         MainClient.Client.SendMessage(channel, message);
     }
+    internal static async Task OnDiscordMessageReceived(SocketMessage arg)
+    {
+        Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Content} {arg.Channel.Id}");
+    }
 
     private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
     {
@@ -44,10 +50,10 @@ internal static class MessageHandler
     private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
         Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
-        await HandleMessage(e.ChatMessage);
+        await HandleIrcMessage(e.ChatMessage);
     }
 
-    private static async Task HandleMessage(ChatMessage ircMessage)
+    private static async Task HandleIrcMessage(ChatMessage ircMessage)
     {
         string message = ircMessage.Message;
         string channel = ircMessage.Channel;

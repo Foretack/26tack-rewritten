@@ -25,10 +25,17 @@ internal static class CommandHandler
     public static void HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
-        IChatCommand command = Commands.First(x => x.Key.Contains(cmdName)).Value;
-        Cooldown cd = new Cooldown(ctx.IrcMessage.Username, ctx.IrcMessage.Channel, command.Info());
-        if (!Cooldown.CheckAndHandleCooldown(cd)) return;
-        command.Run(ctx).SafeFireAndForget(onException: ex => Log.Error(ex, "Command execution failed"));
+        try
+        {
+            IChatCommand command = Commands.First(x => x.Key.Contains(cmdName)).Value;
+            Cooldown cd = new Cooldown(ctx.IrcMessage.Username, ctx.IrcMessage.Channel, command.Info());
+            if (!Cooldown.CheckAndHandleCooldown(cd)) return;
+            command.Run(ctx).SafeFireAndForget(onException: ex => Log.Error(ex, "Command execution failed"));
+        }
+        catch (InvalidOperationException)
+        {
+            Log.Information($"@{ctx.IrcMessage.Username} tried using nonexisting command \"{cmdName}\" fdm");
+        }
     }
 }
 

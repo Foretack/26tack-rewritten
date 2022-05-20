@@ -70,8 +70,13 @@ public static class MainClient
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
-        Log.Debug($"MainClient connected");
+        Log.Debug($"[Main] Connected");
         AnonymousClient.Initialize();
+        MessageHandler.Initialize();
+        CommandHandler.Initialize();
+        await Task.Delay(1000);
+        await ChannelHandler.Connect(false);
+        await DiscordClient.Connect();
         if (!Errored) return;
         await Reconnect();
         Errored = false;

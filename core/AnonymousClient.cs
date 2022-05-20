@@ -39,13 +39,10 @@ internal static class AnonymousClient
         {
             Log.Error($"AnonymousClient encountered a connection error: {e.Error.Message}");
         };
-        Client.OnConnected += async (s, e) =>
+        Client.OnConnected += (s, e) =>
         {
             Connected = true;
-            Log.Debug("AnonymousClient connected");
-            await ChannelHandler.Connect(false);
-            MessageHandler.Initialize();
-            CommandHandler.Initialize();
+            Log.Debug("[Anon] Connected");
         };
     }
 }
