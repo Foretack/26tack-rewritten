@@ -7,7 +7,7 @@ using TwitchLib.Api.Helix.Models.Users.GetUsers;
 namespace _26tack_rewritten.handlers;
 internal static class TwitchAPIHandler
 {
-    private static readonly Helix Helix = new Helix(settings: new ApiSettings { AccessToken = Config.AccessToken, ClientId = Config.ClientID });
+    private static readonly Helix Helix = new Helix(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
 
     internal static async Task<User?> GetUsers(string username)
     {
@@ -40,11 +40,6 @@ internal static class TwitchAPIHandler
         catch (TooManyRequestsException _a)
         {
             Log.Error(_a, $"Failed to fetch users: {string.Join(';', logins ?? ids!)}");
-            return null;
-        }
-        catch (GatewayTimeoutException _b)
-        {
-            Log.Error(_b, $"Failed to fetch users: {string.Join(';', logins ?? ids!)}");
             return null;
         }
         catch (Exception _c)

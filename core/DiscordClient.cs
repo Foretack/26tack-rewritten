@@ -10,7 +10,7 @@ internal static class DiscordClient
 
     public static async Task Connect()
     {
-        await Client.LoginAsync(TokenType.Bot, Config.DiscordAppToken);
+        await Client.LoginAsync(TokenType.Bot, Config.Auth.DiscordToken);
         await Client.StartAsync();
         RegisterEvents(Client);
     }

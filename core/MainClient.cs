@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using _26tack_rewritten.database;
 using _26tack_rewritten.handlers;
 using _26tack_rewritten.json;
 using Serilog;
@@ -14,6 +15,7 @@ namespace _26tack_rewritten.core;
 public static class MainClient
 {
     public static List<string> JLChannels { get; private set; } = new List<string>();
+    public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
 
@@ -23,10 +25,11 @@ public static class MainClient
 
     public static async Task<int> Main(string[] args)
     {
-        LoggingLevelSwitch levelSwitch = new LoggingLevelSwitch();
-        levelSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
-
-        Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(levelSwitch).WriteTo.Console().CreateLogger();
+        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+        Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(LogSwitch).WriteTo.Console().CreateLogger();
+        Database db = new Database();
+        Config.Auth = await db.GetAuthorizationData();
+        Config.Discord = await db.GetDiscordData();
 
         if (Running) await Initialize();
         while (Running) Console.Read();
@@ -47,12 +50,21 @@ public static class MainClient
         Client = new TwitchClient(webSocketClient);
         Client.AutoReListenOnException = true;
 
-        ConnectionCredentials credentials = new ConnectionCredentials(Config.Username, Config.AccessToken);
+        ConnectionCredentials credentials = new ConnectionCredentials(Config.Auth.Username, Config.Auth.AccessToken);
         Client.Initialize(credentials);
 
-        Stream jlcl = await HttpClient.GetStreamAsync(Config.JLChannelListLink);
-        JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
-        JLChannels = deserialized.channels.Select(c => c.name).ToList();
+        try
+        {
+            HttpClient.Timeout = TimeSpan.FromMilliseconds(500);
+            Stream jlcl = await HttpClient.GetStreamAsync(Config.Links.IvrChannels);
+            JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
+            JLChannels = deserialized.channels.Select(c => c.name).ToList();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Failed to load just logged channels");
+            throw;
+        }
 
         Connect();
     }

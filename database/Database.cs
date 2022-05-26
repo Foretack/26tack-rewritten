@@ -94,4 +94,60 @@ internal class Database : DbConnection
         string[] users = q.Results!.Select(x => (string)x[0]).ToArray();
         return users;
     }
+
+    public async Task<Authorization> GetAuthorizationData()
+    {
+        var q = await
+            Select()
+            .Table("auth")
+            .Schema("*")
+            .TryExecute();
+
+        if (!q.Success)
+        {
+            Log.Fatal("Failed to fetch authorization data from the database");
+            throw new MissingFieldException("Failed to fetch authorization data from the database");
+        }
+
+        try
+        {
+            return new Authorization((string)q.Results![0][0],
+                                     (string)q.Results![0][1],
+                                     (string)q.Results![0][2],
+                                     (string)q.Results![0][3],
+                                     (string)q.Results![0][4]);
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "There was an error processing authorization data");
+            throw;
+        }
+    }
+
+    public async Task<Discord> GetDiscordData()
+    {
+        var q = await
+            Select()
+            .Table("links")
+            .Schema("*")
+            .TryExecute();
+
+        if (!q.Success)
+        {
+            Log.Fatal("Failed to fetch discord data from the database");
+            throw new MissingFieldException("Failed to fetch discord data from the database");
+        }
+
+        try
+        {
+            return new Discord((ulong)q.Results![0][0],
+                               (ulong)q.Results![0][1],
+                               (string)q.Results![0][2]);
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "There was an error processing discord data");
+            throw;
+        }
+    }
 }

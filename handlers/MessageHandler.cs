@@ -2,8 +2,7 @@
 using _26tack_rewritten.misc;
 using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
-using Discord;
-using Discord.Commands;
+using AsyncAwaitBestPractices;
 using Discord.WebSocket;
 using Serilog;
 using TwitchLib.Client.Events;
@@ -27,14 +26,23 @@ internal static class MessageHandler
     {
         if (CurrentColor != color)
         {
-            MainClient.Client.SendMessage(Config.Username, $"/color {color}");
+            MainClient.Client.SendMessage(Config.Auth.Username, $"/color {color}");
             CurrentColor = color;
         }
         MainClient.Client.SendMessage(channel, message);
     }
+    public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
+    {
+        await DiscordClient.Client
+            .GetGuild(guildID)
+            .GetTextChannel(channelID)
+            .SendMessageAsync(message);
+    }
+
     internal static async Task OnDiscordMessageReceived(SocketMessage arg)
     {
         Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Content} {arg.Channel.Id}");
+        await HandleDiscordMessage(arg);
     }
 
     private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
@@ -47,21 +55,21 @@ internal static class MessageHandler
         Log.Debug($"Sent message: {e.SentMessage.Message}");
     }
 
-    private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
+    private static void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
         Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
-        await HandleIrcMessage(e.ChatMessage);
+        HandleIrcMessage(e.ChatMessage).SafeFireAndForget(onException: ex => Log.Error(ex, "Failed to handle message"));
     }
 
     private static async Task HandleIrcMessage(ChatMessage ircMessage)
     {
         string message = ircMessage.Message;
         string channel = ircMessage.Channel;
-        string prefix = Config.Prefix;
+        string prefix = Config.MainPrefix;
         string[] splitMessage = message.Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
-        if (message.StartsWith(prefix) 
+        if (message.StartsWith(prefix)
         && ChannelHandler.MainJoinedChannelNames.Contains(channel))
         {
             string commandName = splitMessage[0].Replace(prefix, string.Empty);
@@ -78,14 +86,20 @@ internal static class MessageHandler
         }
         if (Regexes.Mention.IsMatch(message))
         {
-            // TODO: Discord JSON stuff
+            string msg = $"`[{DateTime.Now.ToLocalTime()}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
+            await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
         }
         if (Regexes.Racism.IsMatch(message))
         {
             //
         }
     }
-}
+
+    private static async Task HandleDiscordMessage(SocketMessage socketMessage)
+    {
+        //
+    }
+} // class
 
 internal enum ChatColor
 {

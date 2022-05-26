@@ -1,5 +1,4 @@
-﻿using _26tack_rewritten.handlers;
-using Serilog;
+﻿using Serilog;
 using TwitchLib.Client;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
@@ -27,7 +26,7 @@ internal static class AnonymousClient
         Client.AutoReListenOnException = true;
 
         ConnectionCredentials credentials = new ConnectionCredentials("justinfan123", "justinfan");
-        Client.Initialize(credentials, Config.Username);
+        Client.Initialize(credentials, Config.Auth.Username);
 
         Connect();
     }

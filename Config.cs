@@ -1,31 +1,22 @@
-﻿namespace _26tack_rewritten;
+﻿using _26tack_rewritten.database;
+
+namespace _26tack_rewritten;
 public static class Config
 {
-    public const string RelayChannel = "";
-    public const string Prefix = "|>";
-    public const int MinimumTimeoutTimeForRelay = 28800;
-
-    // Authorization
-    public const string Username = "";
-    public const string AccessToken = "";
-    public const string ClientID = "";
-    public const string SupibotToken = "";
-    public const string DiscordAppToken = "";
-
-    // Database
     public const string Host = "";
     public const string DbUsername = "";
     public const string Password = "";
     public const string DatabaseName = "";
+    public const string RelayChannel = "";
 
-    // Links
-    public const string JLChannelListLink = "";
-    public const string DiscordGeneralLink = "";
-    public const string LogsChannelLink = "";
-    public const string PingsChannelLink = "";
-    public const string DiscordErrorsChannelLink = "";
-    public const string TaisheenBadWordLink = "";
-
-    // Other
-    public const string DiscordPing = "";
+    //Retrieved from the database
+    public static string MainPrefix { get; set; } = "|>";
+    public static int MinimumTimeoutTimeForRelay { get; set; } = 28800;
+    public static Authorization Auth { get; set; } = default!;
+    public static Links Links { get; set; } = default!;
+    public static Discord Discord { get; set; } = default!;
 }
+
+public record Authorization(string Username, string AccessToken, string ClientID, string SupibotToken, string DiscordToken);
+public record Links(string IvrChannels = "https://logs.ivr.fi/channels");
+public record Discord(ulong GuildID, ulong PingsChannelID, string DiscordPing);
