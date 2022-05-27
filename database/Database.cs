@@ -142,7 +142,8 @@ internal class Database : DbConnection
         {
             return new Discord(ulong.Parse(q.Results![0][0].ToString()!),
                                ulong.Parse(q.Results![0][1].ToString()!),
-                               (string)q.Results![0][2]);
+                               ulong.Parse(q.Results![0][2].ToString()!),
+                               (string)q.Results![0][3]);
         }
         catch (Exception ex)
         {

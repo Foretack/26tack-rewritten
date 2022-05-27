@@ -14,8 +14,9 @@ namespace _26tack_rewritten.core;
 
 public static class MainClient
 {
-    public static List<string> JLChannels { get; private set; } = new List<string>();
+    public static List<string> JLChannels { get; private set; } = new List<string>(); // TODO: This doesn't belong here
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
+    public static DateTime StartupTime { get; private set; } = new DateTime();
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
 
@@ -31,6 +32,7 @@ public static class MainClient
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
         Config.Links = new Links();
+        StartupTime = DateTime.Now;
 
         if (Running) await Initialize();
         while (Running) Console.Read();
@@ -87,7 +89,7 @@ public static class MainClient
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
-        await Task.Delay(1000);
+        await Task.Delay(2500);
         await ChannelHandler.Connect(false);
         await DiscordClient.Connect();
         if (!Errored) return;

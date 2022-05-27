@@ -1,6 +1,4 @@
-﻿using _26tack_rewritten.database;
-
-namespace _26tack_rewritten;
+﻿namespace _26tack_rewritten;
 public static class Config
 {
     public const string Host = "";
@@ -19,4 +17,4 @@ public static class Config
 
 public record Authorization(string Username, string AccessToken, string ClientID, string SupibotToken, string DiscordToken);
 public record Links(string IvrChannels = "https://logs.ivr.fi/channels");
-public record Discord(ulong GuildID, ulong PingsChannelID, string DiscordPing);
+public record Discord(ulong GuildID, ulong PingsChannelID, ulong NewsChannelID, string DiscordPing);

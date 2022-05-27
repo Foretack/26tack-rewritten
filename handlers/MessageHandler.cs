@@ -41,7 +41,7 @@ internal static class MessageHandler
 
     internal static async Task OnDiscordMessageReceived(SocketMessage arg)
     {
-        Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Content} {arg.Channel.Id}");
+        Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Channel.Name}: {arg.Content}");
         await HandleDiscordMessage(arg);
     }
 
@@ -69,13 +69,13 @@ internal static class MessageHandler
         string[] splitMessage = message.Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
-        if (message.StartsWith(prefix)
+        if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
         && ChannelHandler.MainJoinedChannelNames.Contains(channel))
         {
             string commandName = splitMessage[0].Replace(prefix, string.Empty);
             Permission permission = new Permission(ircMessage);
             CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
-            CommandHandler.HandleCommand(ctx);
+            await CommandHandler.HandleCommand(ctx);
         }
         if (channel == "pajlada"
         && ircMessage.Username == "pajbot"
@@ -89,15 +89,25 @@ internal static class MessageHandler
             string msg = $"`[{DateTime.Now.ToLocalTime()}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
             await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
         }
-        if (Regexes.Racism.IsMatch(message))
-        {
-            //
-        }
     }
 
     private static async Task HandleDiscordMessage(SocketMessage socketMessage)
     {
-        //
+        await Task.Run(() =>
+        {
+            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
+            && socketMessage.Author.Username.Contains("#api-announcements"))
+            {
+                SendColoredMessage("pajlada",
+                                   "imGlitch 🚨 " + socketMessage.Content[..475].Replace("@Twitch Announcements", string.Empty),
+                                   ChatColor.BlueViolet);
+            }
+            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
+            && socketMessage.Author.Username.Contains("7TV #news"))
+            {
+                SendColoredMessage("pajlada", "7tvM 📣 " + socketMessage.Content, ChatColor.CadetBlue);
+            }
+        });
     }
 } // class
 

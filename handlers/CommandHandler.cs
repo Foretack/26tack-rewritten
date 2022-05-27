@@ -1,41 +1,52 @@
-﻿using _26tack_rewritten.commands;
-using _26tack_rewritten.interfaces;
+﻿using _26tack_rewritten.interfaces;
 using _26tack_rewritten.models;
 using AsyncAwaitBestPractices;
 using Serilog;
 using TwitchLib.Client.Models;
+using _26tack_rewritten.commands;
 
 namespace _26tack_rewritten.handlers;
 internal static class CommandHandler
 {
-    public static readonly Dictionary<string[], IChatCommand> Commands = new Dictionary<string[], IChatCommand>();
+    public static Dictionary<string, ChatCommandHandler> Handlers { get; } = new Dictionary<string, ChatCommandHandler>();
+
+    internal static List<string> Prefixes { get; } = new List<string>();
 
     public static void Initialize()
     {
-        AddCommand(new Ping());
+        RegisterHandler(new BaseHandler());
     }
 
-    public static void AddCommand(IChatCommand command)
+    public static void RegisterHandler(ChatCommandHandler handler)
     {
-        List<string> keys = new List<string>(command.Info().Aliases);
-        keys.Add(command.Info().Name);
-        Commands.Add(keys.ToArray(), command);
+        Handlers.Add(handler.Prefix, handler);
+        Prefixes.Add(handler.Prefix);
+        Log.Verbose($"Loaded Handler {handler.GetType()}");
     }
 
-    public static void HandleCommand(CommandContext ctx)
+    public static async Task HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
-        try
+        await Task.Run(() =>
         {
-            IChatCommand command = Commands.First(x => x.Key.Contains(cmdName)).Value;
-            Cooldown cd = new Cooldown(ctx.IrcMessage.Username, ctx.IrcMessage.Channel, command.Info());
-            if (!Cooldown.CheckAndHandleCooldown(cd)) return;
-            command.Run(ctx).SafeFireAndForget(onException: ex => Log.Error(ex, "Command execution failed"));
-        }
-        catch (InvalidOperationException)
-        {
-            Log.Debug($"@{ctx.IrcMessage.Username} tried using nonexisting command \"{cmdName}\" fdm");
-        }
+            try
+            {
+                string prefix = Prefixes.First(x => ctx.IrcMessage.Message.StartsWith(x));
+                bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
+                if (!s || handler is null) return;
+                
+                handler
+                .Commands
+                .First(kvp => kvp.Key.Contains(cmdName))
+                .Value
+                .Run(ctx)
+                .SafeFireAndForget(onException: ex => Log.Error(ex, $"Error running the command \"{cmdName}\""));
+            }
+            catch (Exception)
+            {
+                Log.Error( $"Command \"{cmdName}\" does not exist");
+            }
+        });
     }
 }
 

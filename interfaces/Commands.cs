@@ -1,5 +1,6 @@
 ﻿using _26tack_rewritten.handlers;
 using _26tack_rewritten.models;
+using TwitchLib.Client.Models;
 
 namespace _26tack_rewritten.interfaces;
 
@@ -9,9 +10,21 @@ public interface IChatCommand
     public Task Run(CommandContext ctx);
 }
 
-public interface ISubCommand
+public abstract class ChatCommandHandler
 {
-    // TODO: ISubCommand && SubCommandHandler
+    public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();
+    public virtual string Prefix { get; protected set; } = Config.MainPrefix;
+    public virtual bool UseUnifiedCooldowns { get; protected set; } = false;
+    public virtual int[] Cooldowns { get; protected set; } = { 5, 15 };
+
+    protected void AddCommand(IChatCommand command)
+    {
+        List<string> keys = new List<string>(command.Info().Aliases)
+        {
+            command.Info().Name
+        };
+        Commands.Add(keys.ToArray(), command);
+    }
 }
 
 public abstract class OptionsParser
