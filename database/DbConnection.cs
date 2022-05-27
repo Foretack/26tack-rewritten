@@ -59,10 +59,22 @@ internal abstract class DbConnection
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
                 List<int> ordinals = new List<int>();
-                while (await r.ReadAsync())
+                if (!ValuesSchema!.Contains("*"))
                 {
-                    foreach (var column in ValuesSchema!) { ordinals.Add(r.GetOrdinal(column)); }
-                    break;
+                    while (await r.ReadAsync())
+                    {
+                        foreach (var column in ValuesSchema!) { ordinals.Add(r.GetOrdinal(column)); }
+                        break;
+                    } 
+                }
+                else
+                {
+                    while (await r.ReadAsync())
+                    {
+                        int columnCount = r.GetColumnSchema().Count;
+                        for (int i = 0; i < columnCount; i++) { ordinals.Add(i); }
+                        break;
+                    }
                 }
                 await r.CloseAsync();
                 

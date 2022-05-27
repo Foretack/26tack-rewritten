@@ -41,7 +41,7 @@ internal static class AnonymousClient
         Client.OnConnected += (s, e) =>
         {
             Connected = true;
-            Log.Debug("[Anon] Connected");
+            Log.Information("[Anon] Connected");
         };
     }
 }

@@ -128,7 +128,7 @@ internal class Database : DbConnection
     {
         var q = await
             Select()
-            .Table("links")
+            .Table("discord")
             .Schema("*")
             .TryExecute();
 
@@ -140,8 +140,8 @@ internal class Database : DbConnection
 
         try
         {
-            return new Discord((ulong)q.Results![0][0],
-                               (ulong)q.Results![0][1],
+            return new Discord(ulong.Parse(q.Results![0][0].ToString()!),
+                               ulong.Parse(q.Results![0][1].ToString()!),
                                (string)q.Results![0][2]);
         }
         catch (Exception ex)

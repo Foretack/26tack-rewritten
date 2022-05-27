@@ -30,7 +30,7 @@ internal static class DiscordClient
 
     private static Task OnConnected()
     {
-        Log.Debug("[Discord] Connected");
+        Log.Information("[Discord] Connected");
         return Task.CompletedTask;
     }
 }

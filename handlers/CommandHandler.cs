@@ -34,7 +34,7 @@ internal static class CommandHandler
         }
         catch (InvalidOperationException)
         {
-            Log.Information($"@{ctx.IrcMessage.Username} tried using nonexisting command \"{cmdName}\" fdm");
+            Log.Debug($"@{ctx.IrcMessage.Username} tried using nonexisting command \"{cmdName}\" fdm");
         }
     }
 }

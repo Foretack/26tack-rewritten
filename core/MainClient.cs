@@ -30,6 +30,7 @@ public static class MainClient
         Database db = new Database();
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
+        Config.Links = new Links();
 
         if (Running) await Initialize();
         while (Running) Console.Read();
@@ -55,7 +56,7 @@ public static class MainClient
 
         try
         {
-            HttpClient.Timeout = TimeSpan.FromMilliseconds(500);
+            HttpClient.Timeout = TimeSpan.FromMilliseconds(1500);
             Stream jlcl = await HttpClient.GetStreamAsync(Config.Links.IvrChannels);
             JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
             JLChannels = deserialized.channels.Select(c => c.name).ToList();
@@ -82,7 +83,7 @@ public static class MainClient
 
     private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
-        Log.Debug($"[Main] Connected");
+        Log.Information($"[Main] Connected");
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
