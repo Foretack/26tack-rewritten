@@ -1,10 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace _26tack_rewritten.json;
 
-namespace _26tack_rewritten.json;
-internal class TMI
+#pragma warning disable CS8618
+#pragma warning disable IDE1006
+
+public class TMI
 {
+    public ChatterData chatters { get; set; }
+}
+
+public class ChatterData
+{
+    public string[] moderators { get; set; }
+    public string[] viewers { get; set; }
 }

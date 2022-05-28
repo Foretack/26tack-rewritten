@@ -13,9 +13,9 @@ public interface IChatCommand
 public abstract class ChatCommandHandler
 {
     public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();
-    public virtual string Prefix { get; protected set; } = Config.MainPrefix;
-    public virtual bool UseUnifiedCooldowns { get; protected set; } = false;
-    public virtual int[] Cooldowns { get; protected set; } = { 5, 15 };
+    public string Prefix { get; protected set; } = Config.MainPrefix;
+    public bool UseUnifiedCooldowns { get; protected set; } = false;
+    public int[] Cooldowns { get; protected set; } = { 5, 15 };
 
     protected void AddCommand(IChatCommand command)
     {
