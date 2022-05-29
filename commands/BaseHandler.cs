@@ -6,6 +6,8 @@ internal class BaseHandler : ChatCommandHandler
 {
     public BaseHandler()
     {
+        SetName = "Base";
+
         AddCommand(new Ping());
         AddCommand(new RandomJoke());
     }

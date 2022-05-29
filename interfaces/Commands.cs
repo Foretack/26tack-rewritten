@@ -13,6 +13,7 @@ public interface IChatCommand
 public abstract class ChatCommandHandler
 {
     public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();
+    public string SetName { get; protected set; } = default!;
     public string Prefix { get; protected set; } = Config.MainPrefix;
     public bool UseUnifiedCooldowns { get; protected set; } = false;
     public int[] Cooldowns { get; protected set; } = { 5, 15 };

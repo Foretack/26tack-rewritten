@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
 using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.json;
@@ -9,8 +8,6 @@ using _26tack_rewritten.utils;
 namespace _26tack_rewritten.commands.adminset;
 internal class Massping : DataCacher<TMI>, IChatCommand
 {
-    private readonly HttpClient Requests = new HttpClient() { Timeout = TimeSpan.FromMilliseconds(500) };
-
     public Command Info()
     {
         string name = "massping";
@@ -38,17 +35,19 @@ internal class Massping : DataCacher<TMI>, IChatCommand
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        var c = GetCachedPiece(targetChannel);
-
-        if (c is not null)
-        {
-            //
-
-        }
         try
         {
-            Stream tmiResponse = await Requests.GetStreamAsync($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
-            TMI clist = (await JsonSerializer.DeserializeAsync<TMI>(tmiResponse))!;
+            TMI? clist;
+            var c = GetCachedPiece(targetChannel);
+            if (c is not null) clist = c.Object;
+            else clist = await ExternalAPIHandler.GetChannelChatters(targetChannel);
+
+            if (clist is null)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan failed to retrieve that channel's chatters");
+                return;
+            }
+            CachePiece(targetChannel, clist, 600);
             if (mods)
             {
                 AppendMods(clist.chatters.moderators, ref sb);
