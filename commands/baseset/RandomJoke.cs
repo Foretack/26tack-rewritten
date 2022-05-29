@@ -25,6 +25,7 @@ internal class RandomJoke : IChatCommand
         if (rj is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, there was an error retrieving a random joke :(");
+            return;
         }
         MessageHandler.SendMessage(channel, $"@{user}, [{rj.category}] {rj.joke.Replace('\n', ' ')} {new string[] { "LuL", "4Head", "xd", string.Empty }.Choice()}");
     }
