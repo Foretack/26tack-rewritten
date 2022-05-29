@@ -34,11 +34,14 @@ internal static class CommandHandler
                 string prefix = Prefixes.First(x => ctx.IrcMessage.Message.StartsWith(x));
                 bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
                 if (!s || handler is null) return;
-                
-                handler
-                .Commands
-                .First(kvp => kvp.Key.Contains(cmdName))
-                .Value
+
+                IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName)).Value;
+                Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
+                                           ctx.IrcMessage.Channel,
+                                           handler.UseUnifiedCooldowns ? handler : command.Info());
+                if (!Cooldown.CheckAndHandleCooldown(cd)) return;
+
+                command
                 .Run(ctx)
                 .SafeFireAndForget(onException: ex => Log.Error(ex, $"Error running the command \"{cmdName}\""));
             }

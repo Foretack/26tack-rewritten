@@ -10,13 +10,13 @@ public interface IChatCommand
     public Task Run(CommandContext ctx);
 }
 
-public abstract class ChatCommandHandler
+public abstract class ChatCommandHandler: ICooldownOptions
 {
     public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();
-    public string SetName { get; protected set; } = default!;
     public string Prefix { get; protected set; } = Config.MainPrefix;
     public bool UseUnifiedCooldowns { get; protected set; } = false;
-    public int[] Cooldowns { get; protected set; } = { 5, 15 };
+    public string Name { get; set; } = default!; 
+    public int[] Cooldowns { get; set; } = default!;
 
     protected void AddCommand(IChatCommand command)
     {

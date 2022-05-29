@@ -6,7 +6,7 @@ internal class AdminHandler : ChatCommandHandler
 {
     public AdminHandler()
     {
-        SetName = "Admin";
+        Name = "Admin";
         Prefix = "func_";
         UseUnifiedCooldowns = true;
         Cooldowns = new int[] { 0, 0 };
