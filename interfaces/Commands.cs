@@ -17,6 +17,7 @@ public abstract class ChatCommandHandler: ICooldownOptions
     public bool UseUnifiedCooldowns { get; protected set; } = false;
     public string Name { get; set; } = default!; 
     public int[] Cooldowns { get; set; } = default!;
+    public PermissionLevels Visibility { get; protected set; } = PermissionLevels.EveryonePlusBlacklisted;
 
     protected void AddCommand(IChatCommand command)
     {
