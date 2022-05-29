@@ -15,6 +15,7 @@ internal static class CommandHandler
     public static void Initialize()
     {
         RegisterHandler(new BaseHandler());
+        RegisterHandler(new AdminHandler());
     }
 
     public static void RegisterHandler(ChatCommandHandler handler)
