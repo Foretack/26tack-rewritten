@@ -7,9 +7,9 @@ public static class Config
     public const string DatabaseName = "";
     public const string RelayChannel = "";
 
-    //Retrieved from the database
     public static string MainPrefix { get; set; } = "|>";
     public static int MinimumTimeoutTimeForRelay { get; set; } = 28800;
+    //Retrieved from the database
     public static Authorization Auth { get; set; } = default!;
     public static Links Links { get; set; } = default!;
     public static Discord Discord { get; set; } = default!;

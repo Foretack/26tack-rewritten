@@ -72,9 +72,12 @@ public static class MainClient
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
-        await Task.Delay(2500);
-        await ChannelHandler.Connect(false);
         await DiscordClient.Connect();
+        while (!(AnonymousClient.Connected && DiscordClient.Connected))
+        {
+            await Task.Delay(1000);
+        }
+        await ChannelHandler.Connect(false);
         if (!Errored) return;
         await Reconnect();
         Errored = false;

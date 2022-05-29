@@ -7,9 +7,9 @@ using TwitchLib.Communication.Models;
 namespace _26tack_rewritten.core;
 internal static class AnonymousClient
 {
-    internal static TwitchClient Client { get; private set; } = new TwitchClient();
+    public static bool Connected { get; set; } = false;
+    public static TwitchClient Client { get; private set; } = new TwitchClient();
 
-    private static bool Connected { get; set; } = false;
 
     public static void Initialize()
     {
