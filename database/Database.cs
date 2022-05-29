@@ -17,7 +17,9 @@ internal class Database : DbConnection
 
         if (!q.Success)
         {
-            // TODO: Discord message
+            await MessageHandler.SendDiscordMessage(Config.Discord.GuildID,
+                                                    Config.Discord.PingsChannelID,
+                                                    $"[{DateTime.Now.ToLocalTime()}] {Config.Discord.DiscordPing} an exception failed to be logged!");
             return false;
         }
         return true;
