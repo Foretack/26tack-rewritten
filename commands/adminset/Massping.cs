@@ -40,14 +40,17 @@ internal class Massping : DataCacher<TMI>, IChatCommand
             TMI? clist;
             var c = GetCachedPiece(targetChannel);
             if (c is not null) clist = c.Object;
-            else clist = await ExternalAPIHandler.GetChannelChatters(targetChannel);
-
-            if (clist is null)
+            else
             {
-                MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan failed to retrieve that channel's chatters");
-                return;
+                clist = await ExternalAPIHandler.GetChannelChatters(targetChannel);
+                if (clist is null)
+                {
+                    MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan failed to retrieve that channel's chatters");
+                    return;
+                }
+                CachePiece(targetChannel, clist, 600);
             }
-            CachePiece(targetChannel, clist, 600);
+            
             if (mods)
             {
                 AppendMods(clist.chatters.moderators, ref sb);
