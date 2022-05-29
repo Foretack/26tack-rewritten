@@ -1,7 +1,5 @@
-﻿using System.Text.Json;
-using _26tack_rewritten.database;
+﻿using _26tack_rewritten.database;
 using _26tack_rewritten.handlers;
-using _26tack_rewritten.json;
 using Serilog;
 using Serilog.Core;
 using TwitchLib.Client;
@@ -14,7 +12,6 @@ namespace _26tack_rewritten.core;
 
 public static class MainClient
 {
-    public static List<string> JLChannels { get; private set; } = new List<string>(); // TODO: This doesn't belong here
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 
@@ -22,7 +19,6 @@ public static class MainClient
 
     private static bool Running { get; set; } = true;
     private static bool Errored { get; set; } = false;
-    private static readonly HttpClient HttpClient = new HttpClient();
 
     public static async Task<int> Main(string[] args)
     {
@@ -34,12 +30,12 @@ public static class MainClient
         Config.Links = new Links();
         StartupTime = DateTime.Now;
 
-        if (Running) await Initialize();
+        if (Running) Initialize();
         while (Running) Console.Read();
         return 0;
     }
 
-    private static async Task Initialize()
+    private static void Initialize()
     {
         ClientOptions options = new ClientOptions();
         options.MessagesAllowedInPeriod = 150;
@@ -55,19 +51,6 @@ public static class MainClient
 
         ConnectionCredentials credentials = new ConnectionCredentials(Config.Auth.Username, Config.Auth.AccessToken);
         Client.Initialize(credentials);
-
-        try
-        {
-            HttpClient.Timeout = TimeSpan.FromMilliseconds(1500);
-            Stream jlcl = await HttpClient.GetStreamAsync(Config.Links.IvrChannels);
-            JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
-            JLChannels = deserialized.channels.Select(c => c.name).ToList();
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Failed to load just logged channels");
-            throw;
-        }
 
         Connect();
     }

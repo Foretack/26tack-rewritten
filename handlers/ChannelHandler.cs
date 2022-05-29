@@ -11,6 +11,7 @@ internal static class ChannelHandler
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
+    public static string[] JLChannels { get; private set;  } = Array.Empty<string>();
 
     private static readonly Database Db = new Database();
     private static readonly List<Channel> FetchedChannels = new List<Channel>(Db.GetChannels().Result);
@@ -25,6 +26,7 @@ internal static class ChannelHandler
             AnonJoinedChannels.Clear();
         }
         RegisterEvents(isReconnect);
+        JLChannels = (await ExternalAPIHandler.GetIvrChannels()).channels.Select(x => x.name).ToArray();
         IAsyncEnumerable<Channel> c = new AsyncEnumerable<Channel>(async y =>
         {
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
@@ -36,7 +38,7 @@ internal static class ChannelHandler
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Name);
-                Log.Debug($"[Main] Attempting to join: {x.Name} (JustLog:{MainClient.JLChannels.Contains(x.Name)})");
+                Log.Debug($"[Main] Attempting to join: {x.Name} (JustLog:{JLChannels.Contains(x.Name)})");
                 await Task.Delay(300);
             }
             AnonymousClient.Client.JoinChannel(x.Name);

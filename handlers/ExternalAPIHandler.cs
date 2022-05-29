@@ -60,4 +60,22 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
+    public static async Task<JustLogLoggedChannels> GetIvrChannels()
+    {
+        HttpClient reqs = new HttpClient();
+
+        try
+        {
+            reqs.Timeout = TimeSpan.FromMilliseconds(1500);
+            Stream jlcl = await reqs.GetStreamAsync(Config.Links.IvrChannels);
+            JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
+            return deserialized;
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Failed to load just logged channels");
+            throw;
+        }
+    }
 }
