@@ -9,8 +9,7 @@ namespace _26tack_rewritten.handlers;
 internal static class CommandHandler
 {
     public static Dictionary<string, ChatCommandHandler> Handlers { get; } = new Dictionary<string, ChatCommandHandler>();
-
-    internal static List<string> Prefixes { get; } = new List<string>();
+    public static List<string> Prefixes { get; } = new List<string>();
 
     public static void Initialize()
     {
@@ -36,7 +35,7 @@ internal static class CommandHandler
                 bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
                 if (!s || handler is null) return;
 
-                IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName)).Value;
+                IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
                 Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
                                            ctx.IrcMessage.Channel,
                                            handler.UseUnifiedCooldowns ? handler : command.Info());

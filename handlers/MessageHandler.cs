@@ -65,14 +65,13 @@ internal static class MessageHandler
     {
         string message = ircMessage.Message;
         string channel = ircMessage.Channel;
-        string prefix = Config.MainPrefix;
         string[] splitMessage = message.Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
         if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
         && ChannelHandler.MainJoinedChannelNames.Contains(channel))
         {
-            string commandName = splitMessage[0].Replace(prefix, string.Empty);
+            string commandName = splitMessage[0];
             Permission permission = new Permission(ircMessage);
             CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
             await CommandHandler.HandleCommand(ctx);
