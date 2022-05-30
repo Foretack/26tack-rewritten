@@ -47,18 +47,18 @@ internal static class ChannelHandler
         });
     }
 
-    public static async Task<bool> JoinChannel(string channel, bool highPriority = false, bool logged = true)
+    public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
-        Channel c = new Channel(channel, highPriority ? 50 : 0, logged);
+        UserFactory uf = new UserFactory();
+        Channel c = new Channel(channel, priority, logged);
+        ExtendedChannel? ec = await uf.CreateChannelProfile(channel);
+        if (ec is null) return false;
         FetchedChannels.Add(c);
 
-        if (highPriority) MainClient.Client.JoinChannel(channel);
+        if (priority >= 50) MainClient.Client.JoinChannel(channel);
         AnonymousClient.Client.JoinChannel(channel);
 
         Database db = new Database();
-        UserFactory uf = new UserFactory();
-        ExtendedChannel? ec = await uf.CreateChannelProfile(channel);
-        if (ec is null) return false;
         await db.AddChannel(ec);
         return true;
     }
