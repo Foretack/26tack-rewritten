@@ -14,5 +14,6 @@ internal class AdminHandler : ChatCommandHandler
         Visibility = PermissionLevels.Whitelisted;
 
         AddCommand(new Massping());
+        AddCommand(new JoinChannel());
     }
 }
