@@ -45,9 +45,9 @@ internal static class CommandHandler
                 .Run(ctx)
                 .SafeFireAndForget(onException: ex => Log.Error(ex, $"Error running the command \"{cmdName}\""));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error( $"Command \"{cmdName}\" does not exist");
+                Log.Error(ex,  $"Something went wrong with executing \"{cmdName}\"");
             }
         });
     }

@@ -3,20 +3,18 @@
 namespace _26tack_rewritten.models;
 public class Cooldown
 {
-    private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>(); // TODO: This is terrible, maybe use a dict?
+    private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>();
     private static readonly List<Cooldown> ChannelCooldownPool = new List<Cooldown>();
 
     public string User { get; set; }
     public string Channel { get; set; }
     public ICooldownOptions CooldownOptions { get; set; }
-    private long LastUsed { get; set; }
 
     public Cooldown(string user, string channel, ICooldownOptions cooldownOptions)
     {
         User = user;
         Channel = channel;
         CooldownOptions = cooldownOptions;
-        LastUsed = DateTimeOffset.Now.ToUnixTimeSeconds();
     }
 
     /// <returns>True if the command can be executed. False if the command is on cooldown</returns>
@@ -24,56 +22,48 @@ public class Cooldown
     {
         int uCD = cd.CooldownOptions.Cooldowns[0];
         int cCD = cd.CooldownOptions.Cooldowns[1];
-        long currentTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-        if (!UserCooldownPool.Any(x => x.User == cd.User)
-        && !ChannelCooldownPool.Any(y => y.Channel == cd.Channel))
+        if (uCD == 0 && cCD == 0) return true;
+
+        if (UserCooldownPool.Any(x => x.User == cd.User && x.CooldownOptions.Name == cd.CooldownOptions.Name) // same user + same command
+        || ChannelCooldownPool.Any(x => x.Channel == cd.Channel && x.CooldownOptions.Name == cd.CooldownOptions.Name)) // same channel + same command
         {
-            RegisterNewCooldown(cd);
-            return true;
-        }
-        if (UserCooldownPool.Any(x => x.User == cd.User && currentTime - x.LastUsed >= uCD)
-        && ChannelCooldownPool.Any(y => y.Channel == cd.Channel && currentTime - y.LastUsed >= cCD))
-        {
-            UpdateExpiredCooldown(cd, true, true);
-            return true;
-        }
-        if (!UserCooldownPool.Any(x => x.User == cd.User)
-        && ChannelCooldownPool.Any(y => y.Channel == cd.Channel && currentTime - y.LastUsed >= cCD))
-        {
-            UpdateExpiredCooldown(cd, user: false);
-            RegisterNewCooldown(cd, channel: false);
-            return true;
-        }
-        if (UserCooldownPool.Any(x => x.User == cd.User && currentTime - x.LastUsed >= uCD)
-        && !ChannelCooldownPool.Any(y => y.Channel == cd.Channel))
-        {
-            UpdateExpiredCooldown(cd, channel: false);
-            RegisterNewCooldown(cd, user: false);
-            return true;
+            Log.Verbose($"[{cd.User};{cd.Channel};{cd.CooldownOptions.Name}] is on cooldown");
+            return false;
         }
 
-        Log.Information($"{cd.User} tried using the command \"{cd.CooldownOptions.Name}\" while on cooldown!");
-        return false;
-    }
+        // Add cooldowns to their respective lists
+        RegisterNewCooldown(cd);
+        Log.Verbose($"+ [{cd.User};{cd.Channel};{cd.CooldownOptions.Name}]");
+
+        // I sure hope playing with lists across multiple threads wont cause any trouble !!
+        Timer? uTimer = null;
+        Timer? cTimer = null;
+
+        // Remove USER cooldown
+        uTimer = new Timer(state =>
+        {
+            UserCooldownPool.Remove(cd);
+            Log.Verbose($"- [{cd.User};{cd.CooldownOptions.Name}]");
+            uTimer?.Dispose();
+        }, null, uCD * 1000, Timeout.Infinite);
+
+        // Remove CHANNEL cooldown
+        cTimer = new Timer(state =>
+        {
+            ChannelCooldownPool.Remove(cd);
+            Log.Verbose($"- [{cd.Channel};{cd.CooldownOptions.Name}]");
+            cTimer?.Dispose();
+        }, null, cCD * 1000, Timeout.Infinite);
+        
+        // Command can't be executed
+        return true;
+    } 
 
     private static void RegisterNewCooldown(Cooldown newCooldown, bool user = true, bool channel = true)
     {
         if (user) UserCooldownPool.Add(newCooldown);
         if (channel) ChannelCooldownPool.Add(newCooldown);
-    }
-    private static void UpdateExpiredCooldown(Cooldown newCooldown, bool user = true, bool channel = true)
-    {
-        if (user)
-        {
-            UserCooldownPool.Remove(UserCooldownPool.First(x => x.User == newCooldown.User));
-            UserCooldownPool.Add(newCooldown);
-        }
-        if (channel)
-        {
-            ChannelCooldownPool.Remove(UserCooldownPool.First(x => x.Channel == newCooldown.Channel));
-            ChannelCooldownPool.Add(newCooldown);
-        }
     }
 }
 

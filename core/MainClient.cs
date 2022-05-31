@@ -24,10 +24,12 @@ public static class MainClient
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
         Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(LogSwitch).WriteTo.Console().CreateLogger();
+
         Database db = new Database();
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
         Config.Links = new Links();
+
         StartupTime = DateTime.Now;
 
         if (Running) Initialize();
@@ -83,10 +85,14 @@ public static class MainClient
         Errored = false;
     }
 
+    // TODO: AnonymousClient doesn't have this.
+    // Also check which client needs to rejoin the channels properly
+    // instead of making them both do it you lazy idiot
     private static async Task Reconnect()
     {
         Client.JoinChannel(Config.RelayChannel);
         Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnecting...");
+        Log.Information("MainClient is attempting reconnection...");
         await ChannelHandler.Connect(Errored);
         Errored = false;
     }
