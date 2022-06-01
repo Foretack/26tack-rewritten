@@ -32,10 +32,16 @@ internal static class CommandList
         await Task.Run(() => {
             sb.Append(handler.Name + " commands: ");
             sb.Append('[');
-            var commandNames = handler.Commands.Select(x => prefix + x.Value.Info().Name).AsEnumerable();
+
+            var commandNames = handler.Commands
+            .Select(x => prefix + x.Value.Info().Name)
+            .AsEnumerable();
             List<string> list = new List<string>(commandNames);
-            var otherSets = CommandHandler.Handlers.Where(x => x.Key != prefix).Select(y => y.Key + "commands").AsEnumerable();
+            var otherSets = CommandHandler.Handlers
+            .Where(x => x.Key != prefix && x.Value.Visibility <= perms)
+            .Select(y => y.Key + "commands").AsEnumerable();
             list.AddRange(otherSets);
+
             sb.Append(string.Join(" | ", list));
             sb.Append(']');
 
