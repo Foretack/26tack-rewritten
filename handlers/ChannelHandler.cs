@@ -63,6 +63,38 @@ internal static class ChannelHandler
         return true;
     }
 
+    public static async Task<bool> PartChannel(string channel)
+    {
+        try
+        {
+            Channel target = AnonJoinedChannels.First(x => x.Name == channel);
+            AnonJoinedChannels.Remove(target);
+            AnonymousClient.Client.LeaveChannel(channel);
+
+            Database db = new Database();
+            await db.RemoveChannel(target);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"AnonymousClient failed to part channel \"{channel}\"");
+            return false;
+        }
+
+        try
+        {
+            Channel target = MainJoinedChannels.First(x => x.Name == channel);
+            MainJoinedChannels.Remove(target);
+            MainJoinedChannelNames.Remove(channel);
+            MainClient.Client.LeaveChannel(channel);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"MainClient failed to part channel \"{channel}\"");
+        }
+
+        return true;
+    }
+
     private static void RegisterEvents(bool isReconnect)
     {
         if (isReconnect) return;

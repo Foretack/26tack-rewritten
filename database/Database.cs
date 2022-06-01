@@ -153,4 +153,16 @@ internal class Database : DbConnection
             throw;
         }
     }
+
+    public async Task<bool> RemoveChannel(ChannelHandler.Channel channel)
+    {
+        var q = await
+            Delete()
+            .Table("channels")
+            .Where($"username = '{channel.Name}'")
+            .TryExecute();
+
+        if (!q.Success) return false;
+        return true;
+    }
 }
