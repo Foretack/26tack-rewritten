@@ -30,7 +30,7 @@ internal class JoinChannel : OptionsParser, IChatCommand
         int priority =  GetIntParam("priority", ctx.IrcMessage.Message) ?? 0;
         bool logged = GetBoolParam("logged", ctx.IrcMessage.Message) ?? true;
 
-        bool successful = await ChannelHandler.JoinChannel(targetChannel, priority, logged);
+        bool successful = await ChannelHandler.JoinChannel(targetChannel, priority, logged); // FIXME: this shit doesn't work
 
         if (successful)
         {

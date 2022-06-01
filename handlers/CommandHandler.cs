@@ -35,6 +35,13 @@ internal static class CommandHandler
                 bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
                 if (!s || handler is null) return;
 
+                if (CommandList.Info().Aliases.Contains(cmdName.Replace(prefix, string.Empty)))
+                {
+                    CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+                    CommandList.Run(ctx2).SafeFireAndForget();
+                    return;
+                }
+
                 IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
                 Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
                                            ctx.IrcMessage.Channel,
