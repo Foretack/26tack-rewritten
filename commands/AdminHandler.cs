@@ -16,5 +16,6 @@ internal class AdminHandler : ChatCommandHandler
         AddCommand(new Massping());
         AddCommand(new JoinChannel());
         AddCommand(new PartChannel());
+        AddCommand(new Debug());
     }
 }
