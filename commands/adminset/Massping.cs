@@ -13,8 +13,9 @@ internal class Massping : DataCacher<TMI>, IChatCommand
         string name = "massping";
         string description = " :tf: ";
         string[] aliases = { "mp" };
+        PermissionLevels permission = PermissionLevels.Whitelisted;
 
-        return new Command(name, description, aliases, permission: PermissionLevels.Whitelisted);
+        return new Command(name, description, aliases, permission: permission);
     }
 
     public async Task Run(CommandContext ctx)
