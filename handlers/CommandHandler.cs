@@ -41,6 +41,12 @@ internal static class CommandHandler
                     CommandList.Run(ctx2).SafeFireAndForget();
                     return;
                 }
+                if (CommandHelp.Info().Name == cmdName.Replace(prefix, string.Empty))
+                {
+                    CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+                    CommandHelp.Run(ctx2).SafeFireAndForget();
+                    return;
+                }
 
                 IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
                 Cooldown cd = new Cooldown(ctx.IrcMessage.Username,

@@ -2,6 +2,7 @@
 using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.models;
+using Serilog;
 
 namespace _26tack_rewritten.commands;
 internal static class CommandList
@@ -26,7 +27,12 @@ internal static class CommandList
         StringBuilder sb = new StringBuilder($"@{user} ");
         string prefix = ctx.CommandName;
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
-        if (!s || handler is null) return;
+        if (!s || handler is null)
+        {
+            MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
+            Log.Error($"commands command failed to get the handler for a prefix somehow pajaS");
+            return;
+        }
 
         await Task.Run(() => {
             sb.Append(handler.Name + " commands: ");
@@ -36,6 +42,7 @@ internal static class CommandList
             .Select(x => prefix + x.Value.Info().Name)
             .AsEnumerable();
             List<string> list = new List<string>(commandNames);
+            list.Add(prefix + "help");
             var otherSets = CommandHandler.Handlers
             .Where(x => x.Key != prefix && x.Value.Visibility <= perms)
             .Select(y => y.Key + "commands").AsEnumerable();
