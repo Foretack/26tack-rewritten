@@ -35,7 +35,7 @@ internal class Suggest : IChatCommand
 
         if (success)
         {
-            MessageHandler.SendColoredMessage(channel, $"@{user}, Apu 👍 Your suggestion has been saved. You will most likely be " +
+            MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
                 $"notified through a supibot reminder regarding it's status", ChatColor.SeaGreen);
             return;
         }
