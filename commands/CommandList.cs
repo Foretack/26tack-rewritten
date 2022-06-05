@@ -21,7 +21,6 @@ internal static class CommandList
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
-        string[] args = ctx.Args;
         PermissionLevels perms = (PermissionLevels)ctx.Permission.Level;
         
         StringBuilder sb = new StringBuilder($"@{user} ");

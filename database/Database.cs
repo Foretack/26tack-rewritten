@@ -34,8 +34,7 @@ internal class Database : DbConnection
             .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"{channel.ID}", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.logged}", "CURRENT_DATE")
             .TryExecute();
 
-        if (!q.Success) return false;
-        return true;
+        return q.Success;
     }
 
     public async Task<ChannelHandler.Channel[]> GetChannels()
@@ -162,7 +161,18 @@ internal class Database : DbConnection
             .Where($"username = '{channel.Name}'")
             .TryExecute();
 
-        if (!q.Success) return false;
-        return true;
+        return q.Success;
+    }
+
+    public async Task<bool> CreateSuggestion(PartialUser user, string suggestionText)
+    {
+        var q = await
+            Insert()
+            .Table("suggestions")
+            .Schema("username", "user_id", "suggestion_text")
+            .Values($"'{user.Username}'", $"'{user.ID}'", $"'{suggestionText}'")
+            .TryExecute();
+
+        return q.Success;
     }
 }
