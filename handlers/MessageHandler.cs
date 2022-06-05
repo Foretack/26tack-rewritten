@@ -29,7 +29,7 @@ internal static class MessageHandler
             MainClient.Client.SendMessage(Config.Auth.Username, $"/color {color}");
             CurrentColor = color;
         }
-        MainClient.Client.SendMessage(channel, message);
+        MainClient.Client.SendMessage(channel, "/me " + message);
     }
     public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
     {
@@ -92,19 +92,24 @@ internal static class MessageHandler
 
     private static async Task HandleDiscordMessage(SocketMessage socketMessage)
     {
+        string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content; 
         await Task.Run(() =>
         {
             if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
             && socketMessage.Author.Username.Contains("#api-announcements"))
             {
                 SendColoredMessage("pajlada",
-                                   "imGlitch 🚨 " + socketMessage.Content[..475].Replace("@Twitch Announcements", string.Empty),
+                                   "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty),
                                    ChatColor.BlueViolet);
             }
             if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
             && socketMessage.Author.Username.Contains("7TV #news"))
             {
-                SendColoredMessage("pajlada", "7tvM 📣 " + socketMessage.Content, ChatColor.CadetBlue);
+                SendColoredMessage("pajlada", "7tvM 📣 " + content, ChatColor.CadetBlue);
+            }
+            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID)
+            {
+                SendColoredMessage(Config.RelayChannel, $"{socketMessage.Author} B) 📢 {content}", ChatColor.Blue); 
             }
         });
     }
