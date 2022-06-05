@@ -109,8 +109,8 @@ internal abstract class DbConnection
             case QueryTypes.Insert:
                 string sv = string.Join(", ", SelectedValues!);
                 qs.Append($"INSERT INTO {TableName} ")
-                    .Append($"({string.Join(", ", SelectedValues!)}) ")
-                    .Append(sv.Contains('(') ? $"{sv}" : $"({sv})");
+                    .Append($"({string.Join(", ", ValuesSchema!)}) ")
+                    .Append("VALUES " + (sv.Contains('(') ? $"{sv}" : $"({sv})"));
                 break;
 
             case QueryTypes.Update:

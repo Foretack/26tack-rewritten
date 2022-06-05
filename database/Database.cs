@@ -31,7 +31,7 @@ internal class Database : DbConnection
             Insert()
             .Table("channels")
             .Schema("display_name", "username", "id", "avatar_url", "priority", "is_logged", "date_joined")
-            .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.logged}", "CURRENT_DATE")
+            .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"{channel.ID}", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.logged}", "CURRENT_DATE")
             .TryExecute();
 
         if (!q.Success) return false;

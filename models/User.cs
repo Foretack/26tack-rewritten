@@ -76,25 +76,17 @@ internal class UserFactory : DataCacher<User>
         }
         return users.ToArray();
     }
-    public async Task<ExtendedChannel?> CreateChannelProfile(string channelName)
+    public async Task<ExtendedChannel?> CreateChannelProfile(ChannelHandler.Channel extender)
     {
-        ChannelHandler.Channel? extender = ChannelHandler.MainJoinedChannels
-            .Concat(ChannelHandler.AnonJoinedChannels)
-            .First(x => x.Name == channelName);
-        if (extender is null)
-        {
-            Log.Error("Attempted to extend a nonexisting channel");
-            return null;
-        }
-        var c = GetCachedPiece(channelName);
-        if (c is not null)
-        {
-            User cc = c.Object;
-            return new ExtendedChannel(cc.Displayname, cc.Username, cc.ID, cc.AvatarUrl, cc.DateCreated, extender.Priority, extender.Logged);
-        }
-        var call = await TwitchAPIHandler.GetUsers(channelName);
+        var call = await TwitchAPIHandler.GetUsers(extender.Name);
         if (call is null) return null;
-        return new ExtendedChannel(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt, extender.Priority, extender.Logged);
+        return new ExtendedChannel(call.DisplayName,
+                                   call.Login,
+                                   call.Id,
+                                   call.ProfileImageUrl,
+                                   call.CreatedAt,
+                                   extender.Priority,
+                                   extender.Logged);
     }
 }
 

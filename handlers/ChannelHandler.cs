@@ -51,7 +51,7 @@ internal static class ChannelHandler
     {
         UserFactory uf = new UserFactory();
         Channel c = new Channel(channel, priority, logged);
-        ExtendedChannel? ec = await uf.CreateChannelProfile(channel);
+        ExtendedChannel? ec = await uf.CreateChannelProfile(c);
         if (ec is null) return false;
         FetchedChannels.Add(c);
 
@@ -59,8 +59,8 @@ internal static class ChannelHandler
         AnonymousClient.Client.JoinChannel(channel);
 
         Database db = new Database();
-        await db.AddChannel(ec);
-        return true;
+        bool s = await db.AddChannel(ec);
+        return s;
     }
 
     public static async Task<bool> PartChannel(string channel)
