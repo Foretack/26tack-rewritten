@@ -61,7 +61,7 @@ internal static class MessageHandler
         HandleIrcMessage(e.ChatMessage).SafeFireAndForget(onException: ex => Log.Error(ex, "Failed to handle message"));
     }
 
-    private static async Task HandleIrcMessage(ChatMessage ircMessage)
+    private static async ValueTask HandleIrcMessage(ChatMessage ircMessage)
     {
         string message = ircMessage.Message;
         string channel = ircMessage.Channel;

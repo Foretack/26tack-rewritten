@@ -46,6 +46,9 @@ csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimenta
 # S101: Types should be named in PascalCase
 dotnet_diagnostic.S101.severity = suggestion
 
+# S1075: URIs should not be hardcoded
+dotnet_diagnostic.S1075.severity = suggestion
+
 [*.{cs,vb}]
 #### Naming styles ####
 

@@ -15,6 +15,7 @@ internal static class CommandHandler
     {
         RegisterHandler(new BaseHandler());
         RegisterHandler(new AdminHandler());
+        RegisterHandler(new WarframeHandler());
     }
 
     public static void RegisterHandler(ChatCommandHandler handler)
@@ -24,7 +25,7 @@ internal static class CommandHandler
         Log.Verbose($"Loaded Handler {handler.GetType()}");
     }
 
-    public static async Task HandleCommand(CommandContext ctx)
+    public static async ValueTask HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
         await Task.Run(() =>
