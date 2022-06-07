@@ -1,17 +1,11 @@
-﻿using System.Text.Json;
-
-using _26tack_rewritten.handlers;
+﻿using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.json;
 using _26tack_rewritten.models;
 
-using Serilog;
-
 namespace _26tack_rewritten.commands.warframeset;
 internal class Fissures : OptionsParser, IChatCommand
 {
-    private static readonly HttpClient Requests = new HttpClient() { Timeout = TimeSpan.FromSeconds(2) };
-
     public Command Info()
     {
         string name = "fissures";
@@ -28,13 +22,10 @@ internal class Fissures : OptionsParser, IChatCommand
         string[] args = ctx.Args;
 
         string fissuresString;
-        Fissure[]? fissures;
 
-        Stream fResponse = await Requests.GetStreamAsync(WarframeHandler.BaseUrl + "/fissures");
-        fissures = await JsonSerializer.DeserializeAsync<Fissure[]>(fResponse);
+        Fissure[]? fissures = await ExternalAPIHandler.GetFissures();
         if (fissures is null)
         {
-            Log.Error("Serialization of current fissures failed");
             MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving fissure data PoroSad");
             return;
         }

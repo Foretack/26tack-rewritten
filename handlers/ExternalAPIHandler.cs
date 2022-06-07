@@ -2,6 +2,7 @@
 using _26tack_rewritten.json;
 using _26tack_rewritten.models;
 using Serilog;
+using _26tack_rewritten.database;
 
 namespace _26tack_rewritten.handlers;
 internal static class ExternalAPIHandler
@@ -64,10 +65,10 @@ internal static class ExternalAPIHandler
     public static async Task<JustLogLoggedChannels> GetIvrChannels()
     {
         HttpClient reqs = new HttpClient();
+        reqs.Timeout = TimeSpan.FromMilliseconds(1500);
 
         try
         {
-            reqs.Timeout = TimeSpan.FromMilliseconds(1500);
             Stream jlcl = await reqs.GetStreamAsync(Config.Links.IvrChannels);
             JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
             return deserialized;
@@ -76,6 +77,46 @@ internal static class ExternalAPIHandler
         {
             Log.Fatal(ex, "Failed to load just logged channels");
             throw;
+        }
+    }
+
+    private const string WarframeBaseUrl = "https://api.warframestat.us/pc";
+    public static async Task<Fissure[]?> GetFissures()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream fResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/fissures");
+            Fissure[] fissures = (await JsonSerializer.DeserializeAsync<Fissure[]>(fResponse))!;
+            return fissures;
+        }
+         catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch current fissures fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
+    public static async Task<Alert[]?> GetAlerts()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream aResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/alerts");
+            Alert[] alerts = (await JsonSerializer.DeserializeAsync<Alert[]>(aResponse))!;
+            return alerts;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch current alerts fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
         }
     }
 }
