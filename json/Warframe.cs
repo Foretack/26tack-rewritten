@@ -69,3 +69,25 @@ public class Fissure
     public string eta { get; set; }
     public bool isStorm { get; set; }
 }
+
+public class CurrentSortie
+{
+    public string id { get; set; }
+    public DateTime activation { get; set; }
+    public string startString { get; set; }
+    public DateTime expiry { get; set; }
+    public bool active { get; set; }
+    public string rewardPool { get; set; }
+    public Variant[] variants { get; set; }
+    public string boss { get; set; }
+    public string faction { get; set; }
+    public bool expired { get; set; }
+    public string eta { get; set; }
+}
+public class Variant
+{
+    public string missionType { get; set; }
+    public string modifier { get; set; }
+    public string modifierDescription { get; set; }
+    public string node { get; set; }
+}

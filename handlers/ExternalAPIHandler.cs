@@ -119,4 +119,24 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
+    public static async Task<CurrentSortie?> GetSortie()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream aResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/sortie?language=en");
+            CurrentSortie sortie = (await JsonSerializer.DeserializeAsync<CurrentSortie>(aResponse))!;
+            return sortie;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch current alerts fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
 }
