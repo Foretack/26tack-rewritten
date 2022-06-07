@@ -10,7 +10,7 @@ using Serilog;
 namespace _26tack_rewritten.commands.warframeset;
 internal class Alerts : DataCacher<Alert[]>, IChatCommand
 {
-    private static readonly HttpClient Requests = new HttpClient();
+    private static readonly HttpClient Requests = new HttpClient() { Timeout = TimeSpan.FromSeconds(1) };
 
     public Command Info()
     {

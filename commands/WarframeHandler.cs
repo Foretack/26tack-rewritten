@@ -12,5 +12,6 @@ internal class WarframeHandler : ChatCommandHandler
         Prefix = "wf>";
 
         AddCommand(new Alerts());
+        AddCommand(new Fissures());
     }
 }
