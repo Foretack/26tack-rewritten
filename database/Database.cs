@@ -43,6 +43,7 @@ internal class Database : DbConnection
             Select()
             .Table("channels")
             .Schema("username", "priority", "is_logged")
+            .Sort("priority DESC")
             .TryExecute();
 
         if (!q.Success)
@@ -170,7 +171,7 @@ internal class Database : DbConnection
             Insert()
             .Table("suggestions")
             .Schema("username", "user_id", "suggestion_text")
-            .Values($"'{user.Username}'", $"'{user.ID}'", $"'{suggestionText}'")
+            .Values($"'{user.Username}'", $"{user.ID}", $"'{suggestionText}'")
             .TryExecute();
 
         return q.Success;
