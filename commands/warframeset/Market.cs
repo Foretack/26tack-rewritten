@@ -74,7 +74,7 @@ internal class Market : IChatCommand
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
-            string listingsString = $"{totalOrders} Total orders " +
+            string listingsString = $"{totalOrders} Active orders " +
                 $"-- {sellersCount} Sellers: Avg. {sellerAveragePrice}P (🡳{cheapestSeller}P   🡱{mostExpensiveSeller}P) " +
                 $"-- {buyersCount} Buyers: Avg. {buyerAveragePrice}P (🡱{mostPayingBuyer}P   🡳{leastPayingBuyer}P)";
 
