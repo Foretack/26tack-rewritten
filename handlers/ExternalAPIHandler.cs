@@ -199,4 +199,22 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
+    public static async Task<MarketItems?> GetMarketItemListings(string itemName)
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream iResponse = await requests.GetStreamAsync($"https://api.warframe.market/v1/items/{itemName}/orders?platform=pc");
+            MarketItems item = (await JsonSerializer.DeserializeAsync<MarketItems>(iResponse))!;
+            return item;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch \"{itemName}\" from the market");
+            return null;
+        }
+    }
 }

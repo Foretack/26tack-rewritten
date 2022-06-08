@@ -15,5 +15,6 @@ internal class WarframeHandler : ChatCommandHandler
         AddCommand(new Fissures());
         AddCommand(new Sortie());
         AddCommand(new Cycle());
+        AddCommand(new Market());
     }
 }

@@ -121,3 +121,23 @@ public class VallisCycle
     public string timeLeft { get; set; }
     public string shortString { get; set; }
 }
+
+public class MarketItems
+{
+    public Payload payload { get; set; }
+}
+public class Payload
+{
+    public Order[] orders { get; set; }
+}
+public class Order
+{
+    public int quantity { get; set; }
+    public int platinum { get; set; }
+    public MarketUser user { get; set; }
+    public string order_type { get; set; }
+}
+public class MarketUser
+{
+    public string status { get; set; }
+}
