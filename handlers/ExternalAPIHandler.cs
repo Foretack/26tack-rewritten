@@ -133,7 +133,67 @@ internal static class ExternalAPIHandler
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed to fetch current alerts fdm");
+            Log.Error(ex, $"Failed to fetch current sortie fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
+
+    public static async Task<CetusCycle?> GetCetusCycle()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/cetusCycle");
+            CetusCycle cycle = (await JsonSerializer.DeserializeAsync<CetusCycle>(cResponse))!;
+            return cycle;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch cetus cycle fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
+
+    public static async Task<VallisCycle?> GetVallisCycle()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/vallisCycle");
+            VallisCycle cycle = (await JsonSerializer.DeserializeAsync<VallisCycle>(cResponse))!;
+            return cycle;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch vallis cycle fdm");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
+
+    public static async Task<CambionCycle?> GetCambionCycle()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/cambionCycle");
+            CambionCycle cycle = (await JsonSerializer.DeserializeAsync<CambionCycle>(cResponse))!;
+            return cycle;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch cambion cycle fdm");
             Database db = new Database();
             await db.LogException(ex);
             return null;

@@ -91,3 +91,33 @@ public class Variant
     public string modifierDescription { get; set; }
     public string node { get; set; }
 }
+
+public class CetusCycle
+{
+    public string id { get; set; }
+    public DateTime expiry { get; set; }
+    public DateTime activation { get; set; }
+    public bool isDay { get; set; }
+    public string state { get; set; }
+    public string timeLeft { get; set; }
+    public bool isCetus { get; set; }
+    public string shortString { get; set; }
+}
+public class CambionCycle
+{
+    public string id { get; set; }
+    public DateTime activation { get; set; }
+    public DateTime expiry { get; set; }
+    public string timeLeft { get; set; }
+    public string active { get; set; }
+}
+public class VallisCycle
+{
+    public string id { get; set; }
+    public DateTime expiry { get; set; }
+    public bool isWarm { get; set; }
+    public string state { get; set; }
+    public DateTime activation { get; set; }
+    public string timeLeft { get; set; }
+    public string shortString { get; set; }
+}
