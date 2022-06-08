@@ -16,7 +16,7 @@ public abstract class DataCacher<T>
         removalScheduler = new Timer(state =>
         {
             CachedData.Remove(key);
-            Log.Verbose($"removed cached object with key \"{key}\"");
+            Log.Debug($"uncached \"{key}\"");
             removalScheduler?.Dispose();
         }, null, maxCachingTime * 1000, Timeout.Infinite);
     }
