@@ -141,3 +141,23 @@ public class MarketUser
 {
     public string status { get; set; }
 }
+
+public class RelicData
+{
+    public Relic[] relics { get; set; }
+}
+public class Relic
+{
+    public string tier { get; set; }
+    public string relicName { get; set; }
+    public string state { get; set; }
+    public RelicReward[] rewards { get; set; }
+    public string _id { get; set; }
+}
+public class RelicReward
+{
+    public string _id { get; set; }
+    public string itemName { get; set; }
+    public string rarity { get; set; }
+    public double chance { get; set; }
+}

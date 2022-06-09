@@ -217,4 +217,22 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
+    public static async Task<RelicData?> GetRelicData()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(5);
+
+        try
+        {
+            Stream rResponse = await requests.GetStreamAsync("http://drops.warframestat.us/data/relics.json");
+            RelicData relics = (await JsonSerializer.DeserializeAsync<RelicData>(rResponse))!;
+            return relics;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to fetch relic data");
+            return null;
+        }
+    }
 }
