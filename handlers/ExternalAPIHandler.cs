@@ -232,6 +232,28 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to fetch relic data");
+            Database db = new Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
+
+    public static async Task<InvasionNode[]?> GetInvasions()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(2);
+
+        try
+        {
+            Stream iResponse = await requests.GetStreamAsync("https://api.warframestat.us/pc/invasions?lang=en");
+            InvasionNode[] invasions = (await JsonSerializer.DeserializeAsync<InvasionNode[]>(iResponse))!;
+            return invasions;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to fetch invasions");
+            Database db = new Database();
+            await db.LogException(ex);
             return null;
         }
     }

@@ -36,14 +36,14 @@ public class Mission
 public class Reward
 {
     public object[] items { get; set; }
-    public Counteditem[] countedItems { get; set; }
+    public CountedItem[] countedItems { get; set; }
     public int credits { get; set; }
     public string asString { get; set; }
     public string itemString { get; set; }
     public string thumbnail { get; set; }
     public int color { get; set; }
 }
-public class Counteditem
+public class CountedItem
 {
     public int count { get; set; }
     public string type { get; set; }
@@ -160,4 +160,15 @@ public class RelicReward
     public string itemName { get; set; }
     public string rarity { get; set; }
     public double chance { get; set; }
+}
+
+public class InvasionNode
+{
+    public InvasionReward attackerReward { get; set; }
+    public InvasionReward defenderReward { get; set; }
+    public bool completed { get; set; }
+}
+public class InvasionReward
+{
+    public CountedItem[] countedItems { get; set; }
 }
