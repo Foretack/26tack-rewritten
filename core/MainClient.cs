@@ -33,7 +33,7 @@ public static class MainClient
         StartupTime = DateTime.Now;
 
         if (Running) Initialize();
-        while (Running) Console.Read();
+        while (Running) Console.ReadLine();
         return 0;
     }
 
