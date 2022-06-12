@@ -172,3 +172,15 @@ public class InvasionReward
 {
     public CountedItem[] countedItems { get; set; }
 }
+
+public class SPReward
+{
+    public string name { get; set; }
+    public int cost { get; set; }
+}
+public class SteelPathRewards
+{
+    public DateTime expiry { get; set; }
+    public SPReward currentReward { get; set; }
+    public SPReward[] rotation { get; set; }
+}
