@@ -41,24 +41,16 @@ internal class Relics : DataCacher<RelicData>, IChatCommand
 
         string item = string.Join(' ', args).ToLower();
         string message;
-        RelicData? relicData = GetCachedPiece("relics")?.Object;
-        if (relicData is not null)
+        RelicData? relicData = GetCachedPiece("relics")?.Object
+            ?? await ExternalAPIHandler.GetRelicData();
+        if (relicData is null)
         {
-            message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
-            MessageHandler.SendMessage(channel, $"@{user}, {message}");
+            MessageHandler.SendMessage(channel, $"@{user}, There was an error while trying to get relic information :(");
             return;
         }
-
-        relicData = await ExternalAPIHandler.GetRelicData();
-        if (relicData is not null)
-        {
-            CachePiece("relics", relicData, 86400);
-            message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
-            MessageHandler.SendMessage(channel, $"@{user}, {message}");
-            return;
-        }
-
-        MessageHandler.SendMessage(channel, $"@{user}, There was an error while trying to get relic information :(");
+        message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
+        MessageHandler.SendMessage(channel, $"@{user}, {message}");
+        CachePiece("relics", relicData, 86400);
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

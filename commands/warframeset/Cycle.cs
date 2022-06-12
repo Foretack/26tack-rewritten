@@ -36,108 +36,66 @@ internal class Cycle : DataCacher<object>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CetusCycle? cycle = (CetusCycle?)GetCachedPiece("cetus")?.Object;
-        if (cycle is not null)
+        CetusCycle? cycle = (CetusCycle?)GetCachedPiece("cetus")?.Object
+            ?? await ExternalAPIHandler.GetCetusCycle();
+        if (cycle is null)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
             return;
         }
-
-        cycle = await ExternalAPIHandler.GetCetusCycle();
-        if (cycle is not null)
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        if (timeLeft.TotalSeconds < 0)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            CachePiece("cetus", cycle, (int)timeLeft.TotalSeconds);
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? '☀' : "🌙")} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-
-        MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
+        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
+        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeftString}");
+        CachePiece("cetus", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendVallisCycle(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        VallisCycle? cycle = (VallisCycle?)GetCachedPiece("vallis")?.Object;
-        if (cycle is not null)
+        VallisCycle? cycle = (VallisCycle?)GetCachedPiece("vallis")?.Object
+            ?? await ExternalAPIHandler.GetVallisCycle();
+        if (cycle is null)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
             return;
         }
-
-        cycle = await ExternalAPIHandler.GetVallisCycle();
-        if (cycle is not null)
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        if (timeLeft.TotalSeconds < 0)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            CachePiece("vallis", cycle, (int)timeLeft.TotalSeconds);
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-
-        MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
+        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
+        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeftString}");
+        CachePiece("vallis", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendCambionCycle(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CambionCycle? cycle = (CambionCycle?)GetCachedPiece("cambion")?.Object;
-        if (cycle is not null)
+        CambionCycle? cycle = (CambionCycle?)GetCachedPiece("cambion")?.Object
+            ?? await ExternalAPIHandler.GetCambionCycle();
+        if (cycle is null)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
             return;
         }
-
-        cycle = await ExternalAPIHandler.GetCambionCycle();
-        if (cycle is not null)
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        if (timeLeft.TotalSeconds < 0)
         {
-            TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-            if (timeLeft.TotalSeconds < 0)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-                return;
-            }
-            CachePiece("cambion", cycle, (int)timeLeft.TotalSeconds);
-            string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-            MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
+            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-
-        MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
+        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
+        CachePiece("cambion", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask Other(CommandContext ctx)
     {

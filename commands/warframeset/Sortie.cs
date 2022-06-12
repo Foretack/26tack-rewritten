@@ -22,26 +22,14 @@ internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie? sortie = GetCachedPiece("sortie")?.Object;
-        if (sortie is not null)
+        CurrentSortie? sortie = GetCachedPiece("sortie")?.Object
+            ?? await ExternalAPIHandler.GetSortie();
+        if (sortie is null)
         {
-            SendSortieResponse(sortie, channel, user);
+            MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. Try again later?");
             return;
         }
 
-        sortie = await ExternalAPIHandler.GetSortie();
-        if (sortie is not null)
-        {
-            CachePiece("sortie", sortie, 600);
-            SendSortieResponse(sortie, channel, user);
-            return;
-        }
-
-        MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. Try again later?");
-    }
-
-    private void SendSortieResponse(CurrentSortie sortie, string channel, string user)
-    {
         TimeSpan timeLeft = sortie.expiry - DateTime.Now;
         if (timeLeft.TotalSeconds < 0)
         {
@@ -56,5 +44,6 @@ internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
             $"3⃣ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} 🡺 time left: {eta}");
+        CachePiece("sortie", sortie, (int)timeLeft.TotalSeconds);
     }
 }

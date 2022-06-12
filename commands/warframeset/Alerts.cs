@@ -20,22 +20,17 @@ internal class Alerts : DataCacher<Alert[]>, IChatCommand
     public async Task Run(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
-
+        string channel = ctx.IrcMessage.Channel
         StringBuilder ab = new StringBuilder();
-        Alert[]? alerts;
 
-        alerts = GetCachedPiece("alerts")?.Object;
+        Alert[]? alerts = GetCachedPiece("alerts")?.Object 
+            ?? await ExternalAPIHandler.GetAlerts();
         if (alerts is null)
         {
-            alerts = await ExternalAPIHandler.GetAlerts();
-            if (alerts is null)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad");
-                return;
-            }
-            CachePiece("alerts", alerts, 150);
+            MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad");
+            return;
         }
+
         string[] rewards = alerts
             .Where(x => x.active)
             .Select(x => $"{x.mission.faction} / {x.mission.type} [{x.mission.reward.asString}] ")
@@ -45,5 +40,6 @@ internal class Alerts : DataCacher<Alert[]>, IChatCommand
             .Append(string.Join(" -- ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
+        CachePiece("alerts", alerts, 150);
     }
 }

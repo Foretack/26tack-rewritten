@@ -21,24 +21,16 @@ internal class Invasions : DataCacher<InvasionNode[]>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[]? invasionNodes = GetCachedPiece("invasions")?.Object;
-        if (invasionNodes is not null)
+        InvasionNode[]? invasionNodes = GetCachedPiece("invasions")?.Object
+            ?? await ExternalAPIHandler.GetInvasions();
+        if (invasionNodes is null)
         {
-            string message = await SumItems(invasionNodes);
-            MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
+            MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :(");
             return;
         }
-
-        invasionNodes = await ExternalAPIHandler.GetInvasions();
-        if (invasionNodes is not null)
-        {
-            string message = await SumItems(invasionNodes);
-            MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
-            CachePiece("invasions", invasionNodes, 300);
-            return;
-        }
-
-        MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :(");
+        string message = await SumItems(invasionNodes);
+        MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
+        CachePiece("invasions", invasionNodes, 300);
     }
 
     private async Task<string> SumItems(InvasionNode[] invasions)
