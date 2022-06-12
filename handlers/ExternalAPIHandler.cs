@@ -277,4 +277,22 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
+    public static async Task<ItemDropData[]?> GetItemDropData(string itemName)
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream iResponse = await requests.GetStreamAsync($"https://api.warframestat.us/drops/search/{itemName}");
+            ItemDropData[] rewards = (await JsonSerializer.DeserializeAsync<ItemDropData[]>(iResponse))!;
+            return rewards;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to drop data for \"{itemName}\"");
+            return null;
+        }
+    }
 }

@@ -184,3 +184,11 @@ public class SteelPathRewards
     public SPReward currentReward { get; set; }
     public SPReward[] rotation { get; set; }
 }
+
+public class ItemDropData
+{
+    public string item { get; set; }
+    public float chance { get; set; }
+    public string place { get; set; }
+    public string rarity { get; set; }
+}
