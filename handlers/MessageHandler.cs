@@ -109,7 +109,7 @@ internal static class MessageHandler
             }
             if (socketMessage.Channel.Id == Config.Discord.NewsChannelID)
             {
-                SendColoredMessage(Config.RelayChannel, $"{socketMessage.Author} B) 📢 {content}", ChatColor.Blue); 
+                SendColoredMessage(Config.RelayChannel, $"New announcement from {socketMessage.Author} B) 📢: {content}", ChatColor.Blue); 
             }
         });
     }
