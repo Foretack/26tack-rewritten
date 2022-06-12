@@ -20,7 +20,7 @@ internal class Alerts : DataCacher<Alert[]>, IChatCommand
     public async Task Run(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel
+        string channel = ctx.IrcMessage.Channel;
         StringBuilder ab = new StringBuilder();
 
         Alert[]? alerts = GetCachedPiece("alerts")?.Object 
