@@ -14,10 +14,10 @@ public static class MainClient
 {
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
+    public static bool Running { get; set; } = true;
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
 
-    private static bool Running { get; set; } = true;
     private static bool Errored { get; set; } = false;
 
     public static async Task<int> Main(string[] args)
