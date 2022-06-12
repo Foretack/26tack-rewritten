@@ -22,7 +22,7 @@ public static class MainClient
 
     public static async Task<int> Main(string[] args)
     {
-        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
         Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(LogSwitch).WriteTo.Console().CreateLogger();
 
         Database db = new Database();
