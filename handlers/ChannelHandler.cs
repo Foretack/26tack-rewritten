@@ -115,14 +115,14 @@ internal static class ChannelHandler
 
     private static void AnonOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
-        Log.Debug($"[Anon] Left channel {e.Channel}");
+        Log.Information($"[Anon] Left channel {e.Channel}");
         AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
     }
 
     // This will crash if FetchedChannels doesn't have the channel
     private static void AnonOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
-        Log.Debug($"[Anon] Joined channel {e.Channel}");
+        Log.Information($"[Anon] Joined channel {e.Channel}");
         AnonJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
     }
 
@@ -135,14 +135,14 @@ internal static class ChannelHandler
 
     private static void MainOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
-        Log.Debug($"[Main] Left channel {e.Channel}");
+        Log.Information($"[Main] Left channel {e.Channel}");
         MainJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
         MainJoinedChannelNames.Remove(e.Channel);
     }
 
     private static void MainOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
-        Log.Debug($"[Main] Joined channel {e.Channel}");
+        Log.Information($"[Main] Joined channel {e.Channel}");
         MainJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
         MainJoinedChannelNames.Add(e.Channel);
     }
