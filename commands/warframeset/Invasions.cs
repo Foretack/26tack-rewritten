@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using _26tack_rewritten.handlers;
+﻿using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.json;
 using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Invasions : DataCacher<InvasionNode[]> , IChatCommand
+internal class Invasions : DataCacher<InvasionNode[]>, IChatCommand
 {
     public Command Info()
     {
