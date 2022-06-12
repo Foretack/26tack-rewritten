@@ -79,7 +79,7 @@ internal static class MessageHandler
         if (channel == "pajlada"
         && ircMessage.Username == "pajbot"
         && ircMessage.IsMe
-        && message.StartsWith("pajaS🚨ALERT"))
+        && message.StartsWith("pajaS 🚨 ALERT"))
         {
             SendMessage("pajlada", RandomReplies.PajbotReplies.Choice());
         }
