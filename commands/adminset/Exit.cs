@@ -18,6 +18,5 @@ internal class Exit : IChatCommand
     public async Task Run(CommandContext ctx)
     {
         MainClient.Running = false;
-        await MainClient.Main(Array.Empty<string>());
     }
 }
