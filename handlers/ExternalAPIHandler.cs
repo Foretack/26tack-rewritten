@@ -291,7 +291,14 @@ internal static class ExternalAPIHandler
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed to drop data for \"{itemName}\"");
+            if (ex is TaskCanceledException)
+            {
+                Log.Error( $"Fetching drop data for \"{itemName}\" timed out");
+            }
+            else
+            {
+                Log.Error(ex, $"Failed to fetch drop data for \"{itemName}\"");
+            }
             return null;
         }
     }
