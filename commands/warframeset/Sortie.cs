@@ -12,7 +12,7 @@ internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
         string name = "sortie";
         string description = "Check the current Sortie";
         string[] aliases = { "anasa" };
-        int[] cooldowns = { 5, 0 };
+        int[] cooldowns = { 10, 3 };
 
         return new Command(name, description, aliases, cooldowns);
     }
