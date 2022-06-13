@@ -5,7 +5,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Cycle : DataCacher<object>, IChatCommand
+internal class Cycle : IChatCommand
 {
     public Command Info()
     {
@@ -36,7 +36,7 @@ internal class Cycle : DataCacher<object>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CetusCycle? cycle = (CetusCycle?)GetCachedPiece("cetus")?.Object
+        CetusCycle? cycle = ObjectCaching.GetCachedObject<CetusCycle>("cetus_state_wf")
             ?? await ExternalAPIHandler.GetCetusCycle();
         if (cycle is null)
         {
@@ -51,14 +51,14 @@ internal class Cycle : DataCacher<object>, IChatCommand
         }
         string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
         MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeftString}");
-        CachePiece("cetus", cycle, (int)timeLeft.TotalSeconds);
+        ObjectCaching.CacheObject("cetus_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendVallisCycle(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        VallisCycle? cycle = (VallisCycle?)GetCachedPiece("vallis")?.Object
+        VallisCycle? cycle = ObjectCaching.GetCachedObject<VallisCycle>("vallis_state_wf")
             ?? await ExternalAPIHandler.GetVallisCycle();
         if (cycle is null)
         {
@@ -73,14 +73,14 @@ internal class Cycle : DataCacher<object>, IChatCommand
         }
         string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
         MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeftString}");
-        CachePiece("vallis", cycle, (int)timeLeft.TotalSeconds);
+        ObjectCaching.CacheObject("vallis_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendCambionCycle(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CambionCycle? cycle = (CambionCycle?)GetCachedPiece("cambion")?.Object
+        CambionCycle? cycle = ObjectCaching.GetCachedObject<CambionCycle>("cambion_state_wf")
             ?? await ExternalAPIHandler.GetCambionCycle();
         if (cycle is null)
         {
@@ -95,7 +95,7 @@ internal class Cycle : DataCacher<object>, IChatCommand
         }
         string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
         MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
-        CachePiece("cambion", cycle, (int)timeLeft.TotalSeconds);
+        ObjectCaching.CacheObject("cambion_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask Other(CommandContext ctx)
     {

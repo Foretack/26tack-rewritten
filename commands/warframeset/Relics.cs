@@ -5,7 +5,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Relics : DataCacher<RelicData>, IChatCommand
+internal class Relics : IChatCommand
 {
     public Command Info()
     {
@@ -41,7 +41,7 @@ internal class Relics : DataCacher<RelicData>, IChatCommand
 
         string item = string.Join(' ', args).ToLower();
         string message;
-        RelicData? relicData = GetCachedPiece("relics")?.Object
+        RelicData? relicData = ObjectCaching.GetCachedObject<RelicData>("relics_wf")
             ?? await ExternalAPIHandler.GetRelicData();
         if (relicData is null)
         {
@@ -50,7 +50,7 @@ internal class Relics : DataCacher<RelicData>, IChatCommand
         }
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
         MessageHandler.SendMessage(channel, $"@{user}, {message}");
-        CachePiece("relics", relicData, 86400);
+        ObjectCaching.CacheObject("relics_wf", relicData, 86400);
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

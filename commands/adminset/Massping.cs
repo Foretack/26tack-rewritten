@@ -6,7 +6,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.adminset;
-internal class Massping : DataCacher<TMI>, IChatCommand
+internal class Massping : IChatCommand
 {
     public Command Info()
     {
@@ -36,11 +36,12 @@ internal class Massping : DataCacher<TMI>, IChatCommand
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
+        // TODO: this is terrible
         try
         {
             TMI? clist;
-            var c = GetCachedPiece(targetChannel);
-            if (c is not null) clist = c.Object;
+            var c = ObjectCaching.GetCachedObject<TMI>(targetChannel + "_MP");
+            if (c is not null) clist = c;
             else
             {
                 clist = await ExternalAPIHandler.GetChannelChatters(targetChannel);
@@ -49,7 +50,7 @@ internal class Massping : DataCacher<TMI>, IChatCommand
                     MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan failed to retrieve that channel's chatters");
                     return;
                 }
-                CachePiece(targetChannel, clist, 600);
+                ObjectCaching.CacheObject(targetChannel + "_MP", clist, 600);
             }
             
             if (mods)

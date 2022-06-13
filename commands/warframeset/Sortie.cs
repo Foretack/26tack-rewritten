@@ -5,7 +5,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
+internal class Sortie : IChatCommand
 {
     public Command Info()
     {
@@ -22,7 +22,7 @@ internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie? sortie = GetCachedPiece("sortie")?.Object
+        CurrentSortie? sortie = ObjectCaching.GetCachedObject<CurrentSortie>("current_sortie_wf")
             ?? await ExternalAPIHandler.GetSortie();
         if (sortie is null)
         {
@@ -44,6 +44,6 @@ internal class Sortie : DataCacher<CurrentSortie>, IChatCommand
             $"3⃣ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} 🡺 time left: {eta}");
-        CachePiece("sortie", sortie, (int)timeLeft.TotalSeconds);
+        ObjectCaching.CacheObject("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);
     }
 }

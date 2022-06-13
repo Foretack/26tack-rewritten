@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using _26tack_rewritten.handlers;
+﻿using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
-using _26tack_rewritten.models;
 using _26tack_rewritten.json;
+using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class SteelPath : DataCacher<SteelPathRewards>, IChatCommand
+internal class SteelPath : IChatCommand
 {
     public Command Info()
     {
@@ -27,7 +22,7 @@ internal class SteelPath : DataCacher<SteelPathRewards>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        SteelPathRewards? rewards = GetCachedPiece("steelpath")?.Object 
+        SteelPathRewards? rewards = ObjectCaching.GetCachedObject<SteelPathRewards>("steelpath_wf")
             ?? await ExternalAPIHandler.GetSteelPathRewards();
         if (rewards is null)
         {
@@ -46,6 +41,6 @@ internal class SteelPath : DataCacher<SteelPathRewards>, IChatCommand
         string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) --";
         string nextInRotationString = $"🏹 Next in rotation: {rewards.rotation[0].name}";
         MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➡ in: {timeLeftString}");
-        CachePiece("steelpath", rewards, (int)timeLeft.TotalSeconds);
+        ObjectCaching.CacheObject("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }
 }

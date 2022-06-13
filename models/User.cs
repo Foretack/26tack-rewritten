@@ -3,24 +3,22 @@ using _26tack_rewritten.utils;
 using Serilog;
 
 namespace _26tack_rewritten.models;
-internal class UserFactory : DataCacher<User>
+internal class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        var c = GetCachedPiece(username);
-        if (c is not null) return c.Object;
+        var c = ObjectCaching.GetCachedObject<User>(username + "_users");
+        if (c is not null) return c;
         var call = await TwitchAPIHandler.GetUsers(username);
         if (call is null)
         {
             var call2 = await ExternalAPIHandler.GetIvrUser(username);
             if (call2 is null) return null;
-            CachePiece(username, call2, 86400);
-            CachePiece(call2.ID, call2, 86400);
+            ObjectCaching.CacheObject(username + "_users", call2, 86400);
             return call2;
         }
         User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
-        CachePiece(username, u, 86400);
-        CachePiece(u.ID, u, 86400);
+        ObjectCaching.CacheObject(username + "_users", u, 86400);
         return u;
     }
     public async Task<User[]?> CreateUserAsync(params string[] usernames)
@@ -34,8 +32,7 @@ internal class UserFactory : DataCacher<User>
             {
                 User user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
                 users.Add(user);
-                CachePiece(user.Username, user, 86400);
-                CachePiece(user.ID, user, 86400);
+                ObjectCaching.CacheObject(user.Username + "_user", user, 86400);
             }
             catch (Exception ex)
             {
@@ -46,13 +43,9 @@ internal class UserFactory : DataCacher<User>
     }
     public async Task<User?> CreateUserByIDAsync(string id)
     {
-        var c = GetCachedPiece(id);
-        if (c is not null) return c.Object;
         var call = await TwitchAPIHandler.GetUsersByID(id);
         if (call is null) return null;
         User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
-        CachePiece(id, u, 86400);
-        CachePiece(u.Username, u, 86400);
         return u;
     }
     public async Task<User[]?> CreateUserByIDAsync(params string[] ids)
@@ -66,8 +59,6 @@ internal class UserFactory : DataCacher<User>
             {
                 User user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
                 users.Add(user);
-                CachePiece(user.Username, user, 86400);
-                CachePiece(user.ID, user, 86400);
             }
             catch (Exception ex)
             {

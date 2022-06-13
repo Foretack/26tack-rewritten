@@ -6,7 +6,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Alerts : DataCacher<Alert[]>, IChatCommand
+internal class Alerts : IChatCommand
 {
     public Command Info()
     {
@@ -23,7 +23,7 @@ internal class Alerts : DataCacher<Alert[]>, IChatCommand
         string channel = ctx.IrcMessage.Channel;
         StringBuilder ab = new StringBuilder();
 
-        Alert[]? alerts = GetCachedPiece("alerts")?.Object 
+        Alert[]? alerts = ObjectCaching.GetCachedObject<Alert[]>("alerts_wf")
             ?? await ExternalAPIHandler.GetAlerts();
         if (alerts is null)
         {
@@ -40,6 +40,6 @@ internal class Alerts : DataCacher<Alert[]>, IChatCommand
             .Append(string.Join(" -- ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
-        CachePiece("alerts", alerts, 150);
+        ObjectCaching.CacheObject("alerts_wf", alerts, 150);
     }
 }

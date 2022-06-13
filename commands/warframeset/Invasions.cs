@@ -5,7 +5,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Invasions : DataCacher<InvasionNode[]>, IChatCommand
+internal class Invasions : IChatCommand
 {
     public Command Info()
     {
@@ -21,7 +21,7 @@ internal class Invasions : DataCacher<InvasionNode[]>, IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[]? invasionNodes = GetCachedPiece("invasions")?.Object
+        InvasionNode[]? invasionNodes = ObjectCaching.GetCachedObject<InvasionNode[]>("invasions_wf")
             ?? await ExternalAPIHandler.GetInvasions();
         if (invasionNodes is null)
         {
@@ -30,7 +30,7 @@ internal class Invasions : DataCacher<InvasionNode[]>, IChatCommand
         }
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
-        CachePiece("invasions", invasionNodes, 300);
+        ObjectCaching.CacheObject("invasions_wf", invasionNodes, 300);
     }
 
     private async Task<string> SumItems(InvasionNode[] invasions)

@@ -5,7 +5,7 @@ using _26tack_rewritten.models;
 using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Mods : DataCacher<ModInfo>, IChatCommand
+internal class Mods : IChatCommand
 {
     public Command Info()
     {
@@ -30,7 +30,7 @@ internal class Mods : DataCacher<ModInfo>, IChatCommand
         }
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
-        ModInfo? mod = GetCachedPiece(modName)?.Object
+        ModInfo? mod = ObjectCaching.GetCachedObject<ModInfo>(modName + "_modobj")
             ?? await ExternalAPIHandler.GetModInfo(modName);
         if (mod is null)
         {
@@ -46,6 +46,6 @@ internal class Mods : DataCacher<ModInfo>, IChatCommand
             $"{(mod.tradable ? string.Empty : "(untradable)")}";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
-        CachePiece(modName, mod, 150);
+        ObjectCaching.CacheObject(modName + "_modobj", mod, 150);
     }
 }
