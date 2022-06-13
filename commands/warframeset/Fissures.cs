@@ -2,9 +2,10 @@
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.json;
 using _26tack_rewritten.models;
+using _26tack_rewritten.utils;
 
 namespace _26tack_rewritten.commands.warframeset;
-internal class Fissures : OptionsParser, IChatCommand
+internal class Fissures : IChatCommand
 {
     public Command Info()
     {
@@ -38,7 +39,7 @@ internal class Fissures : OptionsParser, IChatCommand
             MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", ChatColor.Coral);
             return;
         }
-        bool includeStorms = GetBoolParam("storms", ctx.IrcMessage.Message) ?? true;
+        bool includeStorms = Options.ParseBool("storms", ctx.IrcMessage.Message) ?? true;
 
         fissuresString = args[0].ToLower() switch
         {
