@@ -281,7 +281,7 @@ internal static class ExternalAPIHandler
     public static async Task<ItemDropData[]?> GetItemDropData(string itemName)
     {
         HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
+        requests.Timeout = TimeSpan.FromSeconds(2.5);
 
         try
         {
