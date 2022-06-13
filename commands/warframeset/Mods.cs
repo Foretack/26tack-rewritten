@@ -10,7 +10,7 @@ internal class Mods : DataCacher<ModInfo>, IChatCommand
     public Command Info()
     {
         string name = "modinfo";
-        string description = "Get the stats of the closest matching mod";
+        string description = "Get the stats of the closest matching mod. . Additional options: `rank:number` (0 default)";
         string[] aliases = { "mod", "mods" };
         int[] cooldowns = { 5, 3 };
 
