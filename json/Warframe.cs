@@ -192,3 +192,18 @@ public class ItemDropData
     public string place { get; set; }
     public string rarity { get; set; }
 }
+
+public class LevelStat
+{
+    public string[] stats { get; set; }
+}
+public class ModInfo
+{
+    public string name { get; set; }
+    public string type { get; set; }
+    public bool tradable { get; set; }
+    public int baseDrain { get; set; }
+    public int fusionLimit { get; set; }
+    public LevelStat[] levelStats { get; set; }
+}
+

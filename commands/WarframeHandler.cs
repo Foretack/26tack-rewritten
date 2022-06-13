@@ -20,5 +20,6 @@ internal class WarframeHandler : ChatCommandHandler
         AddCommand(new Invasions());
         AddCommand(new SteelPath());
         AddCommand(new Drops());
+        AddCommand(new Mods());
     }
 }

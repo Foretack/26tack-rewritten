@@ -100,6 +100,7 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+
     public static async Task<Alert[]?> GetAlerts()
     {
         HttpClient requests = new HttpClient();
@@ -298,6 +299,31 @@ internal static class ExternalAPIHandler
             else
             {
                 Log.Error(ex, $"Failed to fetch drop data for \"{itemName}\"");
+            }
+            return null;
+        }
+    }
+
+    public static async Task<ModInfo?> GetModInfo(string modName)
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(2.5);
+
+        try
+        {
+            Stream mResponse = await requests.GetStreamAsync($"https://api.warframestat.us/mods/{modName}");
+            ModInfo mod = (await JsonSerializer.DeserializeAsync<ModInfo>(mResponse))!;
+            return mod;
+        }
+        catch (Exception ex)
+        {
+            if (ex is TaskCanceledException)
+            {
+                Log.Error($"Fetching info about \"{modName}\" timed out");
+            }
+            else
+            {
+                Log.Error(ex, $"Failed to fetch info about \"{modName}\"");
             }
             return null;
         }
