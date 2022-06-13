@@ -29,7 +29,7 @@ internal class Mods : DataCacher<ModInfo>, IChatCommand
             return;
         }
 
-        string modName = string.Join(' ', args).ToLower();
+        string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
         ModInfo? mod = GetCachedPiece(modName)?.Object
             ?? await ExternalAPIHandler.GetModInfo(modName);
         if (mod is null)
@@ -38,7 +38,8 @@ internal class Mods : DataCacher<ModInfo>, IChatCommand
             return;
         }
 
-        int level = 0;
+        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? 0;
+        if (level > mod.fusionLimit) level = mod.fusionLimit;
         string modString = $"{mod.type} \"{mod.name}\" [Rank:{level}/{mod.fusionLimit}] " +
             $"-- drain:{mod.baseDrain + level} " +
             $"-- {string.Join(" | ", mod.levelStats[level].stats)} " +
