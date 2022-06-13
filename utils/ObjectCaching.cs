@@ -8,8 +8,8 @@ public static class ObjectCaching
     public static void CacheObject(string key, object obj, int cacheTime)
     {
         bool s = CachedObjects.TryAdd(key, obj);
-        Log.Debug($"Cached object with key \"{key}\" for {cacheTime}s");
         if (!s) return;
+        Log.Debug($"Cached object with key \"{key}\" for {cacheTime}s");
 
         Timer? remover = null;
         remover = new Timer(callback =>
