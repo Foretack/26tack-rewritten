@@ -1,4 +1,4 @@
-﻿namespace _26tack_rewritten;
+﻿namespace Tack;
 public static class Config
 {
     public const string Host = "";
