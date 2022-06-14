@@ -12,7 +12,7 @@ internal class Relics : IChatCommand
         string name = "relics";
         string description = "Find which relics contain an item, or the contents of a specific relic ";
         string[] aliases = { "relic", "r" };
-        int[] cooldowns = { 10, 3 };
+        int[] cooldowns = { 5, 3 };
 
         return new Command(name, description, aliases, cooldowns);
     }
@@ -50,7 +50,7 @@ internal class Relics : IChatCommand
         }
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
         MessageHandler.SendMessage(channel, $"@{user}, {message}");
-        ObjectCaching.CacheObject("relics_wf", relicData, 86400);
+        ObjectCaching.CacheObject("relics_wf", relicData, 3600);
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

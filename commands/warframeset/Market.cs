@@ -11,7 +11,7 @@ internal class Market : IChatCommand
         string name = "market";
         string description = "Get sell & buy orders for the specified item from warframe.market";
         string[] aliases = { "price" };
-        int[] cooldowns = { 15, 5 };
+        int[] cooldowns = { 10, 5 };
 
         return new Command(name, description, aliases, cooldowns);
     }

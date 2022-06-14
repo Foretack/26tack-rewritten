@@ -12,7 +12,7 @@ internal class Alerts : IChatCommand
     {
         string name = "alerts";
         string description = "Get the current alerts in the system";
-        int[] cooldowns = { 30, 5 };
+        int[] cooldowns = { 10, 3 };
 
         return new Command(name, description, cooldowns: cooldowns);
     }

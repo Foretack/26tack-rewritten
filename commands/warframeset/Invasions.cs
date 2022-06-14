@@ -11,7 +11,7 @@ internal class Invasions : IChatCommand
     {
         string name = "invasions";
         string description = "Get the total rewards of ongoing invasions";
-        int[] cooldowns = { 10, 3 };
+        int[] cooldowns = { 5, 3 };
 
         return new Command(name, description, cooldowns: cooldowns);
     }

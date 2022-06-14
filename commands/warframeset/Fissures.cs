@@ -12,8 +12,9 @@ internal class Fissures : IChatCommand
         string name = "fissures";
         string description = "Get information about active void fissures. Additional options: `storms:true/false` (true default)";
         string[] aliases = { "fissure", "f" };
+        int[] cooldowns = { 10, 3 };
 
-        return new Command(name, description, aliases);
+        return new Command(name, description, aliases, cooldowns);
     }
 
     public async Task Run(CommandContext ctx)
