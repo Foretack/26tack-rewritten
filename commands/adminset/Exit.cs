@@ -1,5 +1,4 @@
-﻿using _26tack_rewritten.core;
-using _26tack_rewritten.handlers;
+﻿using _26tack_rewritten.handlers;
 using _26tack_rewritten.interfaces;
 using _26tack_rewritten.models;
 
@@ -15,8 +14,9 @@ internal class Exit : IChatCommand
         return new Command(name, aliases: aliases, permission: permission);
     }
 
-    public async Task Run(CommandContext ctx)
+    public Task Run(CommandContext ctx)
     {
-        MainClient.Running = false;
+        Environment.Exit(0);
+        return Task.CompletedTask;
     }
 }

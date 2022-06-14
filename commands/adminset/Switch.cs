@@ -15,7 +15,7 @@ internal class Switch : IChatCommand
         return new Command(name, permission: permission);
     }
 
-    public async Task Run(CommandContext ctx)
+    public Task Run(CommandContext ctx)
     {
         string channel = ctx.IrcMessage.Channel;
         string[] args = ctx.Args;
@@ -23,7 +23,7 @@ internal class Switch : IChatCommand
         if (args.Length == 0)
         {
             MessageHandler.SendMessage(channel, " ?? ?? ?? ? idiot");
-            return;
+            return Task.CompletedTask;
         }
 
         switch (args[0])
@@ -56,5 +56,6 @@ internal class Switch : IChatCommand
                 MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel}");
                 break;
         }
+        return Task.CompletedTask;
     }
 }

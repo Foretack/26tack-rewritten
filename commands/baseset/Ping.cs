@@ -16,7 +16,7 @@ internal class Ping : IChatCommand
         return new Command(name, description, aliases);
     }
 
-    public async Task Run(CommandContext ctx)
+    public Task Run(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
@@ -25,5 +25,6 @@ internal class Ping : IChatCommand
         string uptimeString = uptime.TotalDays >= 1 ? $"{uptime:d'd 'h'h '}" : $"{uptime:h'h 'm'm 's's '}";
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} {latency}ms -- {uptimeString}");
+        return Task.CompletedTask;
     }
 }
