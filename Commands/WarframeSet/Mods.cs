@@ -10,7 +10,7 @@ internal class Mods : IChatCommand
     public Command Info()
     {
         string name = "modinfo";
-        string description = "Get the stats of the closest matching mod. Additional options: `rank:number` (0 default)";
+        string description = "Get the stats of the closest matching mod. Additional options: `rank:number` (highest rank by default)";
         string[] aliases = { "mod", "mods" };
         int[] cooldowns = { 5, 3 };
 
@@ -38,12 +38,11 @@ internal class Mods : IChatCommand
             return;
         }
 
-        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? 0;
+        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.fusionLimit;
         if (level > mod.fusionLimit) level = mod.fusionLimit;
-        string modString = $"{mod.type} \"{mod.name}\" [Rank:{level}/{mod.fusionLimit}] " +
-            $"-- drain:{mod.baseDrain + level} " +
-            $"-- {string.Join(" | ", mod.levelStats[level].stats)} " +
-            $"{(mod.tradable ? string.Empty : "(untradable)")}";
+        string modString = $"{mod.type} \"{mod.name}\" " +
+            $"-- [Rank:{level}/{mod.fusionLimit}] drain:{mod.baseDrain + level} " +
+            $"-- {string.Join(" | ", mod.levelStats[level].stats)} ";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
         ObjectCaching.CacheObject(modName + "_modobj", mod, 150);
