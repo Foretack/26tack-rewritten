@@ -30,7 +30,7 @@ internal class Sortie : IChatCommand
             return;
         }
 
-        TimeSpan timeLeft = sortie.expiry - DateTime.Now;
+        TimeSpan timeLeft = sortie.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
