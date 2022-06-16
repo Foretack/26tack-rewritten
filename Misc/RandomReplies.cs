@@ -39,4 +39,38 @@ internal static class RandomReplies
         new string[] { "hi", "ppL"},
         new string[] { "ApuApustaja", "PETPET" }
     };
+    public static readonly string[] StreamOnlineEmotes = new string[]
+    {
+        "forsenPartyBus",
+        "ApuSipSpin",
+        "Apu",
+        "ppBounce",
+        "Okayge",
+        "FeelsOkayMan"
+    };
+    public static readonly string[] StreamOfflineEmotes = new string[]
+    {
+        "FeelsBadMan",
+        "catFaint",
+        "ApuDespair",
+        "ApuDisapproved",
+        "FROZEN",
+        "peepoSadSit",
+        "peepoSadDankSip",
+        "peepoSadDank",
+        "iguess"
+    };
+    public static readonly string[] StreamUpdateEmotes = new string[]
+    {
+        "itIsPointless",
+        "cowJAM",
+        "engiKick",
+        "ApuSkate",
+        "asdf",
+        "flipACat",
+        "ppCircle",
+        "ApuSit",
+        "ApuCool",
+        "ApuPeek"
+    };
 }

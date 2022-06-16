@@ -4,17 +4,23 @@ using Tack.Models;
 using Dasync.Collections;
 using Serilog;
 using TwitchLib.Client.Events;
+using TwitchLib.Api.Services;
+using TwitchLib.Api.Services.Events;
+using TwitchLib.Api.Services.Events.LiveStreamMonitor;
+using Tack.Misc;
+using Tack.Utils;
 
 namespace Tack.Handlers;
 internal static class ChannelHandler
 {
+    private static readonly Database.Database Db = new Database.Database();
+
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
     public static string[] JLChannels { get; private set;  } = Array.Empty<string>();
+    public static List<Channel> FetchedChannels { get; } = new List<Channel>(Db.GetChannels().Result);
 
-    private static readonly Database.Database Db = new Database.Database();
-    private static readonly List<Channel> FetchedChannels = new List<Channel>(Db.GetChannels().Result);
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
 
     internal static async Task Connect(bool isReconnect)
@@ -45,6 +51,7 @@ internal static class ChannelHandler
             Log.Debug($"[Anon] Attempting to join: {x.Name}");
             await Task.Delay(300);
         });
+        StreamMonitor.Start();
     }
 
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
@@ -148,4 +155,65 @@ internal static class ChannelHandler
     }
 
     public record Channel(string Name, int Priority, bool Logged);
+}
+
+internal static class StreamMonitor
+{
+    private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
+    private static readonly Dictionary<string, string[]> StreamsData = new Dictionary<string, string[]>();
+    
+    public static void Start()
+    {
+        MonitoringService.SetChannelsByName(ChannelHandler.FetchedChannels.Select(x => x.Name).ToList());
+        
+        MonitoringService.OnServiceStarted += ServiceStarted;
+        MonitoringService.OnStreamOnline += StreamOnline;
+        MonitoringService.OnStreamUpdate += StreamUpdate;
+        MonitoringService.OnStreamOffline += StreamOffline;
+        
+        MonitoringService.Start();
+    }
+
+    private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
+    {
+        MessageHandler.SendColoredMessage(
+            Config.RelayChannel,
+            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline!",
+            ChatColor.GoldenRod);
+    }
+
+    private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
+    {
+        bool s = StreamsData.TryAdd(e.Channel, new string[] { e.Stream.Title, e.Stream.GameName });
+        if (s) return;
+        if (StreamsData[e.Channel][0] != e.Stream.Title)
+        {
+            StreamsData[e.Channel][0] = e.Stream.Title;
+            MessageHandler.SendColoredMessage(
+                Config.RelayChannel,
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed title to: {e.Stream.Title}",
+                ChatColor.DodgerBlue);
+        }
+        if (StreamsData[e.Channel][1] != e.Stream.GameName)
+        {
+            StreamsData[e.Channel][1] = e.Stream.GameName;
+            MessageHandler.SendColoredMessage(
+                Config.RelayChannel,
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed category to: {e.Stream.Title}",
+                ChatColor.DodgerBlue);
+        }
+    }
+
+    private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
+    {
+        MessageHandler.SendColoredMessage(
+            Config.RelayChannel,
+            $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live!",
+            ChatColor.SpringGreen);
+    }
+
+    private static void ServiceStarted(object? sender, OnServiceStartedArgs e)
+    {
+        MessageHandler.SendMessage(Config.RelayChannel, $"OBSOLETE Hello");
+    }
 }

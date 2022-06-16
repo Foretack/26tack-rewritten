@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using TwitchLib.Api;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Exceptions;
 using TwitchLib.Api.Helix;
@@ -7,8 +8,9 @@ using TwitchLib.Api.Helix.Models.Users.GetUsers;
 namespace Tack.Handlers;
 internal static class TwitchAPIHandler
 {
-    private static readonly Helix Helix = new Helix(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
+    public static readonly TwitchAPI API = new TwitchAPI(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
 
+    private static readonly Helix Helix = API.Helix;
     internal static async Task<User?> GetUsers(string username)
     {
         User[]? u = await GetUsers(new List<string> { username });
