@@ -1,14 +1,13 @@
-﻿using Tack.Core;
-using Tack.Database;
-using Tack.Models;
-using Dasync.Collections;
+﻿using Dasync.Collections;
 using Serilog;
-using TwitchLib.Client.Events;
+using Tack.Core;
+using Tack.Misc;
+using Tack.Models;
+using Tack.Utils;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
-using Tack.Misc;
-using Tack.Utils;
+using TwitchLib.Client.Events;
 
 namespace Tack.Handlers;
 internal static class ChannelHandler
@@ -18,7 +17,7 @@ internal static class ChannelHandler
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
-    public static string[] JLChannels { get; private set;  } = Array.Empty<string>();
+    public static string[] JLChannels { get; private set; } = Array.Empty<string>();
     public static List<Channel> FetchedChannels { get; } = new List<Channel>(Db.GetChannels().Result);
 
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
@@ -161,16 +160,16 @@ internal static class StreamMonitor
 {
     private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
     private static readonly Dictionary<string, string[]> StreamsData = new Dictionary<string, string[]>();
-    
+
     public static void Start()
     {
         MonitoringService.SetChannelsByName(ChannelHandler.FetchedChannels.Select(x => x.Name).ToList());
-        
+
         MonitoringService.OnServiceStarted += ServiceStarted;
         MonitoringService.OnStreamOnline += StreamOnline;
         MonitoringService.OnStreamUpdate += StreamUpdate;
         MonitoringService.OnStreamOffline += StreamOffline;
-        
+
         MonitoringService.Start();
     }
 
