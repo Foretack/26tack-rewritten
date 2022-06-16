@@ -11,7 +11,7 @@ internal class Sortie : IChatCommand
     {
         string name = "sortie";
         string description = "Check the current Sortie";
-        string[] aliases = { "anasa" };
+        string[] aliases = { "anasa", "sorties" };
         int[] cooldowns = { 5, 3 };
 
         return new Command(name, description, aliases, cooldowns);
