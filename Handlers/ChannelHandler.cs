@@ -198,7 +198,7 @@ internal static class StreamMonitor
             StreamsData[e.Channel][1] = e.Stream.GameName;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed category to: {e.Stream.Title}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed category to: {e.Stream.GameName}",
                 ChatColor.DodgerBlue);
         }
     }
