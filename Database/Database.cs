@@ -12,7 +12,7 @@ internal class Database : DbConnection
             Insert()
             .Table("errors")
             .Schema("data", "time")
-            .Values($"'{Formatting.FormatException(exception).Replace('\'', '%')}'", $"CURRENT_TIMESTAMP")
+            .Values($"'{exception.FormatException()}'", $"CURRENT_TIMESTAMP")
             .TryExecute();
 
         if (!q.Success)
