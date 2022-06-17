@@ -63,8 +63,8 @@ internal static class CommandHelp
             .Append(" 🡺 ")
             .Append(cmdinfo.Description)
             .Append(" 🡺 ")
-            .Append($"{cmdinfo.Cooldowns[0]} user cooldown, ")
-            .Append($"{cmdinfo.Cooldowns[1]} channel cooldown.");
+            .Append($"{cmdinfo.Cooldowns[0]}s user cooldown, ")
+            .Append($"{cmdinfo.Cooldowns[1]}s channel cooldown.");
 
             MessageHandler.SendMessage(channel, sb.ToString());
         });
