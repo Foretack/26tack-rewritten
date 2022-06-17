@@ -335,7 +335,7 @@ internal static class ExternalAPIHandler
 
         try
         {
-            Stream bResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/voidTrader");
+            Stream bResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/voidTrader?lang=en");
             VoidTrader baro = (await JsonSerializer.DeserializeAsync<VoidTrader>(bResponse))!;
             return baro;
         }
@@ -360,7 +360,7 @@ internal static class ExternalAPIHandler
 
         try
         {
-            Stream nResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/news");
+            Stream nResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/news?lang=en");
             WarframeNewsObj[] news = (await JsonSerializer.DeserializeAsync<WarframeNewsObj[]>(nResponse))!;
             return news;
         }
