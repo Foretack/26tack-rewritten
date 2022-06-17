@@ -12,7 +12,7 @@ internal static class EventsHandler
     public static void Start()
     {
         IntervalTimer timer = new IntervalTimer();
-        timer.Interval = TimeSpan.FromMinutes(5).TotalMilliseconds;
+        timer.Interval = TimeSpan.FromMinutes(2.5).TotalMilliseconds;
         timer.AutoReset = true;
         timer.Enabled = true;
 
@@ -32,17 +32,15 @@ internal static class EventsHandler
         {
             BaroActive = baro.Active;
             LatestNews = news[0];
-            Log.Debug($"Set: news = {news[0]}, baro = {baro.Active}");
+            Log.Debug($"Set: news = {news[0].Message}, baro = {baro.Active}");
             return;
         }
 
         // Baro arrive
         if (!BaroActive && baro.Active)
         {
-            MessageHandler.SendColoredMessage(
-                "pajlada",
-                $"Void trader Baro Ki’Teer has arrived at {baro.Location}!",
-                ChatColor.DodgerBlue);
+            MessageHandler.SendMessage("pajlada",$"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+            MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
             BaroActive = true;
             int departsInSeconds = (int)(baro.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime()).TotalSeconds;
             ObjectCaching.CacheObject("baro_data", baro, departsInSeconds);
@@ -50,7 +48,7 @@ internal static class EventsHandler
         // Baro Depart
         if (BaroActive && !baro.Active)
         {
-            MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has departed!");
+            MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has departed! 💠");
             BaroActive = false;
         }
 
@@ -61,13 +59,13 @@ internal static class EventsHandler
         {
             MessageHandler.SendColoredMessage(
                 "pajlada",
-                $"Warframe update! {news[0].Message} ({news[0].Link})",
+                $"Warframe update 🚨 {news[0].Message} ( {news[0].Link} ) 🚨 ",
                 ChatColor.Red);
         }
         // Send news regardless to relay channel
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
-            $"Warframe news updated! {news[0].Message} ({news[0].Link})",
+            $"Warframe news updated! {news[0].Message} ( {news[0].Link} )",
             ChatColor.CadetBlue);
         // Set new news as latest
         LatestNews = news[0];
