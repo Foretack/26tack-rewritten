@@ -28,7 +28,7 @@ internal static class EventsHandler
 
         if (baro is null || news is null) return;
         // Don't trigger anything in first 30 minutes
-        if ((DateTime.Now - MainClient.StartupTime).TotalMinutes < 30)
+        if ((DateTime.Now - MainClient.StartupTime).TotalMinutes < 10)
         {
             BaroActive = baro.Active;
             LatestNews = news[0];
