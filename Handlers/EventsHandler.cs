@@ -32,7 +32,7 @@ internal static class EventsHandler
         {
             BaroActive = baro.Active;
             LatestNews = news[0];
-            Log.Verbose($"Set: news = {news[0]}, baro = {baro.Active}");
+            Log.Debug($"Set: news = {news[0]}, baro = {baro.Active}");
             return;
         }
 
