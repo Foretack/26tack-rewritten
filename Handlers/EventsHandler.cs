@@ -17,7 +17,7 @@ internal static class EventsHandler
         timer.Enabled = true;
 
         timer.Elapsed += WarframeUpdates;
-        Log.Information($"{typeof(EventsHandler)} started");
+        Log.Debug($"{typeof(EventsHandler)} started");
     }
 
     private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
