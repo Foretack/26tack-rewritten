@@ -183,7 +183,7 @@ internal static class StreamMonitor
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
-        bool s = StreamsData.TryAdd(e.Channel, new string[] { e.Stream.Title, e.Stream.GameName });
+        bool s = StreamsData.TryAdd(e.Channel, new string[] { "xd", "pajaPants" });
         if (s) return;
         if (StreamsData[e.Channel][0] != e.Stream.Title)
         {
