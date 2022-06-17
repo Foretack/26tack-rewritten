@@ -74,6 +74,7 @@ public static class MainClient
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
+        EventsHandler.Start();
         await DiscordClient.Connect();
         while (!(AnonymousClient.Connected && DiscordClient.Connected))
         {

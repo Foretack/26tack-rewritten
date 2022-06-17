@@ -1,6 +1,8 @@
 ﻿#pragma warning disable CS8618
 #pragma warning disable IDE1006
 
+using System.Text.Json.Serialization;
+
 namespace Tack.Json;
 public class Alert
 {
@@ -207,3 +209,64 @@ public class ModInfo
     public LevelStat[] levelStats { get; set; }
 }
 
+public class Inventory
+{
+    [JsonPropertyName("item")]
+    public string Item { get; set; }
+
+    [JsonPropertyName("ducats")]
+    public int Ducats { get; set; }
+
+    [JsonPropertyName("credits")]
+    public int Credits { get; set; }
+}
+public class VoidTrader
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("activation")]
+    public DateTime Activation { get; set; }
+
+    [JsonPropertyName("startString")]
+    public string StartString { get; set; }
+
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
+
+    [JsonPropertyName("active")]
+    public bool Active { get; set; }
+
+    [JsonPropertyName("character")]
+    public string Character { get; set; }
+
+    [JsonPropertyName("location")]
+    public string Location { get; set; }
+
+    [JsonPropertyName("inventory")]
+    public List<Inventory> Inventory { get; set; }
+
+    [JsonPropertyName("psId")]
+    public string PsId { get; set; }
+
+    [JsonPropertyName("endString")]
+    public string EndString { get; set; }
+
+    [JsonPropertyName("initialStart")]
+    public DateTime InitialStart { get; set; }
+
+    [JsonPropertyName("schedule")]
+    public List<object> Schedule { get; set; }
+}
+
+public class WarframeNewsObj
+{
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
+
+    [JsonPropertyName("link")]
+    public string Link { get; set; }
+
+    [JsonPropertyName("update")]
+    public bool Update { get; set; }
+}

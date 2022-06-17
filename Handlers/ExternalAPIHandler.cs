@@ -1,8 +1,7 @@
 ﻿using System.Text.Json;
+using Serilog;
 using Tack.Json;
 using Tack.Models;
-using Serilog;
-using Tack.Database;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
@@ -92,7 +91,7 @@ internal static class ExternalAPIHandler
             Fissure[] fissures = (await JsonSerializer.DeserializeAsync<Fissure[]>(fResponse))!;
             return fissures;
         }
-         catch (Exception ex)
+        catch (Exception ex)
         {
             Log.Error(ex, $"Failed to fetch current fissures fdm");
             Database.Database db = new Database.Database();
@@ -294,7 +293,7 @@ internal static class ExternalAPIHandler
         {
             if (ex is TaskCanceledException)
             {
-                Log.Error( $"Fetching drop data for \"{itemName}\" timed out");
+                Log.Error($"Fetching drop data for \"{itemName}\" timed out");
             }
             else
             {
@@ -324,6 +323,56 @@ internal static class ExternalAPIHandler
             else
             {
                 Log.Error(ex, $"Failed to fetch info about \"{modName}\"");
+            }
+            return null;
+        }
+    }
+
+    public static async Task<VoidTrader?> GetBaroInfo()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(5);
+
+        try
+        {
+            Stream bResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/voidTrader");
+            VoidTrader baro = (await JsonSerializer.DeserializeAsync<VoidTrader>(bResponse))!;
+            return baro;
+        }
+        catch (Exception ex)
+        {
+            if (ex is TaskCanceledException)
+            {
+                Log.Error($"Fetching baro info timed out");
+            }
+            else
+            {
+                Log.Error(ex, $"Failed to fetch info about baro");
+            }
+            return null;
+        }
+    }
+
+    public static async Task<WarframeNewsObj[]?> GetWarframeNews()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(5);
+
+        try
+        {
+            Stream nResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/news");
+            WarframeNewsObj[] news = (await JsonSerializer.DeserializeAsync<WarframeNewsObj[]>(nResponse))!;
+            return news;
+        }
+        catch (Exception ex)
+        {
+            if (ex is TaskCanceledException)
+            {
+                Log.Error($"Fetching Warframe news info timed out");
+            }
+            else
+            {
+                Log.Error(ex, $"Failed to fetch info about Warframe news");
             }
             return null;
         }
