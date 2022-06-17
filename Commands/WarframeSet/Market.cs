@@ -2,6 +2,7 @@
 using Tack.Interfaces;
 using Tack.Json;
 using Tack.Models;
+using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
 internal class Market : IChatCommand
@@ -9,7 +10,8 @@ internal class Market : IChatCommand
     public Command Info()
     {
         string name = "market";
-        string description = "Get sell & buy orders for the specified item from warframe.market";
+        string description = "Get sell & buy orders for the specified item from warframe.market. " +
+            "Additional options: `activeOnly:true/false` (true default)";
         string[] aliases = { "price" };
         int[] cooldowns = { 10, 5 };
 
@@ -28,7 +30,9 @@ internal class Market : IChatCommand
             return;
         }
 
-        string desiredItem = string.Join('_', args).ToLower();
+        string option1 = "activeOnly";
+        bool activeOnly = Options.ParseBool(option1, ctx.IrcMessage.Message) ?? true;
+        string desiredItem = string.Join('_', args.Where(x => !x.StartsWith(option1))).ToLower();
         MarketItems? listings = await ExternalAPIHandler.GetMarketItemListings(desiredItem);
         if (listings is null)
         {
@@ -38,7 +42,9 @@ internal class Market : IChatCommand
 
         await Task.Run(() =>
         {
-            Order[] orders = listings.payload.orders.Where(x => x.user.status != "offline").ToArray();
+            Order[] orders = listings.payload.orders
+            .Where(x => !activeOnly || x.user.status != "offline")
+            .ToArray();
 
             int totalOrders = orders.Length;
             int cheapestSeller = int.MaxValue;
@@ -74,7 +80,7 @@ internal class Market : IChatCommand
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
-            string listingsString = $"{totalOrders} Active orders " +
+            string listingsString = $"{totalOrders} " + (activeOnly ? "Active" : "Total") + " orders " +
                 $"-- {sellersCount} Sellers: Avg. {sellerAveragePrice}P (🡳{cheapestSeller}P   🡱{mostExpensiveSeller}P) " +
                 $"-- {buyersCount} Buyers: Avg. {buyerAveragePrice}P (🡱{mostPayingBuyer}P   🡳{leastPayingBuyer}P)";
 
