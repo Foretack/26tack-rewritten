@@ -65,7 +65,7 @@ internal static class MessageHandler
     {
         string message = ircMessage.Message;
         string channel = ircMessage.Channel;
-        string[] splitMessage = message.Split(' ');
+        string[] splitMessage = message.Replace("󠀀", " ").Split(' ');
         string[] commandArgs = splitMessage.Skip(1).ToArray();
 
         if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
