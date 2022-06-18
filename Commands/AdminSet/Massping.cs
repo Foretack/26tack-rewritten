@@ -36,36 +36,22 @@ internal class Massping : IChatCommand
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        // TODO: this is terrible
-        try
+        TMI? chatterList = ObjectCaching.GetCachedObject<TMI>(targetChannel + "_CHATTERS")
+            ?? await ExternalAPIHandler.GetChannelChatters(targetChannel);
+        if (chatterList is null)
         {
-            TMI? clist;
-            var c = ObjectCaching.GetCachedObject<TMI>(targetChannel + "_MP");
-            if (c is not null) clist = c;
-            else
-            {
-                clist = await ExternalAPIHandler.GetChannelChatters(targetChannel);
-                if (clist is null)
-                {
-                    MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan failed to retrieve that channel's chatters");
-                    return;
-                }
-                ObjectCaching.CacheObject(targetChannel + "_MP", clist, 600);
-            }
-            
-            if (mods)
-            {
-                AppendMods(clist.chatters.moderators, ref sb);
-                MessageHandler.SendMessage(channel, sb.ToString());
-                return;
-            }
-            AppendViewers(clist.chatters.viewers, ref sb);
+            MessageHandler.SendMessage(channel, $"@{user}, Could not fetch chatters of that channel :(");
+            return;
+        }
+
+        if (mods)
+        {
+            AppendMods(chatterList.chatters.moderators, ref sb);
             MessageHandler.SendMessage(channel, sb.ToString());
+            return;
         }
-        catch (Exception)
-        {
-            MessageHandler.SendMessage(channel, $"@{user}, Fetching users timed out :(");
-        }
+        AppendViewers(chatterList.chatters.viewers, ref sb);
+        MessageHandler.SendMessage(channel, sb.ToString());
     }
 
     private void AppendMods(string[] modList, ref StringBuilder sb)
