@@ -1,7 +1,7 @@
 ﻿using Serilog;
-using Tack.Core;
 using Tack.Json;
 using Tack.Utils;
+using C = Tack.Core.Core;
 using IntervalTimer = System.Timers.Timer;
 
 namespace Tack.Handlers;
@@ -28,7 +28,7 @@ internal static class EventsHandler
 
         if (baro is null || news is null) return;
         // Don't trigger anything in first 30 minutes
-        if ((DateTime.Now - MainClient.StartupTime).TotalMinutes < 10)
+        if ((DateTime.Now - C.StartupTime).TotalMinutes < 10)
         {
             BaroActive = baro.Active;
             LatestNews = news[0];
@@ -39,7 +39,7 @@ internal static class EventsHandler
         // Baro arrive
         if (!BaroActive && baro.Active)
         {
-            MessageHandler.SendMessage("pajlada",$"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+            MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
             MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
             BaroActive = true;
             int departsInSeconds = (int)(baro.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime()).TotalSeconds;

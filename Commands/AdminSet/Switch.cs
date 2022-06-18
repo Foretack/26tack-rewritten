@@ -1,8 +1,8 @@
-﻿using Tack.Core;
+﻿using Serilog.Events;
 using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
-using Serilog.Events;
+using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
 internal class Switch : IChatCommand
@@ -29,31 +29,31 @@ internal class Switch : IChatCommand
         switch (args[0])
         {
             case "verbose":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Verbose}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Verbose;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Verbose}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Verbose;
                 break;
             case "debug":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Debug}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Debug;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Debug}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Debug;
                 break;
             case "info":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Information}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Information;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Information}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Information;
                 break;
             case "warning":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Warning}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Warning;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Warning}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Warning;
                 break;
             case "error":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Error}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Error;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Error}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Error;
                 break;
             case "fatal":
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel} -> {LogEventLevel.Fatal}");
-                MainClient.LogSwitch.MinimumLevel = LogEventLevel.Fatal;
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel} -> {LogEventLevel.Fatal}");
+                C.LogSwitch.MinimumLevel = LogEventLevel.Fatal;
                 break;
             default:
-                MessageHandler.SendMessage(channel, $"{MainClient.LogSwitch.MinimumLevel}");
+                MessageHandler.SendMessage(channel, $"{C.LogSwitch.MinimumLevel}");
                 break;
         }
         return Task.CompletedTask;

@@ -1,9 +1,9 @@
-﻿using Tack.Core;
-using Tack.Handlers;
+﻿using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Misc;
 using Tack.Models;
 using Tack.Utils;
+using C = Tack.Core.Core;
 
 namespace Tack.Commands.BaseSet;
 internal class Ping : IChatCommand
@@ -21,7 +21,7 @@ internal class Ping : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
-        TimeSpan uptime = DateTime.Now - MainClient.StartupTime;
+        TimeSpan uptime = DateTime.Now - C.StartupTime;
         string uptimeString = uptime.TotalDays >= 1 ? $"{uptime:d'd 'h'h '}" : $"{uptime:h'h 'm'm 's's '}";
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} {latency}ms -- {uptimeString}");

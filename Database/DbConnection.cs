@@ -1,7 +1,6 @@
-﻿using Npgsql;
+﻿using System.Text;
+using Npgsql;
 using Serilog;
-using System.Text;
-using Dasync.Collections;
 
 namespace Tack.Database;
 internal abstract class DbConnection
@@ -65,7 +64,7 @@ internal abstract class DbConnection
                     {
                         foreach (var column in ValuesSchema!) { ordinals.Add(r.GetOrdinal(column)); }
                         break;
-                    } 
+                    }
                 }
                 else
                 {
@@ -77,7 +76,7 @@ internal abstract class DbConnection
                     }
                 }
                 await r.CloseAsync();
-                
+
                 NpgsqlDataReader r2 = await cmd.ExecuteReaderAsync();
                 List<object[]> values = new List<object[]>();
                 List<object> valuesInner = new List<object>();

@@ -1,7 +1,5 @@
-﻿using Tack.Database;
+﻿using Serilog;
 using Tack.Handlers;
-using Serilog;
-using Serilog.Core;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
@@ -12,32 +10,10 @@ namespace Tack.Core;
 
 public static class MainClient
 {
-    public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
-    public static DateTime StartupTime { get; private set; } = new DateTime();
-    public static bool Running { get; set; } = true;
+    public static bool Connected { get; private set; } = false;
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
-
-    private static bool Errored { get; set; } = false;
-
-    public static async Task<int> Main(string[] args)
-    {
-        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
-        Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(LogSwitch).WriteTo.Console().CreateLogger();
-
-        Database.Database db = new Database.Database();
-        Config.Auth = await db.GetAuthorizationData();
-        Config.Discord = await db.GetDiscordData();
-        Config.Links = new Links();
-
-        StartupTime = DateTime.Now;
-
-        if (Running) Initialize();
-        while (Running) Console.ReadLine();
-        return 0;
-    }
-
-    private static void Initialize()
+    public static void Initialize()
     {
         ClientOptions options = new ClientOptions();
         options.MessagesAllowedInPeriod = 150;
@@ -60,41 +36,24 @@ public static class MainClient
     private static void Connect()
     {
         Client.Connect();
-        Client.OnConnectionError += (s, e) =>
-        {
-            Errored = true;
-            Log.Fatal($"MainClient encountered a connection error: {e.Error.Message}");
-        };
+        Client.OnConnectionError +=
+            (s, e) => Log.Warning($"MainClient encountered a connection error: {e.Error.Message}");
         Client.OnConnected += ClientConnectedEvent;
     }
 
-    private static async void ClientConnectedEvent(object? sender, OnConnectedArgs e)
+    private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         Log.Information($"[Main] Connected");
-        AnonymousClient.Initialize();
-        MessageHandler.Initialize();
-        CommandHandler.Initialize();
-        EventsHandler.Start();
-        await DiscordClient.Connect();
-        while (!(AnonymousClient.Connected && DiscordClient.Connected))
-        {
-            await Task.Delay(1000);
-        }
-        await ChannelHandler.Connect(false);
-        if (!Errored) return;
-        await Reconnect();
-        Errored = false;
+        Connected = true;
+        Client.OnReconnected +=
+            async (s, e) => await Reconnect();
     }
 
-    // TODO: AnonymousClient doesn't have this.
-    // Also check which client needs to rejoin the channels properly
-    // instead of making them both do it you lazy idiot
     private static async Task Reconnect()
     {
         Client.JoinChannel(Config.RelayChannel);
         Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnecting...");
         Log.Information("MainClient is attempting reconnection...");
-        await ChannelHandler.Connect(Errored);
-        Errored = false;
+        await ChannelHandler.Connect(true);
     }
 }

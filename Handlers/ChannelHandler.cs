@@ -30,6 +30,7 @@ internal static class ChannelHandler
             MainJoinedChannelNames.Clear();
             AnonJoinedChannels.Clear();
         }
+        Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
         JLChannels = (await ExternalAPIHandler.GetIvrChannels()).channels.Select(x => x.name).ToArray();
         IAsyncEnumerable<Channel> c = new AsyncEnumerable<Channel>(async y =>
@@ -158,12 +159,16 @@ internal static class ChannelHandler
 
 internal static class StreamMonitor
 {
+    public static Dictionary<string, bool> StreamsStatus { get; private set; } = new Dictionary<string, bool>();
+
     private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
     private static readonly Dictionary<string, string[]> StreamsData = new Dictionary<string, string[]>();
 
     public static void Start()
     {
-        MonitoringService.SetChannelsByName(ChannelHandler.FetchedChannels.Select(x => x.Name).ToList());
+        List<string> channelsByName = ChannelHandler.FetchedChannels.Select(x => x.Name).ToList();
+        StreamsStatus = channelsByName.ToDictionary(x => x, y => false);
+        MonitoringService.SetChannelsByName(channelsByName);
 
         MonitoringService.OnServiceStarted += ServiceStarted;
         MonitoringService.OnStreamOnline += StreamOnline;
@@ -175,6 +180,7 @@ internal static class StreamMonitor
 
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
+        StreamsStatus[e.Channel] = false;
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
             $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline!",
@@ -183,14 +189,14 @@ internal static class StreamMonitor
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
-        bool s = StreamsData.TryAdd(e.Channel, new string[] { "xd", "pajaPants" });
+        bool s = StreamsData.TryAdd(e.Channel, new string[] { e.Stream.Title, e.Stream.GameName });
         if (s) return;
         if (StreamsData[e.Channel][0] != e.Stream.Title)
         {
             StreamsData[e.Channel][0] = e.Stream.Title;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed title to: {e.Stream.Title}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed their title: {e.Stream.Title}",
                 ChatColor.DodgerBlue);
         }
         if (StreamsData[e.Channel][1] != e.Stream.GameName)
@@ -198,16 +204,17 @@ internal static class StreamMonitor
             StreamsData[e.Channel][1] = e.Stream.GameName;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed category to: {e.Stream.GameName}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} is now playing: {e.Stream.GameName}",
                 ChatColor.DodgerBlue);
         }
     }
 
     private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
+        StreamsStatus[e.Channel] = true;
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
-            $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live!",
+            $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live: {e.Stream.Title} - {e.Stream.GameName}",
             ChatColor.SpringGreen);
     }
 

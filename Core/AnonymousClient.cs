@@ -1,5 +1,7 @@
 ﻿using Serilog;
+using Tack.Handlers;
 using TwitchLib.Client;
+using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
@@ -8,9 +10,8 @@ namespace Tack.Core;
 internal static class AnonymousClient
 {
     public static bool Connected { get; set; } = false;
-    public static TwitchClient Client { get; private set; } = new TwitchClient();
 
-
+    internal static TwitchClient Client { get; private set; } = new TwitchClient();
     public static void Initialize()
     {
         ClientOptions options = new ClientOptions();
@@ -18,7 +19,7 @@ internal static class AnonymousClient
         options.ThrottlingPeriod = TimeSpan.FromSeconds(1);
 
         ReconnectionPolicy policy = new ReconnectionPolicy(10);
-        policy.SetMaxAttempts(50);
+        policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
         WebSocketClient webSocketClient = new WebSocketClient(options);
@@ -34,14 +35,23 @@ internal static class AnonymousClient
     public static void Connect()
     {
         Client.Connect();
-        Client.OnConnectionError += (s, e) =>
-        {
-            Log.Error($"AnonymousClient encountered a connection error: {e.Error.Message}");
-        };
-        Client.OnConnected += (s, e) =>
-        {
-            Connected = true;
-            Log.Information("[Anon] Connected");
-        };
+        Client.OnConnectionError +=
+            (s, e) => Log.Warning($"AnonymousClient encountered a connection error: {e.Error.Message}");
+        Client.OnConnected += ClientConnectedEvent;
+    }
+
+    private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
+    {
+        Log.Information("[Anon] Connected");
+        Connected = true;
+        Client.OnReconnected +=
+            async (s, e) => await Reconnect();
+    }
+
+    private static async Task Reconnect()
+    {
+        Client.JoinChannel(Config.RelayChannel);
+        Log.Information("AnonymousClient is attempting reconnection...");
+        await ChannelHandler.Connect(true);
     }
 }
