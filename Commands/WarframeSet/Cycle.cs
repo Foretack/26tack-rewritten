@@ -25,6 +25,7 @@ internal class Cycle : IChatCommand
             "vallis" => SendVallisCycle(ctx),
             "cambion" => SendCambionCycle(ctx),
             "drift" => SendCambionCycle(ctx),
+            "zariman" => SendZarimanCycle(ctx),
             _ => Other(ctx)
         };
 
@@ -97,6 +98,28 @@ internal class Cycle : IChatCommand
         MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
         ObjectCaching.CacheObject("cambion_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
+    private async ValueTask SendZarimanCycle(CommandContext ctx)
+    {
+        string user = ctx.IrcMessage.DisplayName;
+        string channel = ctx.IrcMessage.Channel;
+
+        ZarimanCycle? cycle = ObjectCaching.GetCachedObject<ZarimanCycle>("zariman_state_wf")
+            ?? await ExternalAPIHandler.GetZarimanCycle();
+        if (cycle is null)
+        {
+            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
+            return;
+        }
+        TimeSpan timeLeft = cycle.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        if (timeLeft.TotalSeconds < 0)
+        {
+            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
+            return;
+        }
+        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {timeLeftString}");
+        ObjectCaching.CacheObject("zariman_state_wf", cycle, (int)timeLeft.TotalSeconds);
+    }
     private async ValueTask Other(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
@@ -115,6 +138,7 @@ internal class Cycle : IChatCommand
             "vallis" => SendVallisCycle(ctx),
             "cambion" => SendCambionCycle(ctx),
             "drift" => SendCambionCycle(ctx),
+            "zariman" => SendZarimanCycle(ctx),
             _ => new Func<ValueTask>(() =>
             {
                 MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");

@@ -199,6 +199,25 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+    public static async Task<ZarimanCycle?> GetZarimanCycle()
+    {
+        HttpClient requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(1);
+
+        try
+        {
+            Stream zResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/zarimanCycle?lang=en");
+            ZarimanCycle cycle = (await JsonSerializer.DeserializeAsync<ZarimanCycle>(zResponse))!;
+            return cycle;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed to fetch Zariman cycle fdm");
+            Database.Database db = new Database.Database();
+            await db.LogException(ex);
+            return null;
+        }
+    }
 
     public static async Task<MarketItems?> GetMarketItemListings(string itemName)
     {

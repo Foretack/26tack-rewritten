@@ -123,6 +123,29 @@ public class VallisCycle
     public string timeLeft { get; set; }
     public string shortString { get; set; }
 }
+public class ZarimanCycle
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; }
+
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
+
+    [JsonPropertyName("activation")]
+    public DateTime Activation { get; set; }
+
+    [JsonPropertyName("isCorpus")]
+    public bool IsCorpus { get; set; }
+
+    [JsonPropertyName("state")]
+    public string State { get; set; }
+
+    [JsonPropertyName("timeLeft")]
+    public string TimeLeft { get; set; }
+
+    [JsonPropertyName("shortString")]
+    public string ShortString { get; set; }
+}
 
 public class MarketItems
 {
