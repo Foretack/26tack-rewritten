@@ -11,7 +11,7 @@ internal class Cycle : IChatCommand
     {
         string name = "cycle";
         string description = "Get the current cycle of the specified open-world node";
-        string[] aliases = { "cycles", "cetus", "vallis", "cambion", "drift" };
+        string[] aliases = { "cycles", "cetus", "vallis", "cambion", "drift", "zariman" };
         int[] cooldowns = { 5, 3 };
 
         return new Command(name, description, aliases, cooldowns);
