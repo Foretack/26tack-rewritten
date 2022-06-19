@@ -164,16 +164,17 @@ internal static class ChannelHandler
 
 internal static class StreamMonitor
 {
-    public static Dictionary<string, bool> StreamsStatus { get; private set; } = new Dictionary<string, bool>();
+    public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
     private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
-    private static readonly Dictionary<string, string[]> StreamsData = new Dictionary<string, string[]>();
 
     public static void Start()
     {
-        List<string> channelsByName = ChannelHandler.FetchedChannels.Select(x => x.Name).ToList();
-        StreamsStatus = channelsByName.ToDictionary(x => x, y => false);
-        MonitoringService.SetChannelsByName(channelsByName);
+        List<ChannelHandler.Channel> Channels = ChannelHandler.FetchedChannels;
+        StreamData = Channels.ToDictionary(
+            x => x.Name,
+            y => new Stream(y.Name, false, string.Empty, string.Empty, DateTime.Now));
+        MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
 
         MonitoringService.OnServiceStarted += ServiceStarted;
         MonitoringService.OnStreamOnline += StreamOnline;
@@ -186,38 +187,40 @@ internal static class StreamMonitor
 
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
-        StreamsStatus[e.Channel] = false;
+        TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started;
+        string uptimeString = $"{uptime:h'h'm'm's's'}";
+        StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
-            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline!",
+            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! They have streamed for: {uptimeString}",
             ChatColor.GoldenRod);
     }
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
-        bool s = StreamsData.TryAdd(e.Channel, new string[] { e.Stream.Title, e.Stream.GameName });
-        if (s) return;
-        if (StreamsData[e.Channel][0] != e.Stream.Title)
+        Stream current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
+        if (StreamData[e.Channel].Title != e.Stream.Title)
         {
-            StreamsData[e.Channel][0] = e.Stream.Title;
+            StreamData[e.Channel] = current;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} changed their title: {e.Stream.Title}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} 📝 @{e.Channel} changed their title: {e.Stream.Title}",
                 ChatColor.DodgerBlue);
         }
-        if (StreamsData[e.Channel][1] != e.Stream.GameName)
+        if (StreamData[e.Channel].GameName != e.Stream.GameName)
         {
-            StreamsData[e.Channel][1] = e.Stream.GameName;
+            StreamData[e.Channel] = current;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} is now playing: {e.Stream.GameName}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} 🎮 @{e.Channel} is now playing: {e.Stream.GameName}",
                 ChatColor.DodgerBlue);
         }
     }
 
     private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
-        StreamsStatus[e.Channel] = true;
+        Stream current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
+        StreamData[e.Channel] = current;
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
             $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live: {e.Stream.Title} - {e.Stream.GameName}",
@@ -228,4 +231,6 @@ internal static class StreamMonitor
     {
         MessageHandler.SendMessage(Config.RelayChannel, $"OBSOLETE Hello");
     }
+
+    internal record Stream(string Username, bool IsOnline, string Title, string GameName, DateTime Started);
 }
