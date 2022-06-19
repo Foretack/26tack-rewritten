@@ -33,10 +33,11 @@ internal static class MessageHandler
     }
     public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
     {
-        await DiscordClient.Client
-            .GetGuild(guildID)
-            .GetTextChannel(channelID)
-            .SendMessageAsync(message);
+        SocketTextChannel channel = ObjectCaching.GetCachedObject<SocketTextChannel>(channelID + "_DISCORD_CHANNEL")
+            ?? DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID);
+        ObjectCaching.CacheObject(channelID + "_DISCORD_CHANNEL", channel, 36400);
+
+        await channel.SendMessageAsync(message);
     }
 
     internal static async Task OnDiscordMessageReceived(SocketMessage arg)
@@ -90,7 +91,7 @@ internal static class MessageHandler
         }
     }
 
-    private static async Task HandleDiscordMessage(SocketMessage socketMessage)
+    private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
     {
         string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content; 
         await Task.Run(() =>
