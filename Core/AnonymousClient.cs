@@ -5,6 +5,7 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
+using TwitchLib.Communication.Events;
 
 namespace Tack.Core;
 internal static class AnonymousClient
@@ -35,23 +36,32 @@ internal static class AnonymousClient
     public static void Connect()
     {
         Client.Connect();
-        Client.OnConnectionError +=
-            (s, e) => Log.Warning($"AnonymousClient encountered a connection error: {e.Error.Message}");
+        Client.OnConnectionError += (s, e) 
+            => Log.Warning($"AnonymousClient encountered a connection error: {e.Error.Message}");
         Client.OnConnected += ClientConnectedEvent;
+        Client.OnDisconnected += ClientDisconnectedEvent;
+        Client.OnReconnected += async (s, e) 
+            => await Reconnect();
     }
 
     private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         Log.Information("[Anon] Connected");
         Connected = true;
-        Client.OnReconnected +=
-            async (s, e) => await Reconnect();
+    }
+
+    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
+    {
+        Log.Warning($"[Anon] Disconnected");
+        Connected = false;
+        Client.Reconnect();
     }
 
     private static async Task Reconnect()
     {
         Client.JoinChannel(Config.RelayChannel);
         Log.Information("AnonymousClient is attempting reconnection...");
+        Log.Information($"AnonymousClient has triggered {typeof(ChannelHandler)} once more!");
         await ChannelHandler.Connect(true);
     }
 }

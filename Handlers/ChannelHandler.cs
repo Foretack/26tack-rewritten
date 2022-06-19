@@ -21,14 +21,18 @@ internal static class ChannelHandler
     public static List<Channel> FetchedChannels { get; } = new List<Channel>(Db.GetChannels().Result);
 
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
+    private static bool IsInProgress { get; set; } = false;
 
     internal static async Task Connect(bool isReconnect)
     {
+        if (IsInProgress) return;
+        IsInProgress = true;
         if (isReconnect)
         {
             MainJoinedChannels.Clear();
             MainJoinedChannelNames.Clear();
             AnonJoinedChannels.Clear();
+            StreamMonitor.Stop();
         }
         Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
@@ -51,6 +55,7 @@ internal static class ChannelHandler
             Log.Debug($"[Anon] Attempting to join: {x.Name}");
             await Task.Delay(300);
         });
+        IsInProgress = false;
         StreamMonitor.Start();
     }
 
@@ -177,6 +182,7 @@ internal static class StreamMonitor
 
         MonitoringService.Start();
     }
+    public static void Stop() { MonitoringService.Stop(); }
 
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
