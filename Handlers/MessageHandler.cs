@@ -81,7 +81,7 @@ internal static class MessageHandler
         && ircMessage.IsMe
         && message.StartsWith("pajaS 🚨 ALERT"))
         {
-            SendMessage("pajlada", RandomReplies.PajbotReplies.Choice());
+            SendMessage("pajlada", "/me " + RandomReplies.PajbotReplies.Choice());
         }
         if (Regexes.Mention.IsMatch(message))
         {
