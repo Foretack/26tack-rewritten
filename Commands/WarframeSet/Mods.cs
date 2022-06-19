@@ -30,7 +30,7 @@ internal class Mods : IChatCommand
         }
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
-        ModInfo? mod = ObjectCaching.GetCachedObject<ModInfo>(modName + "_modobj")
+        ModInfo? mod = ObjectCache.Get<ModInfo>(modName + "_modobj")
             ?? await ExternalAPIHandler.GetModInfo(modName);
         if (mod is null)
         {
@@ -45,6 +45,6 @@ internal class Mods : IChatCommand
             $"-- {string.Join(" | ", mod.levelStats[level].stats)} ";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
-        ObjectCaching.CacheObject(modName + "_modobj", mod, 150);
+        ObjectCache.Put(modName + "_modobj", mod, 150);
     }
 }

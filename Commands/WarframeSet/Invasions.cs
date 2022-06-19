@@ -21,7 +21,7 @@ internal class Invasions : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[]? invasionNodes = ObjectCaching.GetCachedObject<InvasionNode[]>("invasions_wf")
+        InvasionNode[]? invasionNodes = ObjectCache.Get<InvasionNode[]>("invasions_wf")
             ?? await ExternalAPIHandler.GetInvasions();
         if (invasionNodes is null)
         {
@@ -30,7 +30,7 @@ internal class Invasions : IChatCommand
         }
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
-        ObjectCaching.CacheObject("invasions_wf", invasionNodes, 300);
+        ObjectCache.Put("invasions_wf", invasionNodes, 300);
     }
 
     private async Task<string> SumItems(InvasionNode[] invasions)

@@ -41,7 +41,7 @@ internal class Relics : IChatCommand
 
         string item = string.Join(' ', args).ToLower();
         string message;
-        RelicData? relicData = ObjectCaching.GetCachedObject<RelicData>("relics_wf")
+        RelicData? relicData = ObjectCache.Get<RelicData>("relics_wf")
             ?? await ExternalAPIHandler.GetRelicData();
         if (relicData is null)
         {
@@ -50,7 +50,7 @@ internal class Relics : IChatCommand
         }
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
         MessageHandler.SendMessage(channel, $"@{user}, {message}");
-        ObjectCaching.CacheObject("relics_wf", relicData, 3600);
+        ObjectCache.Put("relics_wf", relicData, 3600);
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

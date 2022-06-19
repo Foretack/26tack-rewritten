@@ -22,7 +22,7 @@ internal class Sortie : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie? sortie = ObjectCaching.GetCachedObject<CurrentSortie>("current_sortie_wf")
+        CurrentSortie? sortie = ObjectCache.Get<CurrentSortie>("current_sortie_wf")
             ?? await ExternalAPIHandler.GetSortie();
         if (sortie is null)
         {
@@ -44,6 +44,6 @@ internal class Sortie : IChatCommand
             $"3⃣ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} 🡺 time left: {eta}");
-        ObjectCaching.CacheObject("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);
+        ObjectCache.Put("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);
     }
 }

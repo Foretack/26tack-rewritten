@@ -23,7 +23,7 @@ internal class Alerts : IChatCommand
         string channel = ctx.IrcMessage.Channel;
         StringBuilder ab = new StringBuilder();
 
-        Alert[]? alerts = ObjectCaching.GetCachedObject<Alert[]>("alerts_wf")
+        Alert[]? alerts = ObjectCache.Get<Alert[]>("alerts_wf")
             ?? await ExternalAPIHandler.GetAlerts();
         if (alerts is null)
         {
@@ -40,6 +40,6 @@ internal class Alerts : IChatCommand
             .Append(string.Join(" -- ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
-        ObjectCaching.CacheObject("alerts_wf", alerts, 150);
+        ObjectCache.Put("alerts_wf", alerts, 150);
     }
 }

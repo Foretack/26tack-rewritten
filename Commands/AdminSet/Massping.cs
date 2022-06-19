@@ -36,7 +36,7 @@ internal class Massping : IChatCommand
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        TMI? chatterList = ObjectCaching.GetCachedObject<TMI>(targetChannel + "_CHATTERS")
+        TMI? chatterList = ObjectCache.Get<TMI>(targetChannel + "_CHATTERS")
             ?? await ExternalAPIHandler.GetChannelChatters(targetChannel);
         if (chatterList is null)
         {

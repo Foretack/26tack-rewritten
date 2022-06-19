@@ -22,7 +22,7 @@ internal class SteelPath : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        SteelPathRewards? rewards = ObjectCaching.GetCachedObject<SteelPathRewards>("steelpath_wf")
+        SteelPathRewards? rewards = ObjectCache.Get<SteelPathRewards>("steelpath_wf")
             ?? await ExternalAPIHandler.GetSteelPathRewards();
         if (rewards is null)
         {
@@ -41,6 +41,6 @@ internal class SteelPath : IChatCommand
         string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) --";
         string nextInRotationString = $"🏹 Next in rotation: {rewards.rotation[0].name}";
         MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➡ in: {timeLeftString}");
-        ObjectCaching.CacheObject("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
+        ObjectCache.Put("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }
 }

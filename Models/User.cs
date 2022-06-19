@@ -7,18 +7,18 @@ internal class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        var c = ObjectCaching.GetCachedObject<User>(username + "_users");
+        var c = ObjectCache.Get<User>(username + "_users");
         if (c is not null) return c;
         var call = await TwitchAPIHandler.GetUsers(username);
         if (call is null)
         {
             var call2 = await ExternalAPIHandler.GetIvrUser(username);
             if (call2 is null) return null;
-            ObjectCaching.CacheObject(username + "_users", call2, 86400);
+            ObjectCache.Put(username + "_users", call2, 86400);
             return call2;
         }
         User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
-        ObjectCaching.CacheObject(username + "_users", u, 86400);
+        ObjectCache.Put(username + "_users", u, 86400);
         return u;
     }
     public async Task<User[]?> CreateUserAsync(params string[] usernames)
@@ -32,7 +32,7 @@ internal class UserFactory
             {
                 User user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
                 users.Add(user);
-                ObjectCaching.CacheObject(user.Username + "_user", user, 86400);
+                ObjectCache.Put(user.Username + "_user", user, 86400);
             }
             catch (Exception ex)
             {

@@ -1,11 +1,11 @@
 ﻿using Serilog;
 
 namespace Tack.Utils;
-public static class ObjectCaching
+public static class ObjectCache
 {
     private static readonly Dictionary<string, object> CachedObjects = new Dictionary<string, object>();
-    public static void ClearCache() { CachedObjects.Clear(); }
-    public static void CacheObject(string key, object obj, int cacheTime)
+    public static void Clear() { CachedObjects.Clear(); }
+    public static void Put(string key, object obj, int cacheTime)
     {
         bool s = CachedObjects.TryAdd(key, obj);
         if (!s) return;
@@ -19,7 +19,7 @@ public static class ObjectCaching
             remover?.Dispose();
         }, null, cacheTime * 1000, Timeout.Infinite);
     }
-    public static T? GetCachedObject<T>(string key)
+    public static T? Get<T>(string key)
     {
         CachedObjects.TryGetValue(key, out object? obj);
         return (T?)obj;

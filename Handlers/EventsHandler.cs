@@ -22,7 +22,7 @@ internal static class EventsHandler
 
     private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        VoidTrader? baro = ObjectCaching.GetCachedObject<VoidTrader>("baro_data")
+        VoidTrader? baro = ObjectCache.Get<VoidTrader>("baro_data")
             ?? await ExternalAPIHandler.GetBaroInfo();
         WarframeNewsObj[]? news = await ExternalAPIHandler.GetWarframeNews();
 
@@ -43,7 +43,7 @@ internal static class EventsHandler
             MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
             BaroActive = true;
             int departsInSeconds = (int)(baro.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime()).TotalSeconds;
-            ObjectCaching.CacheObject("baro_data", baro, departsInSeconds);
+            ObjectCache.Put("baro_data", baro, departsInSeconds);
         }
         // Baro Depart
         if (BaroActive && !baro.Active)

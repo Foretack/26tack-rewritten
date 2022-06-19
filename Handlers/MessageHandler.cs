@@ -33,9 +33,9 @@ internal static class MessageHandler
     }
     public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
     {
-        SocketTextChannel channel = ObjectCaching.GetCachedObject<SocketTextChannel>(channelID + "_DISCORD_CHANNEL")
+        SocketTextChannel channel = ObjectCache.Get<SocketTextChannel>(channelID + "_DISCORD_CHANNEL")
             ?? DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID);
-        ObjectCaching.CacheObject(channelID + "_DISCORD_CHANNEL", channel, 36400);
+        ObjectCache.Put(channelID + "_DISCORD_CHANNEL", channel, 36400);
 
         await channel.SendMessageAsync(message);
     }
