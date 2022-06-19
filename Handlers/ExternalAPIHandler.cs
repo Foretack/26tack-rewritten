@@ -362,11 +362,11 @@ internal static class ExternalAPIHandler
         {
             if (ex is TaskCanceledException)
             {
-                Log.Error($"Fetching baro info timed out");
+                Log.Warning($"Fetching baro info timed out");
             }
             else
             {
-                Log.Error(ex, $"Failed to fetch info about baro");
+                Log.Warning( $"Failed to fetch info about baro ({ex.Message})");
             }
             return null;
         }
@@ -387,11 +387,11 @@ internal static class ExternalAPIHandler
         {
             if (ex is TaskCanceledException)
             {
-                Log.Error($"Fetching Warframe news info timed out");
+                Log.Warning($"Fetching Warframe news info timed out");
             }
             else
             {
-                Log.Error(ex, $"Failed to fetch info about Warframe news");
+                Log.Warning($"Failed to fetch info about Warframe news ({ex.Message})");
             }
             return null;
         }
