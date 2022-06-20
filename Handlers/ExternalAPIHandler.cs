@@ -316,7 +316,7 @@ internal static class ExternalAPIHandler
             }
             else
             {
-                Log.Error(ex, $"Failed to fetch drop data for \"{itemName}\"");
+                Log.Error( $"Failed to fetch drop data for \"{itemName}\" ({ex.Message})");
             }
             return null;
         }
@@ -341,7 +341,7 @@ internal static class ExternalAPIHandler
             }
             else
             {
-                Log.Error(ex, $"Failed to fetch info about \"{modName}\"");
+                Log.Error( $"Failed to fetch info about \"{modName}\" ({ex.Message})");
             }
             return null;
         }
