@@ -8,6 +8,7 @@ using Serilog;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
+using Discord;
 
 namespace Tack.Handlers;
 internal static class MessageHandler
@@ -40,10 +41,11 @@ internal static class MessageHandler
         await channel.SendMessageAsync(message);
     }
 
-    internal static async Task OnDiscordMessageReceived(SocketMessage arg)
+    internal static Task OnDiscordMessageReceived(SocketMessage arg)
     {
         Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Channel.Name}: {arg.Content}");
-        await HandleDiscordMessage(arg);
+        HandleDiscordMessage(arg);
+        return Task.CompletedTask;
     }
 
     private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
@@ -91,30 +93,46 @@ internal static class MessageHandler
         }
     }
 
-    private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
+    private static void HandleDiscordMessage(SocketMessage socketMessage)
     {
         string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content;
         ulong channelID = socketMessage.Channel.Id;
         string author = socketMessage.Author.Username;
-        await Task.Run(() =>
+        if (content.Length < 5
+        && socketMessage.Embeds.Count > 0)
         {
-            if (channelID == Config.Discord.NewsChannelID
-            && author.Contains("#api-announcements"))
-            {
-                SendColoredMessage("pajlada",
-                                   "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty),
-                                   ChatColor.BlueViolet);
-            }
-            if (channelID == Config.Discord.NewsChannelID
-            && author.Contains("7TV #news"))
-            {
-                SendColoredMessage("pajlada", "7tvM 📣 " + content, ChatColor.CadetBlue);
-            }
-            if (channelID == Config.Discord.NewsChannelID)
-            {
-                SendColoredMessage(Config.RelayChannel, $"New announcement from {socketMessage.Author} B) 📢 {content}", ChatColor.Blue); 
-            }
-        });
+            int embedCount = socketMessage.Embeds.Count;
+            Embed embed = socketMessage.Embeds.First();
+            content = $"{embed.Title} " +
+                $"{(embed.Url.Length > 0 ? $"( {embed.Url} )" : string.Empty)} " +
+                $"{(embedCount > 1 ? $"[+{embedCount - 1} embed(s)]" : string.Empty)}";
+        }
+        else if (content.Length >= 5
+        && content.Length <= 450
+        && socketMessage.Embeds.Count > 0)
+        {
+            int embedCount = socketMessage.Embeds.Count;
+            content += $"[+{embedCount} embed(s)]";
+        }
+
+        
+        if (channelID == Config.Discord.NewsChannelID
+        && author.Contains("#api-announcements"))
+        {
+            SendColoredMessage("pajlada",
+                                "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty),
+                                ChatColor.BlueViolet);
+        }
+        if (channelID == Config.Discord.NewsChannelID
+        && author.Contains("7TV #news"))
+        {
+            SendColoredMessage("pajlada", "7tvM 📣 " + content, ChatColor.CadetBlue);
+        }
+        if (channelID == Config.Discord.NewsChannelID)
+        {
+            SendColoredMessage(Config.RelayChannel, $"New announcement from {socketMessage.Author} B) 📢 {content}", ChatColor.Blue); 
+        }
+        
     }
 } // class
 
