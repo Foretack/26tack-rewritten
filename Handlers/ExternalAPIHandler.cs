@@ -159,7 +159,6 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
-
     public static async Task<VallisCycle?> GetVallisCycle()
     {
         HttpClient requests = new HttpClient();
@@ -179,7 +178,6 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
-
     public static async Task<CambionCycle?> GetCambionCycle()
     {
         HttpClient requests = new HttpClient();

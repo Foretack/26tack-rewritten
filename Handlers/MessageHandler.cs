@@ -93,24 +93,26 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
     {
-        string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content; 
+        string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content;
+        ulong channelID = socketMessage.Channel.Id;
+        string author = socketMessage.Author.Username;
         await Task.Run(() =>
         {
-            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
-            && socketMessage.Author.Username.Contains("#api-announcements"))
+            if (channelID == Config.Discord.NewsChannelID
+            && author.Contains("#api-announcements"))
             {
                 SendColoredMessage("pajlada",
                                    "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty),
                                    ChatColor.BlueViolet);
             }
-            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID
-            && socketMessage.Author.Username.Contains("7TV #news"))
+            if (channelID == Config.Discord.NewsChannelID
+            && author.Contains("7TV #news"))
             {
                 SendColoredMessage("pajlada", "7tvM 📣 " + content, ChatColor.CadetBlue);
             }
-            if (socketMessage.Channel.Id == Config.Discord.NewsChannelID)
+            if (channelID == Config.Discord.NewsChannelID)
             {
-                SendColoredMessage(Config.RelayChannel, $"New announcement from {socketMessage.Author} B) 📢: {content}", ChatColor.Blue); 
+                SendColoredMessage(Config.RelayChannel, $"New announcement from {socketMessage.Author} B) 📢 {content}", ChatColor.Blue); 
             }
         });
     }

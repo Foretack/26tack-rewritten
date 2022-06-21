@@ -7,6 +7,7 @@ public static class ObjectCache
     public static void Clear() { CachedObjects.Clear(); }
     public static void Put(string key, object obj, int cacheTime)
     {
+        if (cacheTime <= 0) return;
         bool s = CachedObjects.TryAdd(key, obj);
         if (!s) return;
         Log.Debug($"Cached object with key \"{key}\" for {cacheTime}s");
