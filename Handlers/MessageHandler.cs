@@ -95,27 +95,29 @@ internal static class MessageHandler
 
     private static void HandleDiscordMessage(SocketMessage socketMessage)
     {
-        string content = socketMessage.Content.Length >= 475 ? socketMessage.Content[..470]+"..." : socketMessage.Content;
+        string content = socketMessage.Content;
         ulong channelID = socketMessage.Channel.Id;
         string author = socketMessage.Author.Username;
+        var embeds = socketMessage.Embeds;
+        
         if (content.Length < 5
-        && socketMessage.Embeds.Count > 0)
+        && embeds.Count > 0)
         {
-            int embedCount = socketMessage.Embeds.Count;
-            Embed embed = socketMessage.Embeds.First();
+            int embedCount = embeds.Count;
+            Embed embed = embeds.First();
             content = $"{embed.Title} " +
-                $"{(embed.Url.Length > 0 ? $"( {embed.Url} )" : string.Empty)} " +
+                $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
                 $"{(embedCount > 1 ? $"[+{embedCount - 1} embed(s)]" : string.Empty)}";
         }
         else if (content.Length >= 5
         && content.Length <= 450
-        && socketMessage.Embeds.Count > 0)
+        && embeds.Count > 0)
         {
-            int embedCount = socketMessage.Embeds.Count;
+            int embedCount = embeds.Count;
             content += $"[+{embedCount} embed(s)]";
         }
 
-        
+        content = content.Length >= 450 ? content[..450] + "..." : content; 
         if (channelID == Config.Discord.NewsChannelID
         && author.Contains("#api-announcements"))
         {
