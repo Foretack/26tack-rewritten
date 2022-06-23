@@ -7,6 +7,7 @@ using IntervalTimer = System.Timers.Timer;
 namespace Tack.Handlers;
 internal static class EventsHandler
 {
+    public static 
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
     public static void Start()
@@ -27,7 +28,7 @@ internal static class EventsHandler
         WarframeNewsObj[]? news = await ExternalAPIHandler.GetWarframeNews();
 
         if (baro is null || news is null) return;
-        // Don't trigger anything in first 30 minutes
+        // Don't trigger anything in first 10 minutes
         if ((DateTime.Now - C.StartupTime).TotalMinutes < 10)
         {
             BaroActive = baro.Active;
@@ -71,3 +72,5 @@ internal static class EventsHandler
         LatestNews = news[0];
     }
 }
+
+public record Trigger(string Type, string Source, string SourceShort, string Destination, string Formatting, string Args);
