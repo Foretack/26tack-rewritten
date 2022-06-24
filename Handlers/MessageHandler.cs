@@ -97,7 +97,7 @@ internal static class MessageHandler
     {
         string content = socketMessage.Content;
         ulong channelID = socketMessage.Channel.Id;
-        string author = socketMessage.Author.Username;
+        string author = socketMessage.Author.Username.StripDescriminator();
         var embeds = socketMessage.Embeds;
         
         if (content.Length < 5
@@ -117,7 +117,7 @@ internal static class MessageHandler
             content += $"[+{embedCount} embed(s)]";
         }
 
-        content = content.Length >= 450 ? content[..450] + "..." : content; 
+        content = content.Length >= 425 ? content[..425] + "..." : content; 
         if (channelID == Config.Discord.NewsChannelID
         && author.Contains("#api-announcements"))
         {

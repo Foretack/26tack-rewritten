@@ -7,7 +7,7 @@ using IntervalTimer = System.Timers.Timer;
 namespace Tack.Handlers;
 internal static class EventsHandler
 {
-    public static 
+    public static List<Trigger> Triggers { private get; set; } = new List<Trigger>();
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
     public static void Start()
