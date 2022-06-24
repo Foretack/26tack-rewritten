@@ -88,7 +88,7 @@ internal static class MessageHandler
         }
         if (Regexes.Mention.IsMatch(message))
         {
-            string msg = $"`[{DateTime.Now.ToLocalTime()}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
+            string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
             await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
         }
     }
