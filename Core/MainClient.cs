@@ -1,14 +1,13 @@
 ﻿using Serilog;
-using Tack.Handlers;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
-using TwitchLib.Communication.Models;
 using TwitchLib.Communication.Events;
+using TwitchLib.Communication.Models;
+using C = Tack.Core.Core;
 
 namespace Tack.Core;
-
 public static class MainClient
 {
     public static bool Connected { get; private set; } = false;
@@ -37,12 +36,10 @@ public static class MainClient
     private static void Connect()
     {
         Client.Connect();
-        Client.OnConnectionError += (s, e) 
-            => Log.Warning($"MainClient encountered a connection error: {e.Error.Message}");
         Client.OnConnected += ClientConnectedEvent;
         Client.OnDisconnected += ClientDisconnectedEvent;
-        Client.OnReconnected += async (s, e) 
-            => await Reconnect();
+        Client.OnError += ClientErrorEvent;
+        Client.OnConnectionError += ClientConnectionErrorEvent;
     }
 
     private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
@@ -51,18 +48,18 @@ public static class MainClient
         Connected = true;
     }
 
-    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
+    private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
     {
-        Log.Warning($"[Main] Disconnected");
-        Connected = false;
-        Client.Reconnect();
+        C.RestartProcess(nameof(ClientConnectionErrorEvent));
     }
 
-    private static async Task Reconnect()
+    private static void ClientErrorEvent(object? sender, OnErrorEventArgs e)
     {
-        Client.JoinChannel(Config.RelayChannel);
-        Client.SendMessage(Config.RelayChannel, $"ppCircle Reconnecting...");
-        Log.Information($"MainClient has triggered {typeof(ChannelHandler)} once more!");
-        await ChannelHandler.Connect(true);
+        C.RestartProcess(nameof(ClientErrorEvent));
+    }
+
+    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
+    {
+        C.RestartProcess(nameof(ClientDisconnectedEvent));
     }
 }

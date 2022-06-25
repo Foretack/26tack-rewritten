@@ -10,8 +10,8 @@ public static class Core
 {
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
-    public static string AssemblyName { get; } = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(AssemblyName)} can not be null.");
 
+    private static string AssemblyName { get; } = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(AssemblyName)} can not be null.");
     public static async Task<int> Main()
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
@@ -31,11 +31,14 @@ public static class Core
         EventsHandler.Start();
         await DiscordClient.Connect();
 
+        int seconds = 0;
         while (!(AnonymousClient.Connected 
         && DiscordClient.Connected 
         && MainClient.Connected))
         {
             await Task.Delay(1000);
+            seconds++;
+            if (seconds >= 10) RestartProcess("startup timed out");
         }
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
@@ -48,9 +51,9 @@ public static class Core
     {
         Log.Fatal($"The program is restarting...");
         Db db = new Db();
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        #pragma warning disable CS4014
         db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        #pragma warning restore CS4014
         Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
