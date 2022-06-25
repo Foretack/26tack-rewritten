@@ -2,6 +2,7 @@
 using Tack.Interfaces;
 using Tack.Models;
 using Db = Tack.Database.Database;
+using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
 internal class Debug : IChatCommand
@@ -30,6 +31,11 @@ internal class Debug : IChatCommand
             if (args.Length == 2) message = string.Join(" ", args[1..]);
             bool s = await db.LogException(new TestException(message));
             MessageHandler.SendMessage(channel, s.ToString());
+            return;
+        }
+        if (args[0] == "restart")
+        {
+            C.RestartProcess($"manual restart from user `{user}`");
             return;
         }
     }

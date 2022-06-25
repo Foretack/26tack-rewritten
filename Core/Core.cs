@@ -44,11 +44,13 @@ public static class Core
         return 0;
     }
 
-    public static void RestartProcess()
+    public static void RestartProcess(string triggerSource)
     {
         Log.Fatal($"The program is restarting...");
         Db db = new Db();
-        db.LogException(new ApplicationException("PROGRAM RESTARTED")).RunSynchronously();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
