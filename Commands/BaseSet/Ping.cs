@@ -25,8 +25,8 @@ internal class Ping : IChatCommand
         string uptimeString = uptime.TotalDays >= 1 ? $"{uptime:d'd 'h'h '}" : $"{uptime:h'h 'm'm 's's '}";
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} {latency}ms " +
-            $"-- Memory: {C.GetMemoryUsage()}MB " +
-            $"-- Uptime: {uptimeString}");
+            $"◆ Memory: {C.GetMemoryUsage()}MB " +
+            $"◆ Uptime: {uptimeString}");
         return Task.CompletedTask;
     }
 }

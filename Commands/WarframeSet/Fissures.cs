@@ -71,7 +71,7 @@ internal class Fissures : IChatCommand
             .Where(x => includeStorms ? x.tierNum == tierNum : x.tierNum == tierNum && !x.isStorm)
             .Select(m => $"{m.enemy} {m.missionType} ({m.eta})")
             .ToArray();
-        string mString = string.Join(" -- ", missions) + " 🥜";
+        string mString = string.Join(" ◯ ", missions) + " 🥜";
         return mString;
     }
 }

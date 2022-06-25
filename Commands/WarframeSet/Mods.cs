@@ -41,8 +41,8 @@ internal class Mods : IChatCommand
         int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.fusionLimit;
         if (level > mod.fusionLimit) level = mod.fusionLimit;
         string modString = $"{mod.type} \"{mod.name}\" " +
-            $"-- [Rank:{level}/{mod.fusionLimit}] drain:{mod.baseDrain + level} " +
-            $"-- {string.Join(" | ", mod.levelStats[level].stats)} ";
+            $"▣ [Rank:{level}/{mod.fusionLimit}] drain:{mod.baseDrain + level} " +
+            $"▣ {string.Join(" | ", mod.levelStats[level].stats)} ";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
         ObjectCache.Put(modName + "_modobj", mod, 150);

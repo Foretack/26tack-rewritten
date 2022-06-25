@@ -37,7 +37,7 @@ internal class Alerts : IChatCommand
             .ToArray();
 
         ab.Append($"{alerts.Length} Alert(s) 🡺 ")
-            .Append(string.Join(" -- ", rewards));
+            .Append(string.Join(" ● ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
         ObjectCache.Put("alerts_wf", alerts, 150);

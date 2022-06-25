@@ -38,8 +38,8 @@ internal class SteelPath : IChatCommand
         }
 
         string timeLeftString = timeLeft.TotalDays >= 1 ? $"{timeLeft:d'd'h'h'}" : $"{timeLeft:h'h'm'm's's'}";
-        string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) --";
-        string nextInRotationString = $"🏹 Next in rotation: {rewards.rotation[0].name}";
+        string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) 🏹 ●";
+        string nextInRotationString = $" Next in rotation: {rewards.rotation[0].name}";
         MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➡ in: {timeLeftString}");
         ObjectCache.Put("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }
