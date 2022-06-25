@@ -192,27 +192,20 @@ internal static class StreamMonitor
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
-            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! They have streamed for: {uptimeString}",
+            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! {uptimeString}",
             ChatColor.GoldenRod);
     }
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
         Stream current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
-        if (StreamData[e.Channel].Title != e.Stream.Title)
+        if (StreamData[e.Channel].Title != e.Stream.Title
+        || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
             StreamData[e.Channel] = current;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} 📝 @{e.Channel} changed their title: {e.Stream.Title}",
-                ChatColor.DodgerBlue);
-        }
-        if (StreamData[e.Channel].GameName != e.Stream.GameName)
-        {
-            StreamData[e.Channel] = current;
-            MessageHandler.SendColoredMessage(
-                Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} 🎮 @{e.Channel} is now playing: {e.Stream.GameName}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- ",
                 ChatColor.DodgerBlue);
         }
     }
