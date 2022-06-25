@@ -1,4 +1,6 @@
-﻿using Serilog;
+﻿using System.Diagnostics;
+using System.Reflection;
+using Serilog;
 using Serilog.Core;
 using Tack.Handlers;
 using Db = Tack.Database.Database;
@@ -8,6 +10,7 @@ public static class Core
 {
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
+    public static string AssemblyName { get; } = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(AssemblyName)} can not be null.");
 
     public static async Task<int> Main()
     {
@@ -39,5 +42,19 @@ public static class Core
 
         Console.ReadLine();
         return 0;
+    }
+
+    public static void RestartProcess()
+    {
+        Log.Fatal($"The program is restarting...");
+        Db db = new Db();
+        db.LogException(new ApplicationException("PROGRAM RESTARTED")).RunSynchronously();
+        Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
+        Environment.Exit(0);
+    }
+
+    public static float GetMemoryUsage()
+    {
+        return (float)Math.Truncate(Process.GetCurrentProcess().PrivateMemorySize64 / Math.Pow(10, 6) * 100) / 100;
     }
 }
