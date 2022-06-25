@@ -21,4 +21,13 @@ internal static class Formatting
         // If someone's name has a '#' and there isn't a descriminator for whatever reason
         return str;
     }
+
+    public static string StripSymbols(this string str)
+    {
+        char nothing = '\0';
+        return str
+            .Replace('*', nothing)
+            .Replace('_', nothing)
+            .Replace('|', nothing);
+    }
 }
