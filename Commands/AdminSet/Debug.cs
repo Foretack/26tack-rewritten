@@ -1,8 +1,7 @@
-﻿using System.Reflection;
-using Tack.Handlers;
+﻿using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
-using Serilog;
+using Db = Tack.Database.Database;
 
 namespace Tack.Commands.AdminSet;
 internal class Debug : IChatCommand
@@ -24,33 +23,21 @@ internal class Debug : IChatCommand
 
         if (args.Length == 0) return;
 
-        try
+        if (args[0] == "throw")
         {
-            await Task.Run(() =>
-            {
-                string[] splitCall = args[0].Split('.');
-
-                Type obj = Type.GetType(splitCall[0])!;
-                MethodInfo method = obj.GetMethod(GetMethodName(splitCall[1]))!;
-                method.Invoke(obj, new object[] { user, channel });
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "xd");
+            Db db = new Db();
+            string message = "none";
+            if (args.Length == 2) message = string.Join(" ", args[1..]);
+            bool s = await db.LogException(new TestException(message));
+            MessageHandler.SendMessage(channel, s.ToString());
+            return;
         }
     }
 
-    private string GetMethodName(string methodString)
+    public class TestException : Exception
     {
-        int i = methodString.IndexOf('(');
-        return methodString.Substring(0, i);
-    }
-
-    private string GetMethodFirstParam(string methodString)
-    {
-        int start = methodString.IndexOf('(');
-        int end = methodString.IndexOf(')');
-        return methodString.Substring(start, end);
+        public TestException() { }
+        public TestException(string message) : base(message) { }
+        public TestException(string message, Exception inner) : base(message, inner) { }
     }
 }

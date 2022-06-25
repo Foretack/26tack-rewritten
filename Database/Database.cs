@@ -11,8 +11,8 @@ internal class Database : DbConnection
         var q = await
             Insert()
             .Table("errors")
-            .Schema("data", "time")
-            .Values($"'{exception.FormatException()}'", $"CURRENT_TIMESTAMP")
+            .Schema("data")
+            .Values($"'{exception.FormatException()}'")
             .TryExecute();
 
         if (!q.Success)
