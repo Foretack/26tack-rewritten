@@ -38,6 +38,12 @@ internal class Debug : IChatCommand
             C.RestartProcess($"manual restart from user `{user}`");
             return;
         }
+        if (args[0] == "pull")
+        {
+            string output = await C.GitPull() ?? "Command execution failed, check console :(";
+            MessageHandler.SendMessage(channel, output);
+            return;
+        }
     }
 
     public class TestException : Exception

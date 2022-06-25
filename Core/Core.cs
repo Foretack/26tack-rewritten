@@ -3,6 +3,8 @@ using System.Reflection;
 using Serilog;
 using Serilog.Core;
 using Tack.Handlers;
+using CliWrap;
+using CliWrap.Buffered;
 using Db = Tack.Database.Database;
 
 namespace Tack.Core;
@@ -61,5 +63,19 @@ public static class Core
     public static float GetMemoryUsage()
     {
         return (float)Math.Truncate(Process.GetCurrentProcess().PrivateMemorySize64 / Math.Pow(10, 6) * 100) / 100;
+    }
+
+    public static async Task<string?> GitPull()
+    {
+        try
+        {
+            var pullResults = await Cli.Wrap("git").WithArguments("pull").ExecuteBufferedAsync();
+            return pullResults.StandardOutput.Split('\n')[^2];
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"git pull command failed");
+            return null;
+        }
     }
 }
