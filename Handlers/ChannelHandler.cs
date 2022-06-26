@@ -13,7 +13,7 @@ namespace Tack.Handlers;
 internal static class ChannelHandler
 {
     private static readonly Database.Database Db = new Database.Database();
-
+    #region Properties
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
@@ -22,7 +22,9 @@ internal static class ChannelHandler
 
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
     private static bool IsInProgress { get; set; } = false;
+    #endregion
 
+    #region Initialization
     internal static async Task Connect(bool isReconnect)
     {
         if (IsInProgress) return;
@@ -58,6 +60,7 @@ internal static class ChannelHandler
         IsInProgress = false;
         StreamMonitor.Start();
     }
+    #endregion
 
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
@@ -119,7 +122,8 @@ internal static class ChannelHandler
         AnonymousClient.Client.OnLeftChannel += AnonOnLeftChannel;
         AnonymousClient.Client.OnFailureToReceiveJoinConfirmation += AnonOnFailedJoin;
     }
-
+    
+    #region Client events
     private static void AnonOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {
         Log.Warning($"[Anon] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
@@ -131,7 +135,6 @@ internal static class ChannelHandler
         AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
     }
 
-    // This will crash if FetchedChannels doesn't have the channel
     private static void AnonOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
         Log.Information($"[Anon] Joined channel {e.Channel}");
@@ -158,16 +161,20 @@ internal static class ChannelHandler
         MainJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
         MainJoinedChannelNames.Add(e.Channel);
     }
+    #endregion
 
     public record Channel(string Name, int Priority, bool Logged);
 }
 
 internal static class StreamMonitor
 {
+    #region Properties
     public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
     private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
+    #endregion
 
+    #region Controls
     public static void Start()
     {
         List<ChannelHandler.Channel> Channels = ChannelHandler.FetchedChannels;
@@ -184,7 +191,9 @@ internal static class StreamMonitor
         MonitoringService.Start();
     }
     public static void Stop() { MonitoringService.Stop(); }
+    #endregion
 
+    #region Monitor events
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
         TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started;
@@ -224,6 +233,7 @@ internal static class StreamMonitor
     {
         MessageHandler.SendMessage(Config.RelayChannel, $"OBSOLETE Hello");
     }
+    #endregion
 
     internal record Stream(string Username, bool IsOnline, string Title, string GameName, DateTime Started);
 }

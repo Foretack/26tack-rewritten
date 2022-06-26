@@ -79,6 +79,7 @@ internal static class ExternalAPIHandler
         }
     }
 
+    #region Warframe
     private const string WarframeBaseUrl = "https://api.warframestat.us/pc";
     public static async Task<Fissure[]?> GetFissures()
     {
@@ -394,4 +395,5 @@ internal static class ExternalAPIHandler
             return null;
         }
     }
+    #endregion
 }

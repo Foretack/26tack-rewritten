@@ -9,10 +9,15 @@ using IntervalTimer = System.Timers.Timer;
 namespace Tack.Handlers;
 internal static class EventsHandler
 {
+    #region Properties
     public static List<Event> Triggers { private get; set; } = new List<Event>();
+
     private static AsyncEnumerable<Event>? Events { get; set; }
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
+    #endregion
+
+    #region Initialization
     public static async Task Start()
     {
         IntervalTimer timer = new IntervalTimer();
@@ -25,6 +30,20 @@ internal static class EventsHandler
 
         Log.Debug($"{typeof(EventsHandler)} started");
     }
+
+    private static async Task LoadEvents()
+    {
+        Db db = new Db();
+        var e = await db.LoadEvents();
+        if (e is null)
+        {
+            Events = null;
+            Log.Error("Loading events returned null");
+            return;
+        }
+        Events = e;
+    }
+    #endregion
 
     public static async ValueTask CheckTrigger(Trigger trigger)
     {
@@ -44,19 +63,6 @@ internal static class EventsHandler
                 }
             });
         });
-    }
-
-    private static async Task LoadEvents()
-    {
-        Db db = new Db();
-        var e = await db.LoadEvents();
-        if (e is null)
-        {
-            Events = null;
-            Log.Error("Loading events returned null");
-            return;
-        }
-        Events = e;
     }
 
     #region Warframe stuff

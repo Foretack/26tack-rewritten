@@ -8,9 +8,12 @@ using Tack.Commands;
 namespace Tack.Handlers;
 internal static class CommandHandler
 {
+    #region Properties
     public static Dictionary<string, ChatCommandHandler> Handlers { get; } = new Dictionary<string, ChatCommandHandler>();
     public static List<string> Prefixes { get; } = new List<string>();
+    #endregion
 
+    #region Initialization
     public static void Initialize()
     {
         RegisterHandler(new BaseHandler());
@@ -24,6 +27,7 @@ internal static class CommandHandler
         Prefixes.Add(handler.Prefix);
         Log.Verbose($"Loaded Handler {handler.GetType()}");
     }
+    #endregion
 
     public static async ValueTask HandleCommand(CommandContext ctx)
     {

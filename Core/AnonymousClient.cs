@@ -10,9 +10,13 @@ using C = Tack.Core.Core;
 namespace Tack.Core;
 internal static class AnonymousClient
 {
+    #region Properties
     public static bool Connected { get; set; } = false;
 
     internal static TwitchClient Client { get; private set; } = new TwitchClient();
+    #endregion
+
+    #region Initialization
     public static void Initialize()
     {
         ClientOptions options = new ClientOptions();
@@ -41,7 +45,9 @@ internal static class AnonymousClient
         Client.OnError += ClientOnErrorEvent;
         Client.OnConnectionError += ClientConnectionErrorEvent;
     }
+    #endregion
 
+    #region Client events
     private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         Log.Information("[Anon] Connected");
@@ -62,4 +68,5 @@ internal static class AnonymousClient
     {
         C.RestartProcess(nameof(ClientDisconnectedEvent));
     }
+    #endregion
 }

@@ -10,10 +10,14 @@ using Db = Tack.Database.Database;
 namespace Tack.Core;
 public static class Core
 {
+    #region Properties
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 
     private static string AssemblyName { get; } = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(AssemblyName)} can not be null.");
+    #endregion
+
+    #region Main
     public static async Task<int> Main()
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
@@ -48,7 +52,9 @@ public static class Core
         Console.ReadLine();
         return 0;
     }
+    #endregion
 
+    #region Process methods
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal($"The program is restarting...");
@@ -64,6 +70,7 @@ public static class Core
     {
         return (float)Math.Truncate(Process.GetCurrentProcess().PrivateMemorySize64 / Math.Pow(10, 6) * 100) / 100;
     }
+    #endregion
 
     public static async Task<string?> GitPull()
     {

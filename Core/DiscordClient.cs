@@ -6,10 +6,12 @@ using Serilog;
 namespace Tack.Core;
 internal static class DiscordClient
 {
+    #region Properties
     public static bool Connected { get; private set; } = false;
+    public static DiscordSocketClient Client { get; } = new DiscordSocketClient();
+    #endregion
 
-    internal static DiscordSocketClient Client { get; } = new DiscordSocketClient();
-
+    #region Initialization
     public static async Task Connect()
     {
         await Client.LoginAsync(TokenType.Bot, Config.Auth.DiscordToken);
@@ -23,7 +25,9 @@ internal static class DiscordClient
         client.Connected += OnConnected;
         client.Disconnected += OnDisconnected;
     }
+    #endregion
 
+    #region Client events
     private static Task OnDisconnected(Exception arg)
     {
         Log.Warning("[Discord] Disconnected");
@@ -37,4 +41,5 @@ internal static class DiscordClient
         Connected = true;
         return Task.CompletedTask;
     }
+    #endregion
 }

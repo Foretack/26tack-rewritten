@@ -10,9 +10,12 @@ using C = Tack.Core.Core;
 namespace Tack.Core;
 public static class MainClient
 {
+    #region Properties
     public static bool Connected { get; private set; } = false;
+    public static TwitchClient Client { get; private set; } = new TwitchClient();
+    #endregion
 
-    internal static TwitchClient Client { get; private set; } = new TwitchClient();
+    #region Initialization
     public static void Initialize()
     {
         ClientOptions options = new ClientOptions();
@@ -41,7 +44,9 @@ public static class MainClient
         Client.OnError += ClientErrorEvent;
         Client.OnConnectionError += ClientConnectionErrorEvent;
     }
+    #endregion
 
+    #region Client events
     private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
     {
         Log.Information($"[Main] Connected");
@@ -62,4 +67,5 @@ public static class MainClient
     {
         C.RestartProcess(nameof(ClientDisconnectedEvent));
     }
+    #endregion
 }

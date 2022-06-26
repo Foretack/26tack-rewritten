@@ -13,15 +13,20 @@ using Discord;
 namespace Tack.Handlers;
 internal static class MessageHandler
 {
+    #region Properties
     private static ChatColor CurrentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    #endregion
 
+    #region Initialization
     internal static void Initialize()
     {
         AnonymousClient.Client.OnMessageReceived += OnMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }
+    #endregion
 
+    #region Sending
     public static void SendMessage(string channel, string message) { MainClient.Client.SendMessage(channel, message); }
     public static void SendColoredMessage(string channel, string message, ChatColor color)
     {
@@ -40,30 +45,32 @@ internal static class MessageHandler
 
         await channel.SendMessageAsync(message);
     }
+    private static void OnMessageSent(object? sender, OnMessageSentArgs e)
+    {
+        Log.Debug($"Sent message: {e.SentMessage.Message}");
+    }
+    #endregion
 
+    #region Receiving
     internal static Task OnDiscordMessageReceived(SocketMessage arg)
     {
         Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Channel.Name}: {arg.Content}");
         HandleDiscordMessage(arg);
         return Task.CompletedTask;
     }
+    private static void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
+    {
+        Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
+        HandleIrcMessage(e.ChatMessage).SafeFireAndForget(onException: ex => Log.Error(ex, "Failed to handle message"));
+    }
+    #endregion
 
     private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
     {
         Log.Warning($"Message throttled: {e.Message} ({e.SentMessageCount} sent in {e.AllowedInPeriod})");
     }
 
-    private static void OnMessageSent(object? sender, OnMessageSentArgs e)
-    {
-        Log.Debug($"Sent message: {e.SentMessage.Message}");
-    }
-
-    private static void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
-    {
-        Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
-        HandleIrcMessage(e.ChatMessage).SafeFireAndForget(onException: ex => Log.Error(ex, "Failed to handle message"));
-    }
-
+    #region Handling
     private static async ValueTask HandleIrcMessage(ChatMessage ircMessage)
     {
         string message = ircMessage.Message;
@@ -136,6 +143,7 @@ internal static class MessageHandler
         }
         
     }
+    #endregion
 } // class
 
 internal enum ChatColor

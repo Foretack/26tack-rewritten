@@ -8,9 +8,13 @@ using TwitchLib.Api.Helix.Models.Users.GetUsers;
 namespace Tack.Handlers;
 internal static class TwitchAPIHandler
 {
+    #region Properties
     public static readonly TwitchAPI API = new TwitchAPI(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
 
     private static readonly Helix Helix = API.Helix;
+    #endregion
+
+    #region Users
     internal static async Task<User?> GetUsers(string username)
     {
         User[]? u = await GetUsers(new List<string> { username });
@@ -50,4 +54,5 @@ internal static class TwitchAPIHandler
             return null;
         }
     }
+    #endregion
 }
