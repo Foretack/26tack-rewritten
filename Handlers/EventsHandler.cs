@@ -1,26 +1,65 @@
-﻿using Serilog;
+﻿using Dasync.Collections;
+using Serilog;
 using Tack.Json;
 using Tack.Utils;
 using C = Tack.Core.Core;
+using Db = Tack.Database.Database;
 using IntervalTimer = System.Timers.Timer;
 
 namespace Tack.Handlers;
 internal static class EventsHandler
 {
-    public static List<Trigger> Triggers { private get; set; } = new List<Trigger>();
+    public static List<Event> Triggers { private get; set; } = new List<Event>();
+    private static AsyncEnumerable<Event>? Events { get; set; }
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
-    public static void Start()
+    public static async Task Start()
     {
         IntervalTimer timer = new IntervalTimer();
         timer.Interval = TimeSpan.FromMinutes(2.5).TotalMilliseconds;
         timer.AutoReset = true;
         timer.Enabled = true;
-
         timer.Elapsed += WarframeUpdates;
+
+        await LoadEvents();
+
         Log.Debug($"{typeof(EventsHandler)} started");
     }
 
+    public static async ValueTask CheckTrigger(Trigger trigger)
+    {
+        if (Events is null) return;
+
+        await Events.ForEachAsync(async e =>
+        {
+            await Task.Run(() =>
+            {
+                if (trigger.Source.StartsWith("TWITCH"))
+                {
+                    //
+                }
+                else if (trigger.Source.StartsWith("DISCORD"))
+                {
+                    //
+                }
+            });
+        });
+    }
+
+    private static async Task LoadEvents()
+    {
+        Db db = new Db();
+        var e = await db.LoadEvents();
+        if (e is null)
+        {
+            Events = null;
+            Log.Error("Loading events returned null");
+            return;
+        }
+        Events = e;
+    }
+
+    #region Warframe stuff
     private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
     {
         VoidTrader? baro = ObjectCache.Get<VoidTrader>("baro_data")
@@ -71,6 +110,8 @@ internal static class EventsHandler
         // Set new news as latest
         LatestNews = news[0];
     }
+    #endregion
 }
 
-public record Trigger(string Type, string Source, string SourceShort, string Destination, string Formatting, string Args);
+public record Event(string Type, string Identifier, string Source, string? SourceShort, string Destination, string? Formatting, string? Args);
+public record struct Trigger(string Source, string? Content);

@@ -30,7 +30,7 @@ public static class Core
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
-        EventsHandler.Start();
+        await EventsHandler.Start();
         await DiscordClient.Connect();
 
         int seconds = 0;

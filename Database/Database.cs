@@ -2,6 +2,7 @@
 using Tack.Models;
 using Tack.Utils;
 using Serilog;
+using Dasync.Collections;
 
 namespace Tack.Database;
 internal class Database : DbConnection
@@ -175,5 +176,35 @@ internal class Database : DbConnection
             .TryExecute();
 
         return q.Success;
+    }
+
+    public async Task<AsyncEnumerable<Event>?> LoadEvents()
+    {
+        var q = await
+            Select()
+            .Table("event_triggers")
+            .Schema("event_type", "identifier", "event_source", "source_short", "destination", "formatting", "args")
+            .Where("args not like '%DISABLED%'")
+            .TryExecute();
+
+        if (!q.Success) return null;
+
+        AsyncEnumerable<Event> events = new AsyncEnumerable<Event>(async y =>
+        {
+            foreach (var row in q.Results!)
+            {
+                Event e = new Event(
+                    (string)row[0],
+                    (string)row[1],
+                    (string)row[2],
+                    (string?)row[3],
+                    (string)row[4],
+                    (string?)row[5],
+                    (string?)row[6]);
+                await y.ReturnAsync(e);
+            }
+        });
+
+        return events;
     }
 }
