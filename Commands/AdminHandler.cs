@@ -19,5 +19,6 @@ internal class AdminHandler : ChatCommandHandler
         AddCommand(new Debug());
         AddCommand(new Switch());
         AddCommand(new Exit());
+        AddCommand(new Update());
     }
 }
