@@ -60,6 +60,7 @@ internal static class EventsHandler
 
         await Events.ForEachAsync(async e =>
         {
+            bool skip = false;
             string[] iArgs = e.Identifier.Split(':');
             if (iArgs[0] == "source" && iArgs[1] == "contains")
             {
@@ -74,9 +75,9 @@ internal static class EventsHandler
                         e.Args);
                     await FireEvent(triggeredEvent);
                 }
-                return;
+                skip = true;
             }
-            if (iArgs[0] == "source" && iArgs[1] == "equals")
+            if (iArgs[0] == "source" && iArgs[1] == "equals" && !skip)
             {
                 if (trigger.Source.Equals(iArgs[2]))
                 {
@@ -89,9 +90,9 @@ internal static class EventsHandler
                         e.Args);
                     await FireEvent(triggeredEvent);
                 }
-                return;
+                skip = true;
             }
-            if (iArgs[0] == "content" && iArgs[1] == "contains")
+            if (iArgs[0] == "content" && iArgs[1] == "contains" && !skip)
             {
                 if (trigger.Content is not null && trigger.Content.Contains(iArgs[2]))
                 {
@@ -104,12 +105,13 @@ internal static class EventsHandler
                         e.Args);
                     await FireEvent(triggeredEvent);
                 }
-                return;
+                skip = true;
             }
             if (iArgs[0] == "content"
             && iArgs[1] == "equals"
             && trigger.Content is not null
-            && trigger.Content.Equals(iArgs[2]))
+            && trigger.Content.Equals(iArgs[2])
+            && !skip)
             {
                 Event triggeredEvent = new Event(e.Type,
                     e.Identifier,
