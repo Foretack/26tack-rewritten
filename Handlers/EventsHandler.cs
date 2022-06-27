@@ -10,8 +10,6 @@ namespace Tack.Handlers;
 internal static class EventsHandler
 {
     #region Properties
-    public static List<Event> Triggers { private get; set; } = new List<Event>();
-
     private static AsyncEnumerable<Event>? Events { get; set; }
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
@@ -45,25 +43,103 @@ internal static class EventsHandler
     }
     #endregion
 
+    #region Handling
     public static async ValueTask CheckTrigger(Trigger trigger)
     {
-        if (Events is null) return;
+        if (Events is null || await Events.CountAsync() == 0) return;
+
+        if (trigger.Type is not null)
+        {
+            var matching = await Task.Run(() => Events
+            .WhereAwait(async x => await Task.Run(() => x.Type == trigger.Type))
+            .SelectAwait(async y => await Task.Run(() => y)));
+
+            await matching.ForEachAsync(async m => await FireEvent(m));
+            return;
+        }
 
         await Events.ForEachAsync(async e =>
         {
-            await Task.Run(() =>
+            string[] iArgs = e.Identifier.Split(':');
+            if (iArgs[0] == "source" && iArgs[1] == "contains")
             {
-                if (trigger.Source.StartsWith("TWITCH"))
+                if (trigger.Source.Contains(iArgs[2]))
                 {
-                    //
+                    Event triggeredEvent = new Event(e.Type,
+                        e.Identifier,
+                        trigger.Source,
+                        trigger.Source.ShortenSource(),
+                        e.Destination,
+                        e.Formatting,
+                        e.Args);
+                    await FireEvent(triggeredEvent);
                 }
-                else if (trigger.Source.StartsWith("DISCORD"))
+                return;
+            }
+            if (iArgs[0] == "source" && iArgs[1] == "equals")
+            {
+                if (trigger.Source.Equals(iArgs[2]))
                 {
-                    //
+                    Event triggeredEvent = new Event(e.Type,
+                        e.Identifier,
+                        trigger.Source,
+                        trigger.Source.ShortenSource(),
+                        e.Destination,
+                        e.Formatting,
+                        e.Args);
+                    await FireEvent(triggeredEvent);
                 }
-            });
+                return;
+            }
+            if (iArgs[0] == "content" && iArgs[1] == "contains")
+            {
+                if (trigger.Content is not null && trigger.Content.Contains(iArgs[2]))
+                {
+                    Event triggeredEvent = new Event(e.Type,
+                        e.Identifier,
+                        trigger.Source,
+                        trigger.Source.ShortenSource(),
+                        e.Destination,
+                        e.Formatting,
+                        e.Args);
+                    await FireEvent(triggeredEvent);
+                }
+                return;
+            }
+            if (iArgs[0] == "content"
+            && iArgs[1] == "equals"
+            && trigger.Content is not null
+            && trigger.Content.Equals(iArgs[2]))
+            {
+                Event triggeredEvent = new Event(e.Type,
+                    e.Identifier,
+                    trigger.Source,
+                    trigger.Source.ShortenSource(),
+                    e.Destination,
+                    e.Formatting,
+                    e.Args);
+                await FireEvent(triggeredEvent);
+            }
         });
     }
+
+    private static async ValueTask FireEvent(Event e)
+    {
+        string[] dArgs = e.Destination.Split(':');
+        if (dArgs[0] == "twitch")
+        {
+            //
+        }
+        if (dArgs[0] == "discord")
+        {
+            //
+        }
+        if (dArgs[0] == "db")
+        {
+            //
+        }
+    }
+    #endregion
 
     #region Warframe stuff
     private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
@@ -119,5 +195,60 @@ internal static class EventsHandler
     #endregion
 }
 
+/// <param name="Type"> The type of this event </param>
+/// <param name="Identifier"> 
+/// How this event is identified
+/// <list type="bullet|number|table">
+///    <item>
+///        <term>source:contains:value</term>
+///        <description>Source of the event contains value</description>
+///    </item>
+///    <item>
+///        <term>source:equals:value</term>
+///        <description>Source of the event is equal to value</description>
+///    </item>
+///    <item>
+///        <term>content:contains:value</term>
+///        <description>Content of the event contains value</description>
+///    </item>
+///    <item>
+///        <term>content:equals:value</term>
+///        <description>Content of the event is equal to value</description>
+///    </item>
+///</list>
+/// </param>
+/// <param name="Source"> Where the event comes from </param>
+/// <param name="SourceShort"> Source with nicer formatting </param>
+/// <param name="Destination">
+/// Where to relay the event
+/// <list type="bullet|number|table">
+///    <item>
+///        <term>twitch:channel</term>
+///        <description> Specified channel's chat </description>
+///    </item>
+///    <item>
+///        <term>discord:guildid:channelid</term>
+///        <description> Specified Discord channel </description>
+///    </item>
+///    <item>
+///        <term>db:table</term>
+///        <description> Specified database table </description>
+///    </item>
+///</list>
+/// </param>
+/// <param name="Formatting"> How the event text will be relayed </param>
+/// <param name="Args">
+/// Additional options 
+/// <list type="bullet|number|table">
+///    <item>
+///        <term>chance:number</term>
+///        <description> Only relay event after rolling this chance </description>
+///    </item>
+///    <item>
+///        <term>allow_online:bool</term>
+///        <description> Whether the event can be sent in an online stream or not </description>
+///    </item>
+///</list>
+/// </param>
 public record Event(string Type, string Identifier, string Source, string? SourceShort, string Destination, string? Formatting, string? Args);
-public record struct Trigger(string Source, string? Content);
+public record struct Trigger(string? Type, string Source, string? Content);

@@ -7,6 +7,7 @@ internal static class Formatting
                 $" \n`{exception.InnerException}`\n ->" +
                 $" \n`{exception.StackTrace}`";
     }
+
     public static string FormatDate(DateTime date) { return $"{date.Year}-{date.Month}-{date.Day}"; }
 
     public static string StripDescriminator(this string str)
@@ -29,5 +30,22 @@ internal static class Formatting
             .Replace('*', nothing)
             .Replace('_', nothing)
             .Replace('|', nothing);
+    }
+
+    public static string ShortenSource(this string str)
+    {
+        if (str.StartsWith("channel:"))
+        {
+            return "#" + str.Split(':')[1];
+        }
+        if (str.StartsWith("discord_channel:"))
+        {
+            return "###" + str.Split(':')[1];
+        }
+        if (str.StartsWith("internal:"))
+        {
+            return "<I>" + str.Split(':')[1];
+        }
+        return "@" + str.Split(':')[1];
     }
 }
