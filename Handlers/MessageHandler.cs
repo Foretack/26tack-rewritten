@@ -86,13 +86,6 @@ internal static class MessageHandler
             CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
             await CommandHandler.HandleCommand(ctx);
         }
-        if (channel == "pajlada"
-        && ircMessage.Username == "pajbot"
-        && ircMessage.IsMe
-        && message.StartsWith("pajaS 🚨 ALERT"))
-        {
-            SendMessage("pajlada", "/me ApuApustaja 👉 🚨 this is an alert");
-        }
         if (Regexes.Mention.IsMatch(message))
         {
             string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
