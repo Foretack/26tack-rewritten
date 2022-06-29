@@ -27,7 +27,7 @@ internal class Update : IChatCommand
 
         string? pullResult = await C.GitPull();
 
-        if (pullResult is null || !pullResult.Contains(" changed, "))
+        if (pullResult is null)
         {
             MessageHandler.SendMessage(channel, $"something went wrong CaitlynS");
             return;
