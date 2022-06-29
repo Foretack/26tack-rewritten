@@ -77,7 +77,8 @@ public static class Core
         try
         {
             var pullResults = await Cli.Wrap("git").WithArguments("pull").ExecuteBufferedAsync();
-            return pullResults.StandardOutput.Split('\n')[^2];
+            return pullResults.StandardOutput.Split('\n')
+                .First(x => x.Contains("files changed") || x.Contains("file changed") || x.Contains("Already up to date"));
         }
         catch (Exception ex)
         {
