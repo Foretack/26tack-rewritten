@@ -13,6 +13,7 @@ internal static class EventsHandler
     private static AsyncEnumerable<Event>? Events { get; set; }
     private static bool BaroActive { get; set; } = false;
     private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
+    private static readonly Random R = new Random();
     #endregion
 
     #region Initialization
@@ -47,99 +48,141 @@ internal static class EventsHandler
     public static async ValueTask CheckTrigger(Trigger trigger)
     {
         if (Events is null || await Events.CountAsync() == 0) return;
-
         if (trigger.Type is not null)
         {
             var matching = await Task.Run(() => Events
             .WhereAwait(async x => await Task.Run(() => x.Type == trigger.Type))
             .SelectAwait(async y => await Task.Run(() => y)));
 
-            await matching.ForEachAsync(async m => await FireEvent(m));
+            await matching.ForEachAsync(async m => await FireEvent(m, trigger.Content ?? string.Empty));
             return;
         }
 
         await Events.ForEachAsync(async e =>
         {
-            bool skip = false;
-            string[] iArgs = e.Identifier.Split(':');
-            if (iArgs[0] == "source" && iArgs[1] == "contains")
+            // Split multiple identifiers
+            string[] siArgs = e.Identifier.Split(",,");
+            // Identifier count
+            int iLength = siArgs.Length;
+            // Amount of identifiers matched
+            int matchCount = 0;
+
+            foreach (string siArg in siArgs)
             {
-                if (trigger.Source.Contains(iArgs[2]))
+                string[] iArgs = siArg.Split(':');
+
+                if (iArgs[0] == "source" && iArgs[1] == "contains")
                 {
-                    Event triggeredEvent = new Event(e.Type,
-                        e.Identifier,
-                        trigger.Source,
-                        trigger.Source.ShortenSource(),
-                        e.Destination,
-                        e.Formatting,
-                        e.Args);
-                    await FireEvent(triggeredEvent);
+                    if (trigger.Source.Contains(iArgs[2])) matchCount++;
+                    continue;
                 }
-                skip = true;
-            }
-            if (iArgs[0] == "source" && iArgs[1] == "equals" && !skip)
-            {
-                if (trigger.Source.Equals(iArgs[2]))
+                if (iArgs[0] == "source" && iArgs[1] == "equals")
                 {
-                    Event triggeredEvent = new Event(e.Type,
-                        e.Identifier,
-                        trigger.Source,
-                        trigger.Source.ShortenSource(),
-                        e.Destination,
-                        e.Formatting,
-                        e.Args);
-                    await FireEvent(triggeredEvent);
+                    if (trigger.Source.Equals(iArgs[2])) matchCount++;
+                    continue;
                 }
-                skip = true;
-            }
-            if (iArgs[0] == "content" && iArgs[1] == "contains" && !skip)
-            {
-                if (trigger.Content is not null && trigger.Content.Contains(iArgs[2]))
+                if (iArgs[0] == "content" && iArgs[1] == "contains")
                 {
-                    Event triggeredEvent = new Event(e.Type,
-                        e.Identifier,
-                        trigger.Source,
-                        trigger.Source.ShortenSource(),
-                        e.Destination,
-                        e.Formatting,
-                        e.Args);
-                    await FireEvent(triggeredEvent);
+                    if (trigger.Content is not null && trigger.Content.Contains(iArgs[2])) matchCount++;
+                    continue;
                 }
-                skip = true;
+                if (iArgs[0] == "content"
+                && iArgs[1] == "equals"
+                && trigger.Content is not null
+                && trigger.Content.Equals(iArgs[2])) matchCount++;
             }
-            if (iArgs[0] == "content"
-            && iArgs[1] == "equals"
-            && trigger.Content is not null
-            && trigger.Content.Equals(iArgs[2])
-            && !skip)
+
+            // The event is fired only when the matched amount is equal to the identifier count
+            // i.e: when each identifier is matched
+            if (matchCount == iLength)
             {
-                Event triggeredEvent = new Event(e.Type,
+                Event triggeredEvent = new Event(
+                    e.Type,
                     e.Identifier,
                     trigger.Source,
                     trigger.Source.ShortenSource(),
                     e.Destination,
                     e.Formatting,
                     e.Args);
-                await FireEvent(triggeredEvent);
-            }
+                await FireEvent(triggeredEvent, trigger.Content ?? string.Empty);
+                Log.Verbose($"Event fired {triggeredEvent}");
+            } 
         });
     }
 
-    private static async ValueTask FireEvent(Event e)
+    private static async ValueTask FireEvent(Event e, string tContent)
     {
         string[] dArgs = e.Destination.Split(':');
         if (dArgs[0] == "twitch")
         {
-            //
+            string channel = dArgs[1];
+            string? message = tContent.WithFormatOf(e).WithArgsOf(e);
+            if (message is null) return;
+            MessageHandler.SendMessage(channel, message);
         }
         if (dArgs[0] == "discord")
         {
-            //
+            ulong guild = ulong.Parse(dArgs[1]);
+            ulong channel = ulong.Parse(dArgs[2]);
+            string? message = tContent.WithFormatOf(e).WithArgsOf(e);
+            if (message is null) return;
+            await MessageHandler.SendDiscordMessage(guild, channel, message);
         }
         if (dArgs[0] == "db")
         {
             //
         }
+    }
+
+    /// <returns> Content string formatted with the specified event's formatting settings </returns>
+    private static string WithFormatOf(this string str, Event e)
+    {
+        if (e.Formatting is null) return str;
+        
+        string text = Options.ParseString("TEXT", str, "->", '|')
+                ?? "<notext>";
+        int embedcount = Options.ParseInt("EMBEDCOUNT", str, "->", '|')
+            ?? 0;
+        string embedtitle = Options.ParseString("EMBEDTITLE", str, "->", '|')
+            ?? "<notitle>";
+        string embeddesc = Options.ParseString("EMBEDDESC", str, "->", '|')
+            ?? "<nodesc>";
+        string embedlink = Options.ParseString("EMBEDLINK", str, "->", '|')
+            ?? "<nolink>";
+        string from = Options.ParseString("FROM", str, "->", '|')
+            ?? "<nofrom>";
+
+        return e.Formatting
+            .Replace("TEXT", text)
+            .Replace("EMBEDCOUNT", embedcount.ToString())
+            .Replace("EMBEDTITLE", embedtitle)
+            .Replace("EMBEDDESC", embeddesc)
+            .Replace("EMBEDLINK", embedlink)
+            .Replace("FROM", from);
+    }
+    private static string? WithArgsOf(this string str, Event e)
+    {
+        if (e.Args is null) return str;
+        string args = e.Args;
+
+        int chance = Options.ParseInt("chance", args, splitter: ';')
+            ?? 100;
+        bool allowOnline = Options.ParseBool("allow_online", args, splitter: ';')
+            ?? true;
+        int charlimit = Options.ParseInt("char_limit", args, splitter: ';')
+            ?? 500;
+
+        int roll = R.Next(100);
+        if (roll > chance) return null;
+
+        string? d = e.Destination.StartsWith("twitch:") 
+            ? e.Destination.Split(':')[1]
+            : null;
+        if (!allowOnline && d is not null && StreamMonitor.StreamData[d].IsOnline) return null;
+
+        if (str.Length > charlimit) return str[..charlimit];
+        
+        return str;
     }
     #endregion
 
@@ -197,6 +240,8 @@ internal static class EventsHandler
     #endregion
 }
 
+// TEXT->|EMBEDCOUNT->|EMBEDTITLE->|EMBEDDESC->|EMBEDLINK->|FROM->|
+
 /// <param name="Type"> The type of this event </param>
 /// <param name="Identifier"> 
 /// How this event is identified
@@ -249,6 +294,10 @@ internal static class EventsHandler
 ///    <item>
 ///        <term>allow_online:bool</term>
 ///        <description> Whether the event can be sent in an online stream or not </description>
+///    </item>
+///    <item>
+///        <term>char_limit:number</term>
+///        <description> Cut the message and add '...' after the specified amount of characters </description>
 ///    </item>
 ///</list>
 /// </param>
