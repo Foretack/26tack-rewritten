@@ -114,7 +114,7 @@ internal static class MessageHandler
         && embeds.Count > 0)
         {
             int embedCount = embeds.Count;
-            content += $"[+{embedCount} embed(s)]";
+            content += $" [+{embedCount} embed(s)]";
         }
 
         content = content.Length >= 425 ? content[..425] + "..." : content; 
