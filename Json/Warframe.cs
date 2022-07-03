@@ -6,15 +6,8 @@ using System.Text.Json.Serialization;
 namespace Tack.Json;
 public class Alert
 {
-    public string id { get; set; }
-    public DateTime activation { get; set; }
-    public string startString { get; set; }
-    public DateTime expiry { get; set; }
     public bool active { get; set; }
     public Mission mission { get; set; }
-    public string eta { get; set; }
-    public string[] rewardTypes { get; set; }
-    public string tag { get; set; }
 }
 public class Mission
 {
@@ -37,13 +30,9 @@ public class Mission
 }
 public class Reward
 {
-    public object[] items { get; set; }
     public CountedItem[] countedItems { get; set; }
     public int credits { get; set; }
     public string asString { get; set; }
-    public string itemString { get; set; }
-    public string thumbnail { get; set; }
-    public int color { get; set; }
 }
 public class CountedItem
 {
@@ -54,32 +43,17 @@ public class CountedItem
 
 public class Fissure
 {
-    public string id { get; set; }
-    public DateTime activation { get; set; }
-    public string startString { get; set; }
-    public DateTime expiry { get; set; }
     public bool active { get; set; }
-    public string node { get; set; }
     public string missionType { get; set; }
-    public string missionKey { get; set; }
     public string enemy { get; set; }
-    public string enemyKey { get; set; }
-    public string nodeKey { get; set; }
-    public string tier { get; set; }
     public int tierNum { get; set; }
-    public bool expired { get; set; }
     public string eta { get; set; }
     public bool isStorm { get; set; }
 }
 
 public class CurrentSortie
 {
-    public string id { get; set; }
-    public DateTime activation { get; set; }
-    public string startString { get; set; }
     public DateTime expiry { get; set; }
-    public bool active { get; set; }
-    public string rewardPool { get; set; }
     public Variant[] variants { get; set; }
     public string boss { get; set; }
     public string faction { get; set; }
@@ -91,60 +65,27 @@ public class Variant
     public string missionType { get; set; }
     public string modifier { get; set; }
     public string modifierDescription { get; set; }
-    public string node { get; set; }
 }
 
 public class CetusCycle
 {
-    public string id { get; set; }
     public DateTime expiry { get; set; }
-    public DateTime activation { get; set; }
     public bool isDay { get; set; }
-    public string state { get; set; }
-    public string timeLeft { get; set; }
-    public bool isCetus { get; set; }
-    public string shortString { get; set; }
 }
 public class CambionCycle
 {
-    public string id { get; set; }
-    public DateTime activation { get; set; }
     public DateTime expiry { get; set; }
-    public string timeLeft { get; set; }
     public string active { get; set; }
 }
 public class VallisCycle
 {
-    public string id { get; set; }
     public DateTime expiry { get; set; }
     public bool isWarm { get; set; }
-    public string state { get; set; }
-    public DateTime activation { get; set; }
-    public string timeLeft { get; set; }
-    public string shortString { get; set; }
 }
 public class ZarimanCycle
 {
-    [JsonPropertyName("id")]
-    public string Id { get; set; }
-
-    [JsonPropertyName("expiry")]
-    public DateTime Expiry { get; set; }
-
-    [JsonPropertyName("activation")]
-    public DateTime Activation { get; set; }
-
-    [JsonPropertyName("isCorpus")]
-    public bool IsCorpus { get; set; }
-
-    [JsonPropertyName("state")]
-    public string State { get; set; }
-
-    [JsonPropertyName("timeLeft")]
-    public string TimeLeft { get; set; }
-
-    [JsonPropertyName("shortString")]
-    public string ShortString { get; set; }
+    public DateTime expiry { get; set; }
+    public string state { get; set; }
 }
 
 public class MarketItems
@@ -177,13 +118,10 @@ public class Relic
     public string relicName { get; set; }
     public string state { get; set; }
     public RelicReward[] rewards { get; set; }
-    public string _id { get; set; }
 }
 public class RelicReward
 {
-    public string _id { get; set; }
     public string itemName { get; set; }
-    public string rarity { get; set; }
     public double chance { get; set; }
 }
 
@@ -191,7 +129,6 @@ public class InvasionNode
 {
     public InvasionReward attackerReward { get; set; }
     public InvasionReward defenderReward { get; set; }
-    public bool completed { get; set; }
 }
 public class InvasionReward
 {
@@ -215,7 +152,6 @@ public class ItemDropData
     public string item { get; set; }
     public float chance { get; set; }
     public string place { get; set; }
-    public string rarity { get; set; }
 }
 
 public class LevelStat
@@ -226,7 +162,6 @@ public class ModInfo
 {
     public string name { get; set; }
     public string type { get; set; }
-    public bool tradable { get; set; }
     public int baseDrain { get; set; }
     public int fusionLimit { get; set; }
     public LevelStat[] levelStats { get; set; }

@@ -110,14 +110,14 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
             return;
         }
-        TimeSpan timeLeft = cycle.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
         string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {timeLeftString}");
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.state} | time left: {timeLeftString}");
         ObjectCache.Put("zariman_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask Other(CommandContext ctx)
