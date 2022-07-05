@@ -125,11 +125,6 @@ internal static class MessageHandler
                                 "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty).StripSymbols(),
                                 ChatColor.BlueViolet);
         }
-        if (channelID == Config.Discord.NewsChannelID
-        && author.Contains("7TV #news"))
-        {
-            SendColoredMessage("pajlada", "7tvM 📣 " + content.StripSymbols(), ChatColor.CadetBlue);
-        }
         if (channelID == Config.Discord.NewsChannelID)
         {
             SendColoredMessage(Config.RelayChannel, $"{author}📢 {content.StripSymbols()}", ChatColor.Blue); 
