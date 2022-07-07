@@ -196,7 +196,7 @@ internal static class StreamMonitor
     #region Monitor events
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
-        TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started;
+        TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started.ToLocalTime();
         string uptimeString = $"{uptime:h'h'm'm's's'}";
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
