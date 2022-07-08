@@ -26,7 +26,7 @@ internal class PartChannel : IChatCommand
             return;
         }
 
-        string targetChannel = args[0];
+        string targetChannel = args[0].ToLower();
         bool successful = await ChannelHandler.PartChannel(targetChannel);
 
         if (successful)
