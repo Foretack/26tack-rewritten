@@ -39,8 +39,6 @@ internal class Update : IChatCommand
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"PPardner 🔧 {user} {pullResult} | Process should restart shortly...");
-        await Task.Delay(TimeSpan.FromSeconds(15));
-        MessageHandler.SendMessage(channel, $"Pepege nevermind");
+        MessageHandler.SendMessage(channel, $"PPardner 🔧 {user} {pullResult}");
     }
 }
