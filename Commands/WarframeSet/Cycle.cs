@@ -50,8 +50,7 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeftString}");
+        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("cetus_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendVallisCycle(CommandContext ctx)
@@ -72,8 +71,7 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeftString}");
+        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("vallis_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendCambionCycle(CommandContext ctx)
@@ -94,8 +92,7 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeftString}");
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("cambion_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask SendZarimanCycle(CommandContext ctx)
@@ -116,8 +113,7 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        string timeLeftString = timeLeft.TotalHours < 1 ? $"{timeLeft:m'm's's'}" : $"{timeLeft:h'h'm'm's's'}";
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.state} | time left: {timeLeftString}");
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.state} | time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("zariman_state_wf", cycle, (int)timeLeft.TotalSeconds);
     }
     private async ValueTask Other(CommandContext ctx)

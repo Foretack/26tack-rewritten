@@ -10,6 +10,20 @@ internal static class Formatting
 
     public static string FormatDate(DateTime date) { return $"{date.Year}-{date.Month}-{date.Day}"; }
 
+    public static string FormatTimeLeft(this TimeSpan ts) => ts switch
+    {
+        { Days: >= 1, Hours: >= 1 }                      => $"{ts:d' day(s) and 'h' hour(s)'}",
+        { Days: >= 1, Hours: 0 }                         => $"{ts:d' day(s)'}",
+        { Hours: >= 1, Minutes: >= 1, Seconds: >= 1 }    => $"{ts:h'h 'm'm 's's'}",
+        { Hours: >= 1, Minutes: >= 1 }                   => $"{ts:h' hour(s) and 'm' minute(s)'}",
+        { Hours: >= 1, Seconds: >= 1 }                   => $"{ts:h' hour(s) and 's' second(s)'}",
+        { Hours: >= 1 }                                  => $"{ts:h' hour(s)'}",
+        { Minutes: >= 1, Seconds: >= 1}                  => $"{ts:m' minute(s) and 's' second(s)'}",
+        { Minutes: >= 1 }                                => $"{ts:m' minute(s)'}",
+        { Seconds: >= 1 }                                => $"{ts:s' second(s)'}",
+        _                                                => throw new NotImplementedException()
+    };
+
     public static string StripDescriminator(this string str)
     {
         int dCount = str.Count(x => x == '#');
