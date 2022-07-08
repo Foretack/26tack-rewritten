@@ -18,7 +18,7 @@ internal static class ChannelHandler
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
     public static string[] JLChannels { get; private set; } = Array.Empty<string>();
-    public static List<Channel> FetchedChannels { get; } = new List<Channel>(Db.GetChannels().Result);
+    public static List<Channel> FetchedChannels { get; private set; } = new List<Channel>(Db.GetChannels().Result);
 
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
     private static bool IsInProgress { get; set; } = false;
@@ -110,6 +110,18 @@ internal static class ChannelHandler
         return true;
     }
 
+    public static async Task ReloadFetchedChannels()
+    {
+        int pCount = FetchedChannels.Count;
+        FetchedChannels = new List<Channel>(await Db.GetChannels());
+        int cCount = FetchedChannels.Count;
+
+        if (pCount != cCount)
+        {
+            MessageHandler.SendColoredMessage(Config.RelayChannel, $"❕ Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
+        }
+    }
+
     private static void RegisterEvents(bool isReconnect)
     {
         if (isReconnect) return;
@@ -190,6 +202,14 @@ internal static class StreamMonitor
 
         MonitoringService.Start();
     }
+
+    public static void Reset()
+    {
+        StreamData.Clear();
+        List<ChannelHandler.Channel> Channels = ChannelHandler.FetchedChannels;
+        MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
+    }
+
     public static void Stop() { MonitoringService.Stop(); }
     #endregion
 

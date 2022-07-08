@@ -44,6 +44,14 @@ internal class Debug : IChatCommand
             MessageHandler.SendMessage(channel, output);
             return;
         }
+        if (args[0] == "reloadmonitor")
+        {
+            StreamMonitor.Stop();
+            await ChannelHandler.ReloadFetchedChannels();
+            StreamMonitor.Reset();
+            StreamMonitor.Start();
+            return;
+        }
     }
 
     public class TestException : Exception
