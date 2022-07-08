@@ -12,16 +12,37 @@ internal static class Formatting
 
     public static string FormatTimeLeft(this TimeSpan time) => time switch
     {
-        { Days: >= 1, Hours: >= 1 }                      => $"{time:d' day(s) and 'h' hour(s)'}",
-        { Days: >= 1 }                                   => $"{time:d' day(s)'}",
-        { Hours: >= 1, Minutes: >= 1, Seconds: >= 1 }    => $"{time:h'h 'm'm 's's'}",
-        { Hours: >= 1, Minutes: >= 1 }                   => $"{time:h' hour(s) and 'm' minute(s)'}",
-        { Hours: >= 1, Seconds: >= 1 }                   => $"{time:h' hour(s) and 's' second(s)'}",
-        { Hours: >= 1 }                                  => $"{time:h' hour(s)'}",
-        { Minutes: >= 1, Seconds: >= 1}                  => $"{time:m' minute(s) and 's' second(s)'}",
-        { Minutes: >= 1 }                                => $"{time:m' minute(s)'}",
-        { Seconds: >= 1 }                                => $"{time:s' second(s)'}",
-        _                                                => throw new NotImplementedException()
+        { Days: > 1, Hours: > 1 }                       => $"{time:d' days and 'h' hours'}",
+        { Days: 1, Hours: > 1 }                         => $"{time:d' day and 'h' hours'}",
+        { Days: > 1, Hours: 1 }                         => $"{time:d' days and 'h' hour'}",
+
+        { Days: > 1 }                                   => $"{time:d' days'}",
+        { Days: 1 }                                     => $"{time:d' day'}",
+
+        { Hours: >= 1, Minutes: >= 1, Seconds: >= 1 }   => $"{time:h'h 'm'm 's's'}",
+
+        { Hours: > 1, Minutes: > 1 }                    => $"{time:h' hours and 'm' minutes'}",
+        { Hours: 1, Minutes: > 1 }                      => $"{time:h' hour and 'm' minutes'}",
+        { Hours: > 1, Minutes: 1 }                      => $"{time:h' hours and 'm' minute'}",
+
+        { Hours: > 1, Seconds: > 1 }                    => $"{time:h' hours and 's' seconds'}",
+        { Hours: 1, Seconds: > 1 }                      => $"{time:h' hour and 's' seconds'}",
+        { Hours: > 1, Seconds: 1 }                      => $"{time:h' hours and 's' second'}",
+
+        { Hours: > 1 }                                  => $"{time:h' hours'}",
+        { Hours: 1 }                                    => $"{time:h' hour'}",
+
+        { Minutes: > 1, Seconds: > 1}                   => $"{time:m' minutes and 's' seconds'}",
+        { Minutes: 1, Seconds: > 1 }                    => $"{time:m' minute and 's' seconds'}",
+        { Minutes: > 1, Seconds: 1 }                    => $"{time:m' minutes and 's' second'}",
+
+        { Minutes: > 1 }                                => $"{time:m' minutes'}",
+        { Minutes: 1 }                                  => $"{time:m' minute'}",
+
+        { Seconds: > 1 }                                => $"{time:s' seconds'}",
+        { Seconds: 1 }                                  => $"{time:s' second'}",
+
+        _                                                => throw new NotImplementedException() // fuck you if you get here
     };
 
     public static string StripDescriminator(this string str)
