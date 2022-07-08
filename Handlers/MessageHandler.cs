@@ -95,7 +95,7 @@ internal static class MessageHandler
 
     private static void HandleDiscordMessage(SocketMessage socketMessage)
     {
-        string content = socketMessage.Content;
+        string content = socketMessage.CleanContent;
         ulong channelID = socketMessage.Channel.Id;
         string author = socketMessage.Author.Username.StripDescriminator();
         var embeds = socketMessage.Embeds;
