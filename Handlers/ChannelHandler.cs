@@ -210,7 +210,14 @@ internal static class StreamMonitor
         MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
     }
 
-    public static void Stop() { MonitoringService.Stop(); }
+    public static void Stop() 
+    {
+        MonitoringService.OnServiceStarted -= ServiceStarted;
+        MonitoringService.OnStreamOnline -= StreamOnline;
+        MonitoringService.OnStreamUpdate -= StreamUpdate;
+        MonitoringService.OnStreamOffline -= StreamOffline;
+        MonitoringService.Stop(); 
+    }
     #endregion
 
     #region Monitor events
