@@ -177,4 +177,6 @@ internal class Database : DbConnection
 
         return q.Success;
     }
+
+    ~Database() => Dispose();
 }

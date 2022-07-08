@@ -3,13 +3,16 @@ using Npgsql;
 using Serilog;
 
 namespace Tack.Database;
-internal abstract class DbConnection
+internal abstract class DbConnection : IDisposable
 {
-    public HttpClient Requests { get; } = new HttpClient();
+    #region Properties
+    public HttpClient Requests { get; private set; } = new HttpClient();
 
     private const string ConnectionString = $"Host={Config.Host};Username={Config.DbUsername};Password={Config.Password};Database={Config.DatabaseName}";
-    private NpgsqlConnection Connection { get; } = new NpgsqlConnection(ConnectionString);
+    private NpgsqlConnection Connection { get; set; } = new NpgsqlConnection(ConnectionString);
+    #endregion
 
+    #region Query properties
     private QueryTypes? QueryType { get; set; } = null;
     private string? TableName { get; set; } = null;
     private string? SortMethod { get; set; } = null;
@@ -18,9 +21,11 @@ internal abstract class DbConnection
     private string[]? Conditions { get; set; } = null;
     private int? SelectionLimit { get; set; } = null;
     private int? SelectionOffset { get; set; } = null;
+    #endregion
 
     protected DbConnection() { Connection.Open(); }
 
+    #region Methods
     public DbConnection Insert() { QueryType = QueryTypes.Insert; return this; }
     public DbConnection Update() { QueryType = QueryTypes.Update; return this; }
     public DbConnection Delete() { QueryType = QueryTypes.Delete; return this; }
@@ -32,7 +37,9 @@ internal abstract class DbConnection
     public DbConnection Where(params string[] where) { Conditions = where; return this; }
     public DbConnection Limit(int limit) { SelectionLimit = limit; return this; }
     public DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
+    #endregion
 
+    #region Execution
     public async Task<ExecutionResult> TryExecute()
     {
         string? query = BuildQueryString();
@@ -45,6 +52,7 @@ internal abstract class DbConnection
             try
             {
                 await cmd.ExecuteNonQueryAsync();
+                await cmd.DisposeAsync();
                 return new ExecutionResult(true, null);
             }
             catch (Exception ex)
@@ -58,22 +66,17 @@ internal abstract class DbConnection
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
                 List<int> ordinals = new List<int>();
-                if (!ValuesSchema!.Contains("*"))
+                if (!ValuesSchema!.Contains("*") && await r.ReadAsync())
                 {
-                    while (await r.ReadAsync())
-                    {
-                        foreach (var column in ValuesSchema!) { ordinals.Add(r.GetOrdinal(column)); }
-                        break;
+                    foreach (var column in ValuesSchema!) 
+                    { 
+                        ordinals.Add(r.GetOrdinal(column)); 
                     }
                 }
-                else
+                else if (await r.ReadAsync())
                 {
-                    while (await r.ReadAsync())
-                    {
-                        int columnCount = r.GetColumnSchema().Count;
-                        for (int i = 0; i < columnCount; i++) { ordinals.Add(i); }
-                        break;
-                    }
+                    int columnCount = r.GetColumnSchema().Count;
+                    for (int i = 0; i < columnCount; i++) ordinals.Add(i);
                 }
                 await r.CloseAsync();
 
@@ -88,6 +91,9 @@ internal abstract class DbConnection
                 }
                 await r2.CloseAsync();
 
+                await r.DisposeAsync();
+                await r2.DisposeAsync();
+                await cmd.DisposeAsync();
                 return new ExecutionResult(true, values.ToArray());
             }
             catch (Exception ex)
@@ -142,20 +148,59 @@ internal abstract class DbConnection
     {
         if (TableName is null) { Log.Error($"{QueryType} query failed: No table specified"); return false; }
         if (QueryType is null) { Log.Error($"Query to \"{TableName}\" failed: Query type is not specified"); return false; }
-        if (QueryType == QueryTypes.Delete && Conditions is null) { Log.Error($"Deletion failed: No conditions specified with \"Where()\""); return false; }
-        if (QueryType == QueryTypes.Select && ValuesSchema is null) { Log.Error($"Selection failed: No column selected with \"Schema()\""); return false; }
-        if (QueryType == QueryTypes.Insert && (SelectedValues is null || ValuesSchema is null)) { Log.Error($"Insertion failed: columns \"Schema()\" or values \"Values()\" missing"); return false; }
-        if (QueryType == QueryTypes.Update && (SelectedValues is null || ValuesSchema is null)) { Log.Error($"Update query failed: column name \"Schema()\" or new value \"Values()\" missing"); return false; }
-        return true;
+
+        bool valid = QueryType switch
+        {
+            QueryTypes.Delete when Conditions is null     => false,
+            QueryTypes.Select when ValuesSchema is null   => false,
+            QueryTypes.Update when ValuesSchema is null   => false,
+            QueryTypes.Insert when SelectedValues is null => false,
+            QueryTypes.Insert when ValuesSchema is null   => false,
+            _                                             => true
+        };
+        if (!valid) Log.Error($"An invalid query was attempted! {{ Conditions: {Conditions}, ValuesSchema: {ValuesSchema}, SelectedValues: {SelectedValues} }}");
+
+        return valid;
     }
+    #endregion
 
     private enum QueryTypes { Insert, Update, Delete, Select }
     public record ExecutionResult(bool Success, object[][]? Results);
 
-    ~DbConnection()
+    #region Disposal
+    private bool disposedValue;
+
+    protected virtual void Dispose(bool disposing)
     {
-        Connection.Close();
-        Connection.Dispose();
-        Requests.Dispose();
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                Connection.Close();
+                Connection.Dispose();
+                Requests.Dispose();
+            }
+
+            Requests = default!;
+            Connection = default!;
+            QueryType = null;
+            TableName = null;
+            SortMethod = null;
+            SelectedValues = null;
+            ValuesSchema = null;
+            Conditions = null;
+            SelectionLimit = null;
+            SelectionLimit = null;
+            disposedValue = true;
+        }
     }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~DbConnection() { Dispose(disposing: false); }
+    #endregion
 }

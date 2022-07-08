@@ -58,10 +58,10 @@ internal static class MessageHandler
         HandleDiscordMessage(arg);
         return Task.CompletedTask;
     }
-    private static void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
+    private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
         Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
-        HandleIrcMessage(e.ChatMessage).SafeFireAndForget(onException: ex => Log.Error(ex, "Failed to handle message"));
+         await HandleIrcMessage(e.ChatMessage);
     }
     #endregion
 
@@ -73,23 +73,30 @@ internal static class MessageHandler
     #region Handling
     private static async ValueTask HandleIrcMessage(ChatMessage ircMessage)
     {
-        string message = ircMessage.Message;
-        string channel = ircMessage.Channel;
-        string[] splitMessage = message.Replace("󠀀", " ").Split(' ');
-        string[] commandArgs = splitMessage.Skip(1).ToArray();
+        try
+        {
+            string message = ircMessage.Message;
+            string channel = ircMessage.Channel;
+            string[] splitMessage = message.Replace("󠀀", " ").Split(' ');
+            string[] commandArgs = splitMessage.Skip(1).ToArray();
 
-        if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
-        && ChannelHandler.MainJoinedChannelNames.Contains(channel))
-        {
-            string commandName = splitMessage[0].Replace(CommandHandler.Prefixes.First(x => message.StartsWith(x)), string.Empty);
-            Permission permission = new Permission(ircMessage);
-            CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
-            await CommandHandler.HandleCommand(ctx);
+            if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
+            && ChannelHandler.MainJoinedChannelNames.Contains(channel))
+            {
+                string commandName = splitMessage[0].Replace(CommandHandler.Prefixes.First(x => message.StartsWith(x)), string.Empty);
+                Permission permission = new Permission(ircMessage);
+                CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
+                await CommandHandler.HandleCommand(ctx);
+            }
+            if (Regexes.Mention.IsMatch(message))
+            {
+                string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
+                await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
+            }
         }
-        if (Regexes.Mention.IsMatch(message))
+        catch (Exception ex)
         {
-            string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
-            await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
+            Log.Error(ex, $"Handling message failed.");
         }
     }
 
