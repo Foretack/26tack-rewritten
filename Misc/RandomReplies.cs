@@ -15,7 +15,12 @@ internal static class RandomReplies
         "Apu",
         "ppBounce",
         "Okayge",
-        "FeelsOkayMan"
+        "FeelsOkayMan",
+        "PagCube3D",
+        "PagFlag",
+        "Paggi",
+        "PagMan PagFlag",
+        "PagCoin"
     };
     public static readonly string[] StreamOfflineEmotes = new string[]
     {
@@ -27,7 +32,9 @@ internal static class RandomReplies
         "peepoSadSit",
         "peepoSadDankSip",
         "peepoSadDank",
-        "iguess"
+        "OMEGALULiguess",
+        "INSANE",
+        "Aware"
     };
     public static readonly string[] StreamUpdateEmotes = new string[]
     {
