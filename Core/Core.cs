@@ -21,7 +21,10 @@ public static class Core
     public static async Task<int> Main()
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
-        Log.Logger = new LoggerConfiguration().MinimumLevel.ControlledBy(LogSwitch).WriteTo.Console().CreateLogger();
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.ControlledBy(LogSwitch)
+            .WriteTo.Console(outputTemplate: "[{HH:mm:ss} | {Level}] {Message}{NewLine}{Exception}")
+            .CreateLogger();
 
         Db db = new Db();
         Config.Auth = await db.GetAuthorizationData();
