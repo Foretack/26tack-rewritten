@@ -283,7 +283,7 @@ internal static class ExternalAPIHandler
 
         try
         {
-            Stream rResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/steelPath");
+            Stream rResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/steelPath?lang=en");
             SteelPathRewards rewards = (await JsonSerializer.DeserializeAsync<SteelPathRewards>(rResponse))!;
             return rewards;
         }

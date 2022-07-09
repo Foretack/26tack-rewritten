@@ -29,6 +29,7 @@ internal static class ChannelHandler
     {
         if (IsInProgress) return;
         IsInProgress = true;
+
         if (isReconnect)
         {
             MainJoinedChannels.Clear();
@@ -36,14 +37,17 @@ internal static class ChannelHandler
             AnonJoinedChannels.Clear();
             StreamMonitor.Stop();
         }
+
         Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
         JLChannels = (await ExternalAPIHandler.GetIvrChannels()).channels.Select(x => x.name).ToArray();
+
         IAsyncEnumerable<Channel> c = new AsyncEnumerable<Channel>(async y =>
         {
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
         });
+
         await c.ForEachAsync(async x =>
         {
             // Assume the channel is joined until being told otherwise
@@ -57,11 +61,13 @@ internal static class ChannelHandler
             Log.Debug($"[Anon] Attempting to join: {x.Name}");
             await Task.Delay(300);
         });
+        c = default!;
         IsInProgress = false;
         StreamMonitor.Start();
     }
     #endregion
 
+    #region Methods
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
         UserFactory uf = new UserFactory();
@@ -134,7 +140,8 @@ internal static class ChannelHandler
         AnonymousClient.Client.OnLeftChannel += AnonOnLeftChannel;
         AnonymousClient.Client.OnFailureToReceiveJoinConfirmation += AnonOnFailedJoin;
     }
-    
+    #endregion
+
     #region Client events
     private static void AnonOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {

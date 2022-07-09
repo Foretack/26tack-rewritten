@@ -49,6 +49,10 @@ internal static class MessageHandler
     {
         Log.Debug($"Sent message: {e.SentMessage.Message}");
     }
+    private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
+    {
+        Log.Warning($"Message throttled: {e.Message} ({e.SentMessageCount} sent in {e.AllowedInPeriod})");
+    }
     #endregion
 
     #region Receiving
@@ -64,11 +68,6 @@ internal static class MessageHandler
          await HandleIrcMessage(e.ChatMessage);
     }
     #endregion
-
-    private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
-    {
-        Log.Warning($"Message throttled: {e.Message} ({e.SentMessageCount} sent in {e.AllowedInPeriod})");
-    }
 
     #region Handling
     private static async ValueTask HandleIrcMessage(ChatMessage ircMessage)
@@ -139,7 +138,7 @@ internal static class MessageHandler
         
     }
     #endregion
-} // class
+}
 
 internal enum ChatColor
 {
