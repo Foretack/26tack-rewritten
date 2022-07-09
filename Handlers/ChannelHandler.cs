@@ -234,7 +234,7 @@ internal static class StreamMonitor
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
-            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! {uptime.FormatTimeLeft()}",
+            $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! -- {uptime.FormatTimeLeft()}",
             ChatColor.GoldenRod);
     }
 
@@ -244,10 +244,11 @@ internal static class StreamMonitor
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
+            TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started.ToLocalTime();
             StreamData[e.Channel] = current;
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName}",
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
                 ChatColor.DodgerBlue);
         }
     }
