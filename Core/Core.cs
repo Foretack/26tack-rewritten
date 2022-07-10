@@ -23,7 +23,7 @@ public static class Core
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
-            .WriteTo.Console(outputTemplate: "[{HH:mm:ss} | {Level}] {Message}{NewLine}{Exception}")
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
             .CreateLogger();
 
         Db db = new Db();
