@@ -3,7 +3,7 @@ using TwitchLib.Api;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Exceptions;
 using TwitchLib.Api.Helix;
-using TwitchLib.Api.Helix.Models.Users.GetUsers;
+using TLU = TwitchLib.Api.Helix.Models.Users.GetUsers;
 
 namespace Tack.Handlers;
 internal static class TwitchAPIHandler
@@ -15,43 +15,43 @@ internal static class TwitchAPIHandler
     #endregion
 
     #region Users
-    internal static async Task<User?> GetUsers(string username)
+    internal static async Task<TLU::User?> GetUsers(string username)
     {
-        User[]? u = await GetUsers(new List<string> { username });
-        return u?[0];
+        TLU::User[]? u = await GetUsers(new List<string> { username });
+        return u.Length > 0 ? u[0] : null;
     }
-    internal static async Task<User[]?> GetUsers(string[] usernames)
+    internal static async Task<TLU::User[]?> GetUsers(string[] usernames)
     {
-        User[]? u = await GetUsers(usernames.ToList());
-        return u;
+        TLU::User[]? u = await GetUsers(usernames.ToList());
+        return u.Length > 0 ? u : null;
     }
-    internal static async Task<User?> GetUsersByID(string id)
+    internal static async Task<TLU::User?> GetUsersByID(string id)
     {
-        User[]? u = await GetUsers(ids: new List<string> { id });
-        return u?[0];
+        TLU::User[]? u = await GetUsers(ids: new List<string> { id });
+        return u.Length > 0 ? u[0] : null;
     }
-    internal static async Task<User[]?> GetUsersByID(string[] ids)
+    internal static async Task<TLU::User[]?> GetUsersByID(string[] ids)
     {
-        User[]? u = await GetUsers(ids: ids.ToList());
-        return u;
+        TLU::User[]? u = await GetUsers(ids: ids.ToList());
+        return u.Length > 0 ? u : null;
     }
 
-    private static async Task<User[]?> GetUsers(List<string>? logins = null, List<string>? ids = null)
+    private static async Task<TLU::User[]> GetUsers(List<string>? logins = null, List<string>? ids = null)
     {
         try
         {
-            GetUsersResponse us = logins is not null ? await Helix.Users.GetUsersAsync(logins: logins) : await Helix.Users.GetUsersAsync(ids: ids);
+            TLU::GetUsersResponse us = logins is not null ? await Helix.Users.GetUsersAsync(logins: logins) : await Helix.Users.GetUsersAsync(ids: ids);
             return us.Users;
         }
         catch (TooManyRequestsException _a)
         {
             Log.Error(_a, $"Failed to fetch users: {string.Join(';', logins ?? ids!)}");
-            return null;
+            return Array.Empty<TLU::User>();
         }
         catch (Exception _c)
         {
             Log.Error(_c, $"how did I get here");
-            return null;
+            return Array.Empty<TLU::User>();
         }
     }
     #endregion
