@@ -1,12 +1,7 @@
 ﻿namespace Tack.Utils;
 internal static class Formatting
 {
-    public static string FormatException(this Exception exception)
-    {
-        return $"`{exception.Message}`\n ->" +
-                $" \n`{exception.InnerException}`\n ->" +
-                $" \n`{exception.StackTrace}`";
-    }
+    public static string FormatException(this Exception exception) => exception.Message;
 
     public static string FormatDate(DateTime date) { return $"{date.Year}-{date.Month}-{date.Day}"; }
 
