@@ -20,5 +20,6 @@ internal class AdminHandler : ChatCommandHandler
         AddCommand(new Switch());
         AddCommand(new Exit());
         AddCommand(new Update());
+        AddCommand(new EditUser());
     }
 }

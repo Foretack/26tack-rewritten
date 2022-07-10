@@ -178,5 +178,29 @@ internal class Database : DbConnection
         return q.Success;
     }
 
+    public async Task<bool> BlacklistUser(string username, string id)
+    {
+        var q = await
+            Insert()
+            .Table("blacklisted_users")
+            .Schema("username", "id")
+            .Values($"'{username}'", id)
+            .TryExecute();
+
+        return q.Success;
+    }
+
+    public async Task<bool> WhitelistUser(string username)
+    {
+        var q = await
+            Insert()
+            .Table("whitelisted_users")
+            .Schema("username")
+            .Values($"'{username}'")
+            .TryExecute();
+
+        return q.Success;
+    }
+
     ~Database() => Dispose();
 }
