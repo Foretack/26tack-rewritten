@@ -7,15 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class SteelPath : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "steelpath";
-        string description = "Get the current Steel Path rotation & the next one";
-        string[] aliases = { "sp", "path" };
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "steelpath",
+        description: "Get the current Steel Path rotation & the next one",
+        aliases: new string[] { "sp", "path" },
+        cooldowns: new int[] { 5, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

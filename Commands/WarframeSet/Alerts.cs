@@ -8,14 +8,11 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Alerts : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "alerts";
-        string description = "Get the current alerts in the system";
-        int[] cooldowns = { 10, 3 };
-
-        return new Command(name, description, cooldowns: cooldowns);
-    }
+    public Command Info() => new(
+        name: "alerts",
+        description: "Get the current alerts in the system",
+        cooldowns: new int[] { 10, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

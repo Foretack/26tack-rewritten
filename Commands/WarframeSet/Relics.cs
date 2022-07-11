@@ -7,15 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Relics : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "relics";
-        string description = "Find which relics contain an item, or the contents of a specific relic ";
-        string[] aliases = { "relic", "r" };
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "relics",
+        description: "Find which relics contain an item, or the contents of a specific relic",
+        aliases: new string[] { "relic", "r" },
+        cooldowns: new int[] { 5, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

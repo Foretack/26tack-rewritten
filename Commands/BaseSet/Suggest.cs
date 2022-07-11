@@ -1,19 +1,15 @@
 ﻿using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
-using Tack.Database;
 
 namespace Tack.Commands.BaseSet;
 internal class Suggest : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "suggest";
-        string description = "Suggest a feature / give feedback for the bot";
-        int[] cooldowns = { 600, 5 };
-
-        return new Command(name, description, cooldowns: cooldowns);
-    }
+    public Command Info() => new(
+        name: "suggest",
+        description: "Suggest a feature / give feedback for the bot",
+        cooldowns: new int[] { 600, 5 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

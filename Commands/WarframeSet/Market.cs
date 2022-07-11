@@ -7,16 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Market : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "market";
-        string description = "Get sell & buy orders for the specified item from warframe.market. " +
-            "Additional options: `activeOnly:true/false` (true default)";
-        string[] aliases = { "price" };
-        int[] cooldowns = { 10, 5 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "market",
+        description: "Get sell & buy orders for the specified item from warframe.market. Additional options: `activeOnly:true/false` (true default)",
+        aliases: new string[] { "price" },
+        cooldowns: new int[] {10, 3}
+        );
 
     public async Task Run(CommandContext ctx)
     {

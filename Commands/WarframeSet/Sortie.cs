@@ -7,15 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Sortie : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "sortie";
-        string description = "Check the current Sortie";
-        string[] aliases = { "anasa", "sorties" };
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "sortie",
+        description: "Check the current Sortie",
+        aliases: new string[] { "anasa", "sorties" },
+        cooldowns: new int[] { 5, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

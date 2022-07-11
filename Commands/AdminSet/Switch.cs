@@ -7,13 +7,10 @@ using C = Tack.Core.Core;
 namespace Tack.Commands.AdminSet;
 internal class Switch : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "switch";
-        PermissionLevels permission = PermissionLevels.Whitelisted;
-
-        return new Command(name, permission: permission);
-    }
+    public Command Info() => new(
+        name: "switch",
+        permission: PermissionLevels.Whitelisted
+        );
 
     public Task Run(CommandContext ctx)
     {

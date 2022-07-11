@@ -7,14 +7,11 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Invasions : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "invasions";
-        string description = "Get the total rewards of ongoing invasions";
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, cooldowns: cooldowns);
-    }
+    public Command Info() => new(
+        name: "invasions",
+        description: "Get the total rewards of ongoing invasions",
+        cooldowns: new int[] { 5, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

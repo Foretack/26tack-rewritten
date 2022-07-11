@@ -6,14 +6,11 @@ using Tack.Utils;
 namespace Tack.Commands.AdminSet;
 internal class JoinChannel : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "join";
-        string description = "Join the specified channel";
-        PermissionLevels permission = PermissionLevels.Whitelisted;
-
-        return new Command(name, description, permission: permission);
-    }
+    public Command Info() => new(
+        name: "join",
+        description: "Join the specified channel",
+        permission: PermissionLevels.Whitelisted
+        );
 
     public async Task Run(CommandContext ctx)
     {

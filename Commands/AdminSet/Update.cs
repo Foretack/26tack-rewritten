@@ -7,15 +7,11 @@ using Db = Tack.Database.Database;
 namespace Tack.Commands.AdminSet;
 internal class Update : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "update";
-        string description = "yep!! this is the update command!! xD";
-        string[] aliases = { "pull" };
-        PermissionLevels permission = PermissionLevels.Whitelisted;
-
-        return new Command(name, description, aliases, permission: permission);
-    }
+    public Command Info() => new(
+        name: "update",
+        description: "yep!! this is the update command!! xD",
+        permission: PermissionLevels.Whitelisted
+        );
 
     public async Task Run(CommandContext ctx)
     {

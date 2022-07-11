@@ -7,14 +7,12 @@ using C = Tack.Core.Core;
 namespace Tack.Commands.AdminSet;
 internal class Debug : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "debug";
-        string description = "command for testing stuff! Xdxd";
-        PermissionLevels permission = PermissionLevels.Whitelisted;
-
-        return new Command(name, description, permission: permission);
-    }
+    public Command Info() => new(
+        name: "debug",
+        description: "command for testing stuff! Xdxd",
+        permission: PermissionLevels.Whitelisted
+        );
+    
 
     public async Task Run(CommandContext ctx)
     {

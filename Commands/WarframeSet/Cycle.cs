@@ -7,15 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Cycle : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "cycle";
-        string description = "Get the current cycle of the specified open-world node";
-        string[] aliases = { "cycles", "cetus", "vallis", "cambion", "drift", "zariman" };
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "cycle",
+        description: "Get the current cycle of the specified open-world node",
+        aliases: new string[] { "cycles", "cetus", "vallis", "cambion", "drift", "zariman" },
+        cooldowns: new int[] { 5, 3 }
+        );
 
     public async Task Run(CommandContext ctx)
     {

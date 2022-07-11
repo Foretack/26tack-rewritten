@@ -7,15 +7,12 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Mods : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "modinfo";
-        string description = "Get the stats of the closest matching mod. Additional options: `rank:number` (highest rank by default)";
-        string[] aliases = { "mod", "mods" };
-        int[] cooldowns = { 5, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "modinfo",
+        description: "Get the stats of the closest matching mod. Additional options: `rank:number` (highest rank by default)",
+        aliases: new string[] {"mod", "mods"},
+        cooldowns: new int[] {10, 3}
+        );
 
     public async Task Run(CommandContext ctx)
     {

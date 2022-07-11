@@ -8,13 +8,11 @@ using C = Tack.Core.Core;
 namespace Tack.Commands.BaseSet;
 internal class Ping : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "ping";
-        string description = "Does the pong thing or whatever!";
-        string[] aliases = { "pong", "peng", "pang", "pung" };
-        return new Command(name, description, aliases);
-    }
+    public Command Info() => new(
+        name: "ping",
+        description: "Does the pong thing or whatever!",
+        aliases: new string[] { "pong", "peng", "pang", "pung" }
+        );
 
     public Task Run(CommandContext ctx)
     {

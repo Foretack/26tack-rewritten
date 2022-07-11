@@ -8,15 +8,12 @@ using Tack.Utils;
 namespace Tack.Commands.AdminSet;
 internal class Massping : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "massping";
-        string description = " :tf: ";
-        string[] aliases = { "mp" };
-        PermissionLevels permission = PermissionLevels.Whitelisted;
-
-        return new Command(name, description, aliases, permission: permission);
-    }
+    public Command Info() => new(
+        name: "massping",
+        description: " :tf: ",
+        aliases: new string[] { "mp" },
+        permission: PermissionLevels.Whitelisted
+        );
 
     public async Task Run(CommandContext ctx)
     {

@@ -6,15 +6,11 @@ using Tack.Models;
 namespace Tack.Commands.WarframeSet;
 internal class Drops : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "drops";
-        string description = "Get the best location to farm a specific item";
-        string[] aliases = { "where" };
-        int[] cooldowns = { 10, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "drops",
+        description: "Get the best location to farm a specific item",
+        aliases: new string[] { "where" }
+        );
 
     public async Task Run(CommandContext ctx)
     {

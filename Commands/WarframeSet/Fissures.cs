@@ -7,15 +7,11 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Fissures : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "fissures";
-        string description = "Get information about active void fissures. Additional options: `storms:true/false` (true default)";
-        string[] aliases = { "fissure", "f" };
-        int[] cooldowns = { 10, 3 };
-
-        return new Command(name, description, aliases, cooldowns);
-    }
+    public Command Info() => new(
+        name: "fissures", 
+        description: "Get information about active void fissures. Additional options: `storms:true/false` (true default)", 
+        aliases: new string[] { "fissure", "f" }
+        );
 
     public async Task Run(CommandContext ctx)
     {

@@ -6,14 +6,11 @@ using Tack.Utils;
 namespace Tack.Commands.BaseSet;
 internal class RandomJoke : IChatCommand
 {
-    public Command Info()
-    {
-        string name = "randomjoke";
-        string description = "Get a random joke LuL ";
-        string[] aliases = { "4head", "rj" };
-
-        return new Command(name, description, aliases);
-    }
+    public Command Info() => new(
+        name: "randomjoke",
+        description: "Get a random joke LuL ",
+        aliases: new string[] { "4head", "rj" }
+        );
 
     public async Task Run(CommandContext ctx)
     {
