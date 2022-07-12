@@ -32,12 +32,14 @@ internal class Drops : IChatCommand
         }
 
         string item = string.Join(' ', ctx.Args);
-        ItemDropData[]? itemDrops = await ExternalAPIHandler.GetItemDropData(item);
-        if (itemDrops is null)
+        var r = await ExternalAPIHandler.WarframeStatusApi<ItemDropData[]>($"drops/search/{item}", string.Empty, string.Empty);
+        if (!r.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :(");
+            MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
             return;
         }
+
+        ItemDropData[] itemDrops = r.Value;
         if (itemDrops.Length == 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, No drop locations for that item were found. Unlucky!");
@@ -49,6 +51,7 @@ internal class Drops : IChatCommand
             return itemDrops.OrderByDescending(x => x.chance).ToArray();
         });
         if (topDrops.Length > 3) topDrops = topDrops[..3];
+
         string[] dropsString = topDrops.Select(x => $"{x.place} 🡺 {x.chance}%").ToArray();
         MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].item}\": " +
             string.Join(" ◯ ", dropsString));

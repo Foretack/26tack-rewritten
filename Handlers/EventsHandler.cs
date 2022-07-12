@@ -33,8 +33,8 @@ internal static class EventsHandler
     private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
     {
         VoidTrader? baro = ObjectCache.Get<VoidTrader>("baro_data")
-            ?? await ExternalAPIHandler.GetBaroInfo();
-        WarframeNewsObj[]? news = await ExternalAPIHandler.GetWarframeNews();
+            ?? (await ExternalAPIHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
+        WarframeNewsObj[]? news = (await ExternalAPIHandler.WarframeStatusApi<WarframeNewsObj[]>("news")).Value;
 
         if (baro is null || news is null) return;
         // Don't trigger anything in first 10 minutes

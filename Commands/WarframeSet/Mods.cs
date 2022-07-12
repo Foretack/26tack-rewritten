@@ -27,21 +27,26 @@ internal class Mods : IChatCommand
         }
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
-        ModInfo? mod = ObjectCache.Get<ModInfo>(modName + "_modobj")
-            ?? await ExternalAPIHandler.GetModInfo(modName);
+        ModInfo? mod = ObjectCache.Get<ModInfo>(modName + "_modobj");
         if (mod is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
+                return;
+            }
+            mod = r.Value;
+            ObjectCache.Put(modName + "_modobj", mod, 150);
         }
 
         int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.fusionLimit;
         if (level > mod.fusionLimit) level = mod.fusionLimit;
-        string modString = $"{mod.type} \"{mod.name}\" " +
+        string modString = 
+            $"{mod.type} \"{mod.name}\" " +
             $"▣ [Rank:{level}/{mod.fusionLimit}] drain:{mod.baseDrain + level} " +
             $"▣ {string.Join(" | ", mod.levelStats[level].stats)} ";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
-        ObjectCache.Put(modName + "_modobj", mod, 150);
     }
 }

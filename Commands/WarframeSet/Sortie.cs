@@ -19,12 +19,16 @@ internal class Sortie : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie? sortie = ObjectCache.Get<CurrentSortie>("current_sortie_wf")
-            ?? await ExternalAPIHandler.GetSortie();
+        CurrentSortie? sortie = ObjectCache.Get<CurrentSortie>("current_sortie_wf");
         if (sortie is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. Try again later?");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
+                return; 
+            }
+            sortie = r.Value;
         }
 
         TimeSpan timeLeft = sortie.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();

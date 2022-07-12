@@ -55,14 +55,18 @@ internal class Cycle : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        VallisCycle? cycle = ObjectCache.Get<VallisCycle>("vallis_state_wf")
-            ?? await ExternalAPIHandler.GetVallisCycle();
+        VallisCycle? cycle = ObjectCache.Get<VallisCycle>("vallis_state_wf");
         if (cycle is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<VallisCycle>("vallisCycle");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
+                return;
+            }
+            cycle = r.Value;
         }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
@@ -76,14 +80,18 @@ internal class Cycle : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CambionCycle? cycle = ObjectCache.Get<CambionCycle>("cambion_state_wf")
-            ?? await ExternalAPIHandler.GetCambionCycle();
+        CambionCycle? cycle = ObjectCache.Get<CambionCycle>("cambion_state_wf");
         if (cycle is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<CambionCycle>("cambionCycle");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
+                return;
+            }
+            cycle = r.Value;
         }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
@@ -97,14 +105,18 @@ internal class Cycle : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        ZarimanCycle? cycle = ObjectCache.Get<ZarimanCycle>("zariman_state_wf")
-            ?? await ExternalAPIHandler.GetZarimanCycle();
+        ZarimanCycle? cycle = ObjectCache.Get<ZarimanCycle>("zariman_state_wf");
         if (cycle is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<ZarimanCycle>("zarimanCycle");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
+                return;
+            }
+            cycle = r.Value;
         }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");

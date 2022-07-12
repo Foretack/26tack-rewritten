@@ -19,12 +19,16 @@ internal class SteelPath : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        SteelPathRewards? rewards = ObjectCache.Get<SteelPathRewards>("steelpath_wf")
-            ?? await ExternalAPIHandler.GetSteelPathRewards();
+        SteelPathRewards? rewards = ObjectCache.Get<SteelPathRewards>("steelpath_wf");
         if (rewards is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error getting Steel Path data :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, There was an error getting Steel Path data :( ({r.Exception.Message})");
+                return;
+            }
+            rewards = r.Value;
         }
 
         TimeSpan timeLeft = rewards.expiry - DateTime.Now;

@@ -18,13 +18,18 @@ internal class Invasions : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[]? invasionNodes = ObjectCache.Get<InvasionNode[]>("invasions_wf")
-            ?? await ExternalAPIHandler.GetInvasions();
+        InvasionNode[]? invasionNodes = ObjectCache.Get<InvasionNode[]>("invasions_wf");
         if (invasionNodes is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :(");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :( ({r.Exception.Message})");
+                return; 
+            }
+            invasionNodes = r.Value;
         }
+
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
         ObjectCache.Put("invasions_wf", invasionNodes, 300);

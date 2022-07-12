@@ -20,12 +20,16 @@ internal class Alerts : IChatCommand
         string channel = ctx.IrcMessage.Channel;
         StringBuilder ab = new StringBuilder();
 
-        Alert[]? alerts = ObjectCache.Get<Alert[]>("alerts_wf")
-            ?? await ExternalAPIHandler.GetAlerts();
+        Alert[]? alerts = ObjectCache.Get<Alert[]>("alerts_wf");
         if (alerts is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad");
-            return;
+            var r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
+            if (!r.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad ({r.Exception.Message})");
+                return; 
+            }
+            alerts = r.Value;
         }
 
         string[] rewards = alerts

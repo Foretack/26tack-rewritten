@@ -21,7 +21,7 @@ internal class Fissures : IChatCommand
 
         string fissuresString;
 
-        Fissure[]? fissures = await ExternalAPIHandler.GetFissures();
+        Fissure[]? fissures = (await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures")).Value;
         if (fissures is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving fissure data PoroSad");

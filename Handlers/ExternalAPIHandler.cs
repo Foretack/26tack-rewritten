@@ -81,65 +81,6 @@ internal static class ExternalAPIHandler
 
     #region Warframe
     private const string WarframeBaseUrl = "https://api.warframestat.us/pc";
-    public static async Task<Fissure[]?> GetFissures()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream fResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/fissures");
-            Fissure[] fissures = (await JsonSerializer.DeserializeAsync<Fissure[]>(fResponse))!;
-            return fissures;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch current fissures fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-
-    public static async Task<Alert[]?> GetAlerts()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream aResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/alerts");
-            Alert[] alerts = (await JsonSerializer.DeserializeAsync<Alert[]>(aResponse))!;
-            return alerts;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch current alerts fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-
-    public static async Task<CurrentSortie?> GetSortie()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream aResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/sortie?language=en");
-            CurrentSortie sortie = (await JsonSerializer.DeserializeAsync<CurrentSortie>(aResponse))!;
-            return sortie;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch current sortie fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
 
     public static async Task<CetusCycle?> GetCetusCycle()
     {
@@ -155,63 +96,6 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to fetch cetus cycle fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-    public static async Task<VallisCycle?> GetVallisCycle()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/vallisCycle");
-            VallisCycle cycle = (await JsonSerializer.DeserializeAsync<VallisCycle>(cResponse))!;
-            return cycle;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch vallis cycle fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-    public static async Task<CambionCycle?> GetCambionCycle()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/cambionCycle");
-            CambionCycle cycle = (await JsonSerializer.DeserializeAsync<CambionCycle>(cResponse))!;
-            return cycle;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch cambion cycle fdm");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-    public static async Task<ZarimanCycle?> GetZarimanCycle()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream zResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/zarimanCycle?lang=en");
-            ZarimanCycle cycle = (await JsonSerializer.DeserializeAsync<ZarimanCycle>(zResponse))!;
-            return cycle;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch Zariman cycle fdm");
             Database.Database db = new Database.Database();
             await db.LogException(ex);
             return null;
@@ -256,144 +140,32 @@ internal static class ExternalAPIHandler
         }
     }
 
-    public static async Task<InvasionNode[]?> GetInvasions()
+    public static async Task<Result<T>> WarframeStatusApi<T>(string endpoint, string platform = "pc", string language = "en", int timeout = 5) 
     {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(2);
+        HttpClient caller = new HttpClient();
+        caller.Timeout = TimeSpan.FromSeconds(timeout);
 
         try
         {
-            Stream iResponse = await requests.GetStreamAsync("https://api.warframestat.us/pc/invasions?lang=en");
-            InvasionNode[] invasions = (await JsonSerializer.DeserializeAsync<InvasionNode[]>(iResponse))!;
-            return invasions;
+            string pStr = string.IsNullOrEmpty(platform) ? string.Empty : $"{platform}/";
+            string langStr = string.IsNullOrEmpty(language) ? string.Empty : $"?lang={language}";
+            Stream response = await caller.GetStreamAsync($"{WarframeBaseUrl}/{pStr}{endpoint}{langStr}");
+            caller.Dispose();
+            T value =  (await JsonSerializer.DeserializeAsync<T>(response))!;
+            return new Result<T>(value, true, default!);
+        }
+        catch (TimeoutException tex)
+        {
+            Log.Warning($"Call for `{typeof(T)}` timed out ({timeout}s)");
+            return new Result<T>(default!, false, tex);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to fetch invasions");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-
-    public static async Task<SteelPathRewards?> GetSteelPathRewards()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream rResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/steelPath?lang=en");
-            SteelPathRewards rewards = (await JsonSerializer.DeserializeAsync<SteelPathRewards>(rResponse))!;
-            return rewards;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to fetch steel path rewards");
-            Database.Database db = new Database.Database();
-            await db.LogException(ex);
-            return null;
-        }
-    }
-
-    public static async Task<ItemDropData[]?> GetItemDropData(string itemName)
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(2.5);
-
-        try
-        {
-            Stream iResponse = await requests.GetStreamAsync($"https://api.warframestat.us/drops/search/{itemName}");
-            ItemDropData[] rewards = (await JsonSerializer.DeserializeAsync<ItemDropData[]>(iResponse))!;
-            return rewards;
-        }
-        catch (Exception ex)
-        {
-            if (ex is TaskCanceledException)
-            {
-                Log.Error($"Fetching drop data for \"{itemName}\" timed out");
-            }
-            else
-            {
-                Log.Error( $"Failed to fetch drop data for \"{itemName}\" ({ex.Message})");
-            }
-            return null;
-        }
-    }
-
-    public static async Task<ModInfo?> GetModInfo(string modName)
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(2.5);
-
-        try
-        {
-            Stream mResponse = await requests.GetStreamAsync($"https://api.warframestat.us/mods/{modName}");
-            ModInfo mod = (await JsonSerializer.DeserializeAsync<ModInfo>(mResponse))!;
-            return mod;
-        }
-        catch (Exception ex)
-        {
-            if (ex is TaskCanceledException)
-            {
-                Log.Error($"Fetching info about \"{modName}\" timed out");
-            }
-            else
-            {
-                Log.Error( $"Failed to fetch info about \"{modName}\" ({ex.Message})");
-            }
-            return null;
-        }
-    }
-
-    public static async Task<VoidTrader?> GetBaroInfo()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(5);
-
-        try
-        {
-            Stream bResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/voidTrader?lang=en");
-            VoidTrader baro = (await JsonSerializer.DeserializeAsync<VoidTrader>(bResponse))!;
-            return baro;
-        }
-        catch (Exception ex)
-        {
-            if (ex is TaskCanceledException)
-            {
-                Log.Warning($"Fetching baro info timed out");
-            }
-            else
-            {
-                Log.Warning( $"Failed to fetch info about baro ({ex.Message})");
-            }
-            return null;
-        }
-    }
-
-    public static async Task<WarframeNewsObj[]?> GetWarframeNews()
-    {
-        HttpClient requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(5);
-
-        try
-        {
-            Stream nResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/news?lang=en");
-            WarframeNewsObj[] news = (await JsonSerializer.DeserializeAsync<WarframeNewsObj[]>(nResponse))!;
-            return news;
-        }
-        catch (Exception ex)
-        {
-            if (ex is TaskCanceledException)
-            {
-                Log.Warning($"Fetching Warframe news info timed out");
-            }
-            else
-            {
-                Log.Warning($"Failed to fetch info about Warframe news ({ex.Message})");
-            }
-            return null;
+            Log.Error(ex, $"Exception thrown during api call for `{typeof(T)}`");
+            return new Result<T>(default!, false, ex);
         }
     }
     #endregion
 }
+
+public record struct Result<T>(T Value, bool Success, Exception Exception);
