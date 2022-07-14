@@ -2,7 +2,7 @@
 using Tack.Interfaces;
 using Tack.Models;
 using C = Tack.Core.Core;
-using Db = Tack.Database.Database;
+using Tack.Database;
 
 namespace Tack.Commands.AdminSet;
 internal class Update : IChatCommand
@@ -18,7 +18,7 @@ internal class Update : IChatCommand
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        Db db = new Db();
+        DbQueries db = new DbQueries();
         await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
 
         string? pullResult = await C.GitPull();

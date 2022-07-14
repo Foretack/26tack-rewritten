@@ -2,6 +2,7 @@
 using Serilog;
 using Tack.Json;
 using Tack.Models;
+using Tack.Database;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
@@ -96,7 +97,7 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to fetch cetus cycle fdm");
-            Database.Database db = new Database.Database();
+            DbQueries db = new DbQueries();
             await db.LogException(ex);
             return null;
         }
@@ -134,7 +135,7 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to fetch relic data");
-            Database.Database db = new Database.Database();
+            DbQueries db = new DbQueries();
             await db.LogException(ex);
             return null;
         }

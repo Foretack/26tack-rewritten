@@ -5,7 +5,7 @@ using Serilog.Core;
 using Tack.Handlers;
 using CliWrap;
 using CliWrap.Buffered;
-using Db = Tack.Database.Database;
+using Tack.Database;
 
 namespace Tack.Core;
 public static class Core
@@ -26,7 +26,7 @@ public static class Core
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
             .CreateLogger();
 
-        Db db = new Db();
+        DbQueries db = new DbQueries();
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
         Config.Links = new Links();
@@ -61,7 +61,7 @@ public static class Core
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal($"The program is restarting...");
-        Db db = new Db();
+        DbQueries db = new DbQueries();
         #pragma warning disable CS4014
         db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
         #pragma warning restore CS4014

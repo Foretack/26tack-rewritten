@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
-using Db = Tack.Database.Database;
+using Db = Tack.Database.DbQueries;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
@@ -49,6 +49,10 @@ internal class Debug : IChatCommand
             StreamMonitor.Reset();
             StreamMonitor.Start();
             return;
+        }
+        if (args[0] == "reloadtriggers")
+        {
+            MessageHandler.ReloadDiscordTriggers();
         }
     }
 

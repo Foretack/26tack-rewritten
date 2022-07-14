@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
 
@@ -25,7 +26,7 @@ internal class Suggest : IChatCommand
             return;
         }
 
-        Database.Database db = new Database.Database();
+        DbQueries db = new DbQueries();
         PartialUser partialUser = new PartialUser(user, rawname, id);
         bool success = await db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
 

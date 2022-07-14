@@ -65,18 +65,18 @@ internal abstract class DbConnection : IDisposable
             try
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
-                List<int> ordinals = new List<int>();
+                List<short> ordinals = new List<short>();
                 if (!ValuesSchema!.Contains("*") && await r.ReadAsync())
                 {
                     foreach (var column in ValuesSchema!) 
                     { 
-                        ordinals.Add(r.GetOrdinal(column)); 
+                        ordinals.Add((short)r.GetOrdinal(column)); 
                     }
                 }
                 else if (await r.ReadAsync())
                 {
                     int columnCount = r.GetColumnSchema().Count;
-                    for (int i = 0; i < columnCount; i++) ordinals.Add(i);
+                    for (short i = 0; i < columnCount; i++) ordinals.Add(i);
                 }
                 await r.CloseAsync();
 
@@ -85,7 +85,7 @@ internal abstract class DbConnection : IDisposable
                 List<object> valuesInner = new List<object>();
                 while (await r2.ReadAsync())
                 {
-                    foreach (int o in ordinals) { valuesInner.Add(r.GetValue(o)); }
+                    foreach (short o in ordinals) { valuesInner.Add(r.GetValue(o)); }
                     values.Add(valuesInner.ToArray());
                     valuesInner.Clear();
                 }
@@ -98,7 +98,8 @@ internal abstract class DbConnection : IDisposable
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Exception was thrown during {QueryType} query");
+                Log.Error(ex, $"Exception was thrown during {QueryType} query" +
+                    $"\n Full Query:\n {query}");
             }
         }
         return new ExecutionResult(false, null);

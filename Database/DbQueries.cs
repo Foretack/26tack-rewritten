@@ -5,8 +5,10 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Database;
-internal class Database : DbConnection
+internal class DbQueries : DbConnection
 {
+    public static DbQueries NewInstance() => new DbQueries();
+
     public async Task<bool> LogException(Exception exception)
     {
         var q = await
@@ -202,5 +204,26 @@ internal class Database : DbConnection
         return q.Success;
     }
 
-    ~Database() => Dispose();
+    public DiscordEvent[] GetDiscordEvents()
+    {
+        var q =
+            Select()
+            .Table("discord_triggers")
+            .Schema("*")
+            .TryExecute()
+            .Result;
+
+        DiscordEvent[] events = q.Results!.Select(x => new DiscordEvent(
+            ulong.Parse(x[0].ToString()!),
+            (string)x[1],
+            x[2] is DBNull ? null : (string)x[2],
+            (string)x[3],
+            x[4] is DBNull ? null : (string)x[4],
+            (string)x[5]
+            )).ToArray();
+        
+        return events;
+    }
+
+    ~DbQueries() => Dispose();
 }

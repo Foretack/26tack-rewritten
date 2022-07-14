@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
 using Tack.Interfaces;
 using Tack.Models;
-using Db = Tack.Database.Database;
+using Tack.Database;
 
 namespace Tack.Commands.AdminSet;
 internal class EditUser : IChatCommand
@@ -52,14 +52,14 @@ internal class EditUser : IChatCommand
 
     private async Task<bool> BlacklistUser(string username, string id)
     {
-        Db db = new Db();
+        DbQueries db = new DbQueries();
         bool s = await db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
         return s;
     }
     private async Task<bool> WhitelistUser(string username)
     {
-        Db db = new Db();
+        DbQueries db = new DbQueries();
         bool s = await db.WhitelistUser(username);
         Permission.WhitelistUser(username);
         return s;

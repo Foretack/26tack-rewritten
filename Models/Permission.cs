@@ -12,9 +12,8 @@ public class Permission
     private bool IsVIP { get; set; }
     private bool IsSubscriber { get; set; }
 
-    private static readonly Database.Database Db = new Database.Database();
-    private static readonly List<string> BlacklistedUsers = Db.GetBlacklistedUsers().Result.ToList();
-    private static readonly List<string> WhitelistedUsers = Db.GetWhitelistedUsers().Result.ToList();
+    private static readonly List<string> BlacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
+    private static readonly List<string> WhitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
 
     public Permission(ChatMessage ircMessage)
     {

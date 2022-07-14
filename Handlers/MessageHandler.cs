@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using Serilog;
 using Tack.Core;
+using Tack.Database;
 using Tack.Misc;
 using Tack.Models;
 using Tack.Utils;
@@ -13,28 +14,42 @@ namespace Tack.Handlers;
 internal static class MessageHandler
 {
     #region Properties
-    private static ChatColor CurrentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    private static ChatColor CurrentColor { get; set; } = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    private static DiscordEvent[] DiscordEvents { get; set; } = DbQueries.NewInstance().GetDiscordEvents();
+    private static readonly Dictionary<string, string> LastSentMessage = new Dictionary<string, string>();
     #endregion
 
     #region Initialization
-    internal static void Initialize()
+    public static void Initialize()
     {
         AnonymousClient.Client.OnMessageReceived += OnMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }
+
+    public static void ReloadDiscordTriggers() { DiscordEvents = DbQueries.NewInstance().GetDiscordEvents(); }
     #endregion
 
     #region Sending
-    public static void SendMessage(string channel, string message) { MainClient.Client.SendMessage(channel, message); }
+    public static void SendMessage(string channel, string message) 
+    {
+        message = message.Length >= 500 ? message[..495] + "..." : message;
+        if (!LastSentMessage.ContainsKey(channel)) LastSentMessage.Add(channel, message);
+        else if (LastSentMessage[channel] == message)
+        {
+            message += "󠀀";
+        } 
+        MainClient.Client.SendMessage(channel, message);
+        LastSentMessage[channel] = message;
+    }
     public static void SendColoredMessage(string channel, string message, ChatColor color)
     {
         if (CurrentColor != color)
         {
-            MainClient.Client.SendMessage(Config.Auth.Username, $"/color {color}");
+            SendMessage(Config.Auth.Username, $"/color {color}");
             CurrentColor = color;
         }
-        MainClient.Client.SendMessage(channel, "/me " + message);
+        SendMessage(channel, "/me " + message);
     }
     public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
     {
@@ -105,7 +120,7 @@ internal static class MessageHandler
         string author = socketMessage.Author.Username.StripDescriminator();
         var embeds = socketMessage.Embeds;
 
-        if (content.Length < 5
+        if (content.Length < 10
         && embeds.Count > 0)
         {
             int embedCount = embeds.Count;
@@ -122,7 +137,6 @@ internal static class MessageHandler
             content += $" [+{embedCount} embed(s)]";
         }
 
-        content = content.Length >= 425 ? content[..425] + "..." : content;
         if (channelID == Config.Discord.NewsChannelID
         && author.Contains("#api-announcements"))
         {
@@ -130,15 +144,26 @@ internal static class MessageHandler
                                 "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty).StripSymbols(),
                                 ChatColor.BlueViolet);
         }
-        if (channelID == Config.Discord.NewsChannelID)
-        {
-            SendColoredMessage(Config.RelayChannel, $"{author}📢 {content.StripSymbols()}", ChatColor.Blue);
-        }
 
+        var evs = DiscordEvents.Where(x => x.ChannelID == channelID && author.Contains(x.NameContains)).ToArray();
+        foreach (var ev in evs)
+        {
+            string newContent = content;
+            if (ev is null) return;
+
+            if (ev.Remove is not null) newContent = ev.Remove == "_ALL_" ? string.Empty : newContent.Replace(ev.Remove, string.Empty);
+            if (ev.Prepend is not null) newContent = $"{ev.Prepend} {newContent}";
+            ChatColor color;
+            if (Enum.TryParse<ChatColor>(ev.Color, out var clr)) color = clr;
+            else color = ChatColor.BlueViolet;
+
+            SendColoredMessage(ev.OutputChannel, newContent, color);
+        }
     }
     #endregion
 }
 
+internal record DiscordEvent(ulong ChannelID, string NameContains, string? Remove, string OutputChannel, string? Prepend, string Color);
 internal enum ChatColor
 {
     FANCY_NOT_SET_STATE_NAME,

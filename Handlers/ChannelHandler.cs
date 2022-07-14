@@ -8,17 +8,17 @@ using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using TwitchLib.Client.Events;
+using Tack.Database;
 
 namespace Tack.Handlers;
 internal static class ChannelHandler
 {
-    private static readonly Database.Database Db = new Database.Database();
     #region Properties
     public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
     public static string[] JLChannels { get; private set; } = Array.Empty<string>();
-    public static List<Channel> FetchedChannels { get; private set; } = new List<Channel>(Db.GetChannels().Result);
+    public static List<Channel> FetchedChannels { get; private set; } = new List<Channel>(DbQueries.NewInstance().GetChannels().Result);
 
     private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
     private static bool IsInProgress { get; set; } = false;
@@ -79,7 +79,7 @@ internal static class ChannelHandler
         if (priority >= 50) MainClient.Client.JoinChannel(channel);
         AnonymousClient.Client.JoinChannel(channel);
 
-        Database.Database db = new Database.Database();
+        DbQueries db = new DbQueries();
         bool s = await db.AddChannel(ec);
         return s;
     }
@@ -92,7 +92,7 @@ internal static class ChannelHandler
             AnonJoinedChannels.Remove(target);
             AnonymousClient.Client.LeaveChannel(channel);
 
-            Database.Database db = new Database.Database();
+            DbQueries db = new DbQueries();
             await db.RemoveChannel(target);
         }
         catch (Exception ex)
@@ -119,7 +119,7 @@ internal static class ChannelHandler
     public static async Task ReloadFetchedChannels()
     {
         int pCount = FetchedChannels.Count;
-        FetchedChannels = new List<Channel>(await Db.GetChannels());
+        FetchedChannels = new List<Channel>(await DbQueries.NewInstance().GetChannels());
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
