@@ -137,14 +137,6 @@ internal static class MessageHandler
             content += $" [+{embedCount} embed(s)]";
         }
 
-        if (channelID == Config.Discord.NewsChannelID
-        && author.Contains("#api-announcements"))
-        {
-            SendColoredMessage("pajlada",
-                                "imGlitch 🚨 " + content.Replace("@Twitch Announcements", string.Empty).StripSymbols(),
-                                ChatColor.BlueViolet);
-        }
-
         var evs = DiscordEvents.Where(x => x.ChannelID == channelID && author.Contains(x.NameContains)).ToArray();
         foreach (var ev in evs)
         {
