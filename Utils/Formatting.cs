@@ -59,7 +59,7 @@ internal static class Formatting
         return str
             .Replace('*', nothing)
             .Replace('_', nothing)
-            .Replace('|', nothing);
+            .Replace("||", string.Empty);
     }
 
     public static string ShortenSource(this string str)

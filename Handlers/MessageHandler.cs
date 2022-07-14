@@ -140,7 +140,7 @@ internal static class MessageHandler
         var evs = DiscordEvents.Where(x => x.ChannelID == channelID && author.Contains(x.NameContains)).ToArray();
         foreach (var ev in evs)
         {
-            string newContent = content;
+            string newContent = content.StripSymbols();
             if (ev is null) return;
 
             if (ev.Remove is not null) newContent = ev.Remove == "_ALL_" ? string.Empty : newContent.Replace(ev.Remove, string.Empty);
