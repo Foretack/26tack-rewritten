@@ -37,7 +37,7 @@ internal class Alerts : IChatCommand
             .Select(x => $"{x.mission.faction} / {x.mission.type} [{x.mission.reward.asString}] ")
             .ToArray();
 
-        ab.Append($"{alerts.Length} Alert(s) 🡺 ")
+        ab.Append($"{alerts.Length} {"Alert".PluralizeOn(alerts.Length)} 🡺 ")
             .Append(string.Join(" ● ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);

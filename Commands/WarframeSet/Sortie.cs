@@ -39,8 +39,8 @@ internal class Sortie : IChatCommand
         }
         string sortieString = $"{sortie.faction} -- " +
             $"● {sortie.variants[0].missionType} [{sortie.variants[0].modifier}] " +
-            $"●● {sortie.variants[1].missionType} [{sortie.variants[1].modifier}] " +
-            $"●●● {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
+            $"■ {sortie.variants[1].missionType} [{sortie.variants[1].modifier}] " +
+            $"◆ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);

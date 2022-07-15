@@ -21,8 +21,8 @@ internal class Ping : IChatCommand
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
         TimeSpan uptime = DateTime.Now - C.StartupTime;
 
-        MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} {latency}ms " +
-            $"◆ Memory: {C.GetMemoryUsage()}MB " +
+        MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} ● {latency}ms " +
+            $"■ Memory: {C.GetMemoryUsage()}MB " +
             $"◆ Uptime: {uptime.FormatTimeLeft()}");
         return Task.CompletedTask;
     }

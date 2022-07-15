@@ -78,4 +78,8 @@ internal static class Formatting
         }
         return "@" + str.Split(':')[1];
     }
+
+    public static string PluralizeOn(this string str, int count) => count == 1 ? str : str + 's';
+    public static string PluralizeOn(this string str, int count, bool withE) => count == 1 && withE ? str : str + "es";
+    public static string PluralizeOn(this string str, int count, string specialCase) => count == 1 ? str : specialCase;
 }

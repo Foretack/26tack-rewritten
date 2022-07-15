@@ -125,16 +125,17 @@ internal static class MessageHandler
         {
             int embedCount = embeds.Count;
             Embed embed = embeds.First();
-            content = $"{embed.Title} " +
-                $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
-                $"{(embedCount > 1 ? $"[+{embedCount - 1} embed(s)]" : string.Empty)}";
+            content = 
+                embed.Title +
+                embed.Url is null ? string.Empty : $" ( {embed.Url} ) " +
+                (embedCount > 1 ? $"[+{embedCount - 1} {"embed".PluralizeOn(embedCount - 1)}]" : string.Empty);
         }
         else if (content.Length >= 50
         && content.Length <= 450
         && embeds.Count > 0)
         {
             int embedCount = embeds.Count;
-            content += $" [+{embedCount} embed(s)]";
+            content += $" [+{embedCount} {"embed".PluralizeOn(embedCount)}]";
         }
 
         var evs = DiscordEvents.Where(x => x.ChannelID == channelID && author.Contains(x.NameContains)).ToArray();
