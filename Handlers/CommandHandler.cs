@@ -54,6 +54,7 @@ internal static class CommandHandler
                 }
 
                 IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
+                if (!ctx.Permission.Permits(command)) return;
                 Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
                                            ctx.IrcMessage.Channel,
                                            handler.UseUnifiedCooldowns ? handler : command.Info());

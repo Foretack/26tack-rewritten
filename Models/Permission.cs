@@ -1,4 +1,5 @@
 ﻿using Tack.Database;
+using Tack.Interfaces;
 using TwitchLib.Client.Models;
 
 namespace Tack.Models;
@@ -38,6 +39,8 @@ public class Permission
 
         return level;
     }
+
+    public bool Permits(IChatCommand command) => Level >= (int)command.Info().Permission;
 
     public static void BlacklistUser(string username) { BlacklistedUsers.Add(username); }
     public static void UnBlacklistUser(string username) { BlacklistedUsers.Remove(username); }
