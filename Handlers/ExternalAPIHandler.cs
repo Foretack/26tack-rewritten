@@ -155,7 +155,7 @@ internal static class ExternalAPIHandler
             T value =  (await JsonSerializer.DeserializeAsync<T>(response))!;
             return new Result<T>(value, true, default!);
         }
-        catch (TimeoutException tex)
+        catch (TaskCanceledException tex)
         {
             Log.Warning($"Call for `{typeof(T)}` timed out ({timeout}s)");
             return new Result<T>(default!, false, tex);
