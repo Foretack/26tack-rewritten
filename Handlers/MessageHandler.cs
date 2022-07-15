@@ -120,7 +120,7 @@ internal static class MessageHandler
         string author = socketMessage.Author.Username.StripDescriminator();
         var embeds = socketMessage.Embeds;
 
-        if (content.Length < 10
+        if (content.Length < 50
         && embeds.Count > 0)
         {
             int embedCount = embeds.Count;
@@ -129,7 +129,7 @@ internal static class MessageHandler
                 $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
                 $"{(embedCount > 1 ? $"[+{embedCount - 1} embed(s)]" : string.Empty)}";
         }
-        else if (content.Length >= 5
+        else if (content.Length >= 50
         && content.Length <= 450
         && embeds.Count > 0)
         {
