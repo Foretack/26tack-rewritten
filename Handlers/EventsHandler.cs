@@ -19,7 +19,7 @@ internal static class EventsHandler
         timer.Interval = TimeSpan.FromMinutes(2.5).TotalMilliseconds;
         timer.AutoReset = true;
         timer.Enabled = true;
-        timer.Elapsed += WarframeUpdates;
+        timer.Elapsed += async (s, e) => await WarframeUpdates();
 
         Log.Debug($"{typeof(EventsHandler)} started");
     }
@@ -30,7 +30,7 @@ internal static class EventsHandler
     #endregion
 
     #region Warframe stuff
-    private static async void WarframeUpdates(object? sender, System.Timers.ElapsedEventArgs e)
+    private static async Task WarframeUpdates()
     {
         VoidTrader? baro = ObjectCache.Get<VoidTrader>("baro_data")
             ?? (await ExternalAPIHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
@@ -62,23 +62,28 @@ internal static class EventsHandler
             BaroActive = false;
         }
 
-        // Skip if nothing changes
-        if (LatestNews.Message == news[0].Message) return;
-        // If the news is an update, send to pajlada's chat
-        if (news[0].Update)
+        // Lazy fix
+        try
         {
+            // Skip if nothing changes
+            if (LatestNews.Message == news[0].Message) return;
+            // If the news is an update, send to pajlada's chat
+            if (news[0].Update)
+            {
+                MessageHandler.SendColoredMessage(
+                    "pajlada",
+                    $"Warframe update 🚨 {news[0].Message} ( {news[0].Link} ) 🚨 ",
+                    ChatColor.Red);
+            }
+            // Send news regardless to relay channel
             MessageHandler.SendColoredMessage(
-                "pajlada",
-                $"Warframe update 🚨 {news[0].Message} ( {news[0].Link} ) 🚨 ",
-                ChatColor.Red);
+                Config.RelayChannel,
+                $"Warframe news updated! {news[0].Message} ( {news[0].Link} )",
+                ChatColor.CadetBlue);
+            // Set new news as latest
+            LatestNews = news[0];
         }
-        // Send news regardless to relay channel
-        MessageHandler.SendColoredMessage(
-            Config.RelayChannel,
-            $"Warframe news updated! {news[0].Message} ( {news[0].Link} )",
-            ChatColor.CadetBlue);
-        // Set new news as latest
-        LatestNews = news[0];
+        catch (InvalidOperationException) { Log.Warning("Error processing Warframe news"); }
     }
     #endregion
 }
