@@ -68,11 +68,6 @@ public static class Core
         Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
-
-    public static float GetMemoryUsage()
-    {
-        return (float)Math.Truncate(Process.GetCurrentProcess().PrivateMemorySize64 / Math.Pow(10, 6) * 100) / 100;
-    }
     #endregion
 
     public static async Task<string?> GitPull()

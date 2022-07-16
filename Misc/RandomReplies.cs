@@ -6,7 +6,8 @@ internal static class RandomReplies
         new string[] { "FeelsDankMan 🏓 💥", "PONG!" },
         new string[] { "FeelsDankMan 🤜 🩸", "🔔"},
         new string[] { "hi", "ppL"},
-        new string[] { "ApuApustaja", "PETPET" }
+        new string[] { "ApuApustaja", "PETPET" },
+        new string[] { "FeelsDankMan [", "] get caged lol" }
     };
     public static readonly string[] StreamOnlineEmotes = new string[]
     {
