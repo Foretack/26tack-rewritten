@@ -7,6 +7,7 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Cycle : IChatCommand
 {
+    private readonly string[] CycleTypes = { "cetus", "vallis", "cambion", "drift", "zariman" };
     public Command Info() => new(
         name: "cycle",
         description: "Get the current cycle of the specified open-world node",
@@ -16,74 +17,23 @@ internal class Cycle : IChatCommand
 
     public async Task Run(CommandContext ctx)
     {
-        ValueTask task(CommandContext ctx) => ctx.CommandName switch
+        if (!CycleTypes.Contains(ctx.CommandName))
         {
-            "cetus" => SendCetusCycle(ctx),
-            "vallis" => SendVallisCycle(ctx),
-            "cambion" => SendCambionCycle(ctx),
-            "drift" => SendCambionCycle(ctx),
-            "zariman" => SendZarimanCycle(ctx),
-            _ => Other(ctx)
-        };
-
-        await task(ctx);
+            await Other(ctx);
+            return;
+        }
+        await SendCycleOf(ctx);
     }
 
-    private async ValueTask SendCetusCycle(CommandContext ctx)
+    private async ValueTask SendCycle<T>(CommandContext ctx, string cycleName) where T : IWorldCycle
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
-
-        CetusCycle? cycle = ObjectCache.Get<CetusCycle>("cetus_state_wf")
-            ?? await ExternalAPIHandler.GetCetusCycle();
+        
+        T? cycle = ObjectCache.Get<T>(cycleName + "_wf");
         if (cycle is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
-            return;
-        }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-        if (timeLeft.TotalSeconds < 0)
-        {
-            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-            return;
-        }
-        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isDay ? $"☀" : "🌙")} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("cetus_state_wf", cycle, (int)timeLeft.TotalSeconds);
-    }
-    private async ValueTask SendVallisCycle(CommandContext ctx)
-    {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
-
-        VallisCycle? cycle = ObjectCache.Get<VallisCycle>("vallis_state_wf");
-        if (cycle is null)
-        {
-            var r = await ExternalAPIHandler.WarframeStatusApi<VallisCycle>("vallisCycle");
-            if (!r.Success)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :(");
-                return;
-            }
-            cycle = r.Value;
-        }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
-        if (timeLeft.TotalSeconds < 0)
-        {
-            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-            return;
-        }
-        MessageHandler.SendMessage(channel, $"@{user}, {(cycle.isWarm ? "🔥" : '❄')} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("vallis_state_wf", cycle, (int)timeLeft.TotalSeconds);
-    }
-    private async ValueTask SendCambionCycle(CommandContext ctx)
-    {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
-
-        CambionCycle? cycle = ObjectCache.Get<CambionCycle>("cambion_state_wf");
-        if (cycle is null)
-        {
-            var r = await ExternalAPIHandler.WarframeStatusApi<CambionCycle>("cambionCycle");
+            var r = await ExternalAPIHandler.WarframeStatusApi<T>(cycleName);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
@@ -91,40 +41,16 @@ internal class Cycle : IChatCommand
             }
             cycle = r.Value;
         }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
+        TimeSpan timeLeft = cycle.Expiry.ToLocalTime() - DateTime.Now;
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.active} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("cambion_state_wf", cycle, (int)timeLeft.TotalSeconds);
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {timeLeft.FormatTimeLeft()}");
+        ObjectCache.Put(cycleName + "_wf", cycle, (int)timeLeft.TotalSeconds);
     }
-    private async ValueTask SendZarimanCycle(CommandContext ctx)
-    {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
 
-        ZarimanCycle? cycle = ObjectCache.Get<ZarimanCycle>("zariman_state_wf");
-        if (cycle is null)
-        {
-            var r = await ExternalAPIHandler.WarframeStatusApi<ZarimanCycle>("zarimanCycle");
-            if (!r.Success)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
-                return;
-            }
-            cycle = r.Value;
-        }
-        TimeSpan timeLeft = cycle.expiry.ToLocalTime() - DateTime.Now;
-        if (timeLeft.TotalSeconds < 0)
-        {
-            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
-            return;
-        }
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.state} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("zariman_state_wf", cycle, (int)timeLeft.TotalSeconds);
-    }
     private async ValueTask Other(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
@@ -136,21 +62,40 @@ internal class Cycle : IChatCommand
             MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <cetus/vallis/cambion/zariman>");
             return;
         }
-
-        ValueTask task(CommandContext ctx) => args[0].ToLower() switch
+        if (!CycleTypes.Contains(args[0].ToLower()))
         {
-            "cetus" => SendCetusCycle(ctx),
-            "vallis" => SendVallisCycle(ctx),
-            "cambion" => SendCambionCycle(ctx),
-            "drift" => SendCambionCycle(ctx),
-            "zariman" => SendZarimanCycle(ctx),
-            _ => new Func<ValueTask>(() =>
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");
-                return new ValueTask();
-            }).Invoke()
-        };
+            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");
+            return;
+        }
 
-        await task(ctx);
+        await SendCycleOf(ctx, args[0]);
+    }
+
+    private async ValueTask SendCycleOf(CommandContext ctx, string? name = null)
+    {
+        string commandName = name ?? ctx.CommandName;
+
+        switch (commandName)
+        {
+            case "vallis":
+                await SendCycle<VallisCycle>(ctx, "vallisCycle");
+                break;
+
+            case "cambion":
+                await SendCycle<CambionCycle>(ctx, "cambionCycle");
+                break;
+
+            case "drift":
+                await SendCycle<CambionCycle>(ctx, "cambionCycle");
+                break;
+
+            case "zariman":
+                await SendCycle<ZarimanCycle>(ctx, "zarimanCycle");
+                break;
+
+            default:
+                await SendCycle<CetusCycle>(ctx, "cetusCycle");
+                break;
+        }
     }
 }

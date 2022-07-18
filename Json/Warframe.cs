@@ -2,6 +2,7 @@
 #pragma warning disable IDE1006
 
 using System.Text.Json.Serialization;
+using Tack.Interfaces;
 
 namespace Tack.Json;
 public class Alert
@@ -67,25 +68,33 @@ public class Variant
     public string modifierDescription { get; set; }
 }
 
-public class CetusCycle
+public class CetusCycle : IWorldCycle
 {
-    public DateTime expiry { get; set; }
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
     public bool isDay { get; set; }
+    public string State { get => isDay ? "☀" : "🌙"; }
 }
-public class CambionCycle
+public class CambionCycle : IWorldCycle
 {
-    public DateTime expiry { get; set; }
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
     public string active { get; set; }
+    public string State { get => active; }
 }
-public class VallisCycle
+public class VallisCycle : IWorldCycle
 {
-    public DateTime expiry { get; set; }
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
     public bool isWarm { get; set; }
+    public string State { get => isWarm ? "🔥" : "❄"; }
 }
-public class ZarimanCycle
+public class ZarimanCycle : IWorldCycle
 {
-    public DateTime expiry { get; set; }
-    public string state { get; set; }
+    [JsonPropertyName("expiry")]
+    public DateTime Expiry { get; set; }
+    [JsonPropertyName("state")]
+    public string State { get; set; }
 }
 
 public class MarketItems
