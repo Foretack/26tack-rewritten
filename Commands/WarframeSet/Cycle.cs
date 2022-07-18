@@ -59,7 +59,7 @@ internal class Cycle : IChatCommand
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <cetus/vallis/cambion/zariman>");
+            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <{string.Join('/', CycleTypes)}>");
             return;
         }
         if (!CycleTypes.Contains(args[0].ToLower()))
