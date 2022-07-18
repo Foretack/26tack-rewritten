@@ -1,5 +1,5 @@
 ﻿using Tack.Commands.BaseSet;
-using Tack.Interfaces;
+using Tack.Nonclass;
 
 namespace Tack.Commands;
 internal class BaseHandler : ChatCommandHandler

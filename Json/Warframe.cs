@@ -2,7 +2,7 @@
 #pragma warning disable IDE1006
 
 using System.Text.Json.Serialization;
-using Tack.Interfaces;
+using Tack.Nonclass;
 
 namespace Tack.Json;
 public class Alert

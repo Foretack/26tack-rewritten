@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Tack.Nonclass;
 
 namespace Tack.Models;
 public class Cooldown
@@ -67,8 +68,4 @@ public class Cooldown
     }
 }
 
-public interface ICooldownOptions
-{
-    public string Name { get; set; }
-    public int[] Cooldowns { get; set; }
-}
+

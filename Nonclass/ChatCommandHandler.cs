@@ -1,14 +1,6 @@
-﻿using Tack.Handlers;
-using Tack.Models;
+﻿using Tack.Models;
 
-namespace Tack.Interfaces;
-
-public interface IChatCommand
-{
-    public Command Info();
-    public Task Run(CommandContext ctx);
-}
-
+namespace Tack.Nonclass;
 public abstract class ChatCommandHandler : ICooldownOptions
 {
     public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();

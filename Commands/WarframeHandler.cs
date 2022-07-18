@@ -1,5 +1,5 @@
 ﻿using Tack.Commands.WarframeSet;
-using Tack.Interfaces;
+using Tack.Nonclass;
 
 namespace Tack.Commands;
 internal class WarframeHandler : ChatCommandHandler

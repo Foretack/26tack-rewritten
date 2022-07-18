@@ -1,5 +1,5 @@
 ﻿using Tack.Database;
-using Tack.Interfaces;
+using Tack.Nonclass;
 using TwitchLib.Client.Models;
 
 namespace Tack.Models;

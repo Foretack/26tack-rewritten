@@ -1,6 +1,6 @@
 ﻿using Tack.Database;
 using Tack.Handlers;
-using Tack.Interfaces;
+using Tack.Nonclass;
 using Tack.Models;
 
 namespace Tack.Commands.BaseSet;

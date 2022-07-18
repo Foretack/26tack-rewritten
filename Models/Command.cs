@@ -1,4 +1,6 @@
-﻿namespace Tack.Models;
+﻿using Tack.Nonclass;
+
+namespace Tack.Models;
 
 public class Command : ICooldownOptions
 {

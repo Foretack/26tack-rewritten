@@ -1,4 +1,4 @@
-﻿using Tack.Interfaces;
+﻿using Tack.Nonclass;
 using Tack.Models;
 using AsyncAwaitBestPractices;
 using Serilog;
@@ -29,6 +29,7 @@ internal static class CommandHandler
     }
     #endregion
 
+    #region Handling
     public static async ValueTask HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
@@ -70,6 +71,7 @@ internal static class CommandHandler
             }
         });
     }
+    #endregion
 }
 
 public record CommandContext(ChatMessage IrcMessage, string[] Args, string CommandName, Permission Permission);

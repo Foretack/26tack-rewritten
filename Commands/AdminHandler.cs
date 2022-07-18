@@ -1,5 +1,5 @@
 ﻿using Tack.Commands.AdminSet;
-using Tack.Interfaces;
+using Tack.Nonclass;
 using Tack.Models;
 
 namespace Tack.Commands;

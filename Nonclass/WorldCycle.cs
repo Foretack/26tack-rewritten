@@ -1,4 +1,4 @@
-﻿namespace Tack.Interfaces;
+﻿namespace Tack.Nonclass;
 public interface IWorldCycle
 {
     public DateTime Expiry { get; set; }
