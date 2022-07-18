@@ -133,7 +133,7 @@ internal class Cycle : IChatCommand
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <cetus/vallis/cambion>");
+            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <cetus/vallis/cambion/zariman>");
             return;
         }
 
