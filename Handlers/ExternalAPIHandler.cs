@@ -81,7 +81,7 @@ internal static class ExternalAPIHandler
     }
 
     #region Warframe
-    private const string WarframeBaseUrl = "https://api.warframestat.us/pc";
+    private const string WarframeBaseUrl = "https://api.warframestat.us/";
 
     public static async Task<CetusCycle?> GetCetusCycle()
     {
