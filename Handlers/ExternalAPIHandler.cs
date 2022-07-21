@@ -150,7 +150,9 @@ internal static class ExternalAPIHandler
         {
             string pStr = string.IsNullOrEmpty(platform) ? string.Empty : $"{platform}/";
             string langStr = string.IsNullOrEmpty(language) ? string.Empty : $"?lang={language}";
-            Stream response = await caller.GetStreamAsync($"{WarframeBaseUrl}/{pStr}{endpoint}{langStr}");
+            string url = $"{WarframeBaseUrl}{pStr}{endpoint}{langStr}";
+            Stream response = await caller.GetStreamAsync(url);
+            Log.Debug($"called {url} [{typeof(T)}]");
             caller.Dispose();
             T value =  (await JsonSerializer.DeserializeAsync<T>(response))!;
             return new Result<T>(value, true, default!);
