@@ -11,7 +11,7 @@ public abstract class ChatCommandHandler : ICooldownOptions
     public virtual short ChannelCooldown { get; } = 5;
     public virtual PermissionLevels Visibility { get; } = PermissionLevels.Everyone;
 
-    internal void AddCommand(Command command)
+    protected void AddCommand(Command command)
     {
         List<string> keys = new List<string>(command.Info.Aliases)
         {
