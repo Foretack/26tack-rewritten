@@ -3,8 +3,8 @@ using Tack.Models;
 
 namespace Tack.Nonclass;
 
-public interface IChatCommand
+public abstract class Command
 {
-    public Command Info();
-    public Task Run(CommandContext ctx);
+    public abstract CommandInfo Info { get; }
+    public abstract Task Execute(CommandContext ctx);
 }

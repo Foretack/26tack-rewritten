@@ -5,17 +5,18 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Cycle : IChatCommand
+internal class Cycle : Command
 {
     private readonly string[] CycleTypes = { "cetus", "vallis", "cambion", "drift", "zariman" };
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "cycle",
         description: "Get the current cycle of the specified open-world node",
         aliases: new string[] { "cycles", "cetus", "vallis", "cambion", "drift", "zariman" },
-        cooldowns: new int[] { 5, 3 }
-        );
+        userCooldown: 5,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         if (!CycleTypes.Contains(ctx.CommandName))
         {

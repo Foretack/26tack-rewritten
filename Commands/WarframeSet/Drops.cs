@@ -1,18 +1,18 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 
 namespace Tack.Commands.WarframeSet;
-internal class Drops : IChatCommand
+internal class Drops : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "drops",
         description: "Get the best location to farm a specific item",
         aliases: new string[] { "where" }
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

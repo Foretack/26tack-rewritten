@@ -4,15 +4,15 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.BaseSet;
-internal class RandomJoke : IChatCommand
+internal class RandomJoke : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "randomjoke",
         description: "Get a random joke LuL ",
         aliases: new string[] { "4head", "rj" }
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

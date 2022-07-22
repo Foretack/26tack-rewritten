@@ -3,15 +3,15 @@ using Tack.Nonclass;
 using Tack.Models;
 
 namespace Tack.Commands.AdminSet;
-internal class PartChannel : IChatCommand
+internal class PartChannel : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "part",
         description: "Part the specified channel",
         permission: PermissionLevels.Whitelisted
-        );
+    );
     
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

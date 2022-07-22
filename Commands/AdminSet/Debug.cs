@@ -5,16 +5,15 @@ using Db = Tack.Database.DbQueries;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
-internal class Debug : IChatCommand
+internal class Debug : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "debug",
         description: "command for testing stuff! Xdxd",
         permission: PermissionLevels.Whitelisted
-        );
+    );
     
-
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

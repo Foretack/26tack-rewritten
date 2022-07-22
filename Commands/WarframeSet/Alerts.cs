@@ -6,15 +6,16 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Alerts : IChatCommand
+internal class Alerts : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "alerts",
         description: "Get the current alerts in the system",
-        cooldowns: new int[] { 10, 3 }
-        );
+        userCooldown: 10,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

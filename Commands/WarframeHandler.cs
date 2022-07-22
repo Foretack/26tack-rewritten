@@ -4,13 +4,12 @@ using Tack.Nonclass;
 namespace Tack.Commands;
 internal class WarframeHandler : ChatCommandHandler
 {
+    public override string Name => "Warframe";
+    public override string Prefix => "wf>";
     internal const string BaseUrl = "https://api.warframestat.us/pc";
 
     public WarframeHandler()
     {
-        Name = "Warframe";
-        Prefix = "wf>";
-
         AddCommand(new Alerts());
         AddCommand(new Fissures());
         AddCommand(new Sortie());

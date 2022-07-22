@@ -5,15 +5,15 @@ using C = Tack.Core.Core;
 using Tack.Database;
 
 namespace Tack.Commands.AdminSet;
-internal class Update : IChatCommand
+internal class Update : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "update",
         description: "yep!! this is the update command!! xD",
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

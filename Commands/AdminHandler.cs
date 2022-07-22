@@ -5,14 +5,15 @@ using Tack.Models;
 namespace Tack.Commands;
 internal class AdminHandler : ChatCommandHandler
 {
+    public override string Name => "Admin";
+    public override string Prefix => "func_";
+    public override bool UseUnifiedCooldowns => true;
+    public override short UserCooldown => 0;
+    public override short ChannelCooldown => 0;
+    public override PermissionLevels Visibility => PermissionLevels.Whitelisted;
+
     public AdminHandler()
     {
-        Name = "Admin";
-        Prefix = "func_";
-        UseUnifiedCooldowns = true;
-        Cooldowns = new int[] { 0, 0 };
-        Visibility = PermissionLevels.Whitelisted;
-
         AddCommand(new Massping());
         AddCommand(new JoinChannel());
         AddCommand(new PartChannel());

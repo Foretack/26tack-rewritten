@@ -6,15 +6,15 @@ using Tack.Utils;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.BaseSet;
-internal class Ping : IChatCommand
+internal class Ping : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "ping",
         description: "Does the pong thing or whatever!",
         aliases: new string[] { "pong", "peng", "pang", "pung" }
-        );
+    );
 
-    public Task Run(CommandContext ctx)
+    public override Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

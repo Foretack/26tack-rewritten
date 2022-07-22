@@ -7,16 +7,14 @@ using Serilog;
 namespace Tack.Commands;
 internal static class CommandList
 {
-    public  static Command Info()
-    {
-        string name = "commands";
-        string description = "Returns a list of all available commands & command sets";
-        string[] aliases = { "cmds", "cmdlist", "commandlist", "commands" };
-        int[] cooldowns = { 3, 0 };
-        PermissionLevels permission = PermissionLevels.EveryonePlusBlacklisted;
-
-        return new Command(name, description, aliases, cooldowns, permission);
-    }
+    public static CommandInfo Info { get; } = new(
+        name: "commands",
+        description: "Returns a list of all available commands & command sets",
+        aliases: new string[] { "cmds", "cmdlist", "commandlist", "commands" },
+        userCooldown: 3,
+        channelCooldown: 0,
+        permission: PermissionLevels.EveryonePlusBlacklisted
+    );
 
     public static async Task Run(CommandContext ctx)
     {
@@ -39,7 +37,7 @@ internal static class CommandList
             sb.Append('[');
 
             var commandNames = handler.Commands
-            .Select(x => prefix + x.Value.Info().Name)
+            .Select(x => prefix + x.Value.Info.Name)
             .AsEnumerable();
             List<string> list = new List<string>(commandNames);
             list.Add(prefix + "help");

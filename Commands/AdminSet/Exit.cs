@@ -3,15 +3,15 @@ using Tack.Nonclass;
 using Tack.Models;
 
 namespace Tack.Commands.AdminSet;
-internal class Exit : IChatCommand
+internal class Exit : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "exit",
-        aliases: new string[] {"quit"},
+        aliases: new string[] { "quit" },
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public Task Run(CommandContext ctx)
+    public override Task Execute(CommandContext ctx)
     {
         Environment.Exit(0);
         return Task.CompletedTask;

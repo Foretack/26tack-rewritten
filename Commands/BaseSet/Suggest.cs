@@ -4,15 +4,15 @@ using Tack.Nonclass;
 using Tack.Models;
 
 namespace Tack.Commands.BaseSet;
-internal class Suggest : IChatCommand
+internal class Suggest : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "suggest",
         description: "Suggest a feature / give feedback for the bot",
-        cooldowns: new int[] { 600, 5 }
-        );
+        userCooldown: 600
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string rawname = ctx.IrcMessage.Username;

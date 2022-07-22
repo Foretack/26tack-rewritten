@@ -6,16 +6,16 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
-internal class Massping : IChatCommand
+internal class Massping : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "massping",
         description: " :tf: ",
         aliases: new string[] { "mp" },
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

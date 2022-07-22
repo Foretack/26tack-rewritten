@@ -7,15 +7,14 @@ using Serilog;
 namespace Tack.Commands;
 internal static class CommandHelp
 {
-    public static Command Info()
-    {
-        string name = "help";
-        string description = "Get information on a command's usage, aliases, cooldowns and permission";
-        int[] cooldowns = { 3, 0 };
-        PermissionLevels permission = PermissionLevels.EveryonePlusBlacklisted;
-
-        return new Command(name, description, cooldowns: cooldowns, permission: permission);
-    }
+    public static CommandInfo Info { get; } = new(
+        name: "help",
+        description: "Get information on a command's usage, aliases, cooldowns and permission",
+        aliases: new string[] { "help" },
+        userCooldown: 3,
+        channelCooldown: 0,
+        permission: PermissionLevels.EveryonePlusBlacklisted
+    );
 
     public static async Task Run(CommandContext ctx)
     {
@@ -40,7 +39,7 @@ internal static class CommandHelp
 
         await Task.Run(() =>
         {
-            IChatCommand? command = null;
+            Command? command = null;
 
             try
             {
@@ -52,7 +51,7 @@ internal static class CommandHelp
                 return;
             }
 
-            Command cmdinfo = command.Info();
+            CommandInfo cmdinfo = command.Info;
             StringBuilder sb = new StringBuilder($"@{user}, ");
 
             sb.Append($"Command: {prefix}{cmdinfo.Name}")
@@ -63,8 +62,8 @@ internal static class CommandHelp
             .Append(" 🡺 ")
             .Append(cmdinfo.Description)
             .Append(" 🡺 ")
-            .Append($"{cmdinfo.Cooldowns[0]}s user cooldown, ")
-            .Append($"{cmdinfo.Cooldowns[1]}s channel cooldown.");
+            .Append($"{cmdinfo.UserCooldown}s user cooldown, ")
+            .Append($"{cmdinfo.ChannelCooldown}s channel cooldown.");
 
             MessageHandler.SendMessage(channel, sb.ToString());
         });

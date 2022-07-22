@@ -41,28 +41,28 @@ internal static class CommandHandler
                 bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
                 if (!s || handler is null) return;
 
-                if (CommandList.Info().Aliases.Contains(cmdName.Replace(prefix, string.Empty)))
+                if (CommandList.Info.Aliases.Contains(cmdName.Replace(prefix, string.Empty)))
                 {
                     CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
                     CommandList.Run(ctx2).SafeFireAndForget();
                     return;
                 }
-                if (CommandHelp.Info().Name == cmdName.Replace(prefix, string.Empty))
+                if (CommandHelp.Info.Name == cmdName.Replace(prefix, string.Empty))
                 {
                     CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
                     CommandHelp.Run(ctx2).SafeFireAndForget();
                     return;
                 }
 
-                IChatCommand command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
+                Command command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
                 if (!ctx.Permission.Permits(command)) return;
                 Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
                                            ctx.IrcMessage.Channel,
-                                           handler.UseUnifiedCooldowns ? handler : command.Info());
+                                           handler.UseUnifiedCooldowns ? handler : command.Info);
                 if (!Cooldown.CheckAndHandleCooldown(cd)) return;
 
                 command
-                .Run(ctx)
+                .Execute(ctx)
                 .SafeFireAndForget(onException: ex => Log.Error(ex, $"Error running the command \"{cmdName}\""));
             }
             catch (Exception ex)

@@ -5,16 +5,17 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Relics : IChatCommand
+internal class Relics : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "relics",
         description: "Find which relics contain an item, or the contents of a specific relic",
         aliases: new string[] { "relic", "r" },
-        cooldowns: new int[] { 5, 3 }
-        );
+        userCooldown: 5,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

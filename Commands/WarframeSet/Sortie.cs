@@ -5,16 +5,17 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Sortie : IChatCommand
+internal class Sortie : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "sortie",
         description: "Check the current Sortie",
         aliases: new string[] { "anasa", "sorties" },
-        cooldowns: new int[] { 5, 3 }
-        );
+        userCooldown: 5,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

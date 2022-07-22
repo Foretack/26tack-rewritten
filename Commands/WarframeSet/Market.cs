@@ -5,16 +5,17 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Market : IChatCommand
+internal class Market : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "market",
         description: "Get sell & buy orders for the specified item from warframe.market. Additional options: `activeOnly:true/false` (true default)",
         aliases: new string[] { "price" },
-        cooldowns: new int[] {10, 3}
-        );
+        userCooldown: 10,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

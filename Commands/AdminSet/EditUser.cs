@@ -4,15 +4,15 @@ using Tack.Models;
 using Tack.Database;
 
 namespace Tack.Commands.AdminSet;
-internal class EditUser : IChatCommand
+internal class EditUser : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "edituser",
         aliases: new string[] { "user", "whitelist", "blacklist" },
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

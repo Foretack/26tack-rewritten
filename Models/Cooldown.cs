@@ -21,8 +21,8 @@ public class Cooldown
     /// <returns>True if the command can be executed. False if the command is on cooldown</returns>
     public static bool CheckAndHandleCooldown(Cooldown cd)
     {
-        int uCD = cd.CooldownOptions.Cooldowns[0];
-        int cCD = cd.CooldownOptions.Cooldowns[1];
+        int uCD = cd.CooldownOptions.UserCooldown;
+        int cCD = cd.CooldownOptions.ChannelCooldown;
 
         if (uCD == 0 && cCD == 0) return true;
 

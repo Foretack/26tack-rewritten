@@ -2,20 +2,23 @@
 
 namespace Tack.Models;
 
-public class Command : ICooldownOptions
+public class CommandInfo : ICooldownOptions
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public string[] Aliases { get; set; }
-    public int[] Cooldowns { get; set; }
-    public PermissionLevels Permission { get; set; }
+    public string Name { get; private set; }
+    public string Description { get; private set; }
+    public string[] Aliases { get; private set; }
+    public short UserCooldown { get; private set; }
+    public short ChannelCooldown { get; private set; }
+    public PermissionLevels Permission { get; private set; }
 
-    public Command(string name, string? description = null, string[]? aliases = null, int[]? cooldowns = null, PermissionLevels permission = PermissionLevels.Everyone)
+    public CommandInfo(string name, string? description = null, string[]? aliases = null, 
+    short? userCooldown = null, short? channelCooldown = null, PermissionLevels? permission = null)
     {
         Name = name;
-        Description = description ?? "No Description.";
+        Description = description ?? "No Description";
         Aliases = aliases ?? Array.Empty<string>();
-        Cooldowns = cooldowns ?? new int[] { 10, 5 };
-        Permission = permission;
+        UserCooldown = userCooldown ?? 15;
+        ChannelCooldown = channelCooldown ?? 5;
+        Permission = permission ?? PermissionLevels.Everyone;
     }
 }

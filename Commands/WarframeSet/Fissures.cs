@@ -5,15 +5,15 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Fissures : IChatCommand
+internal class Fissures : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "fissures", 
         description: "Get information about active void fissures. Additional options: `storms:true/false` (true default)", 
         aliases: new string[] { "fissure", "f" }
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

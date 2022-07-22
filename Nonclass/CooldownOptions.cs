@@ -1,6 +1,7 @@
 ﻿namespace Tack.Nonclass;
 public interface ICooldownOptions
 {
-    public string Name { get; set; }
-    public int[] Cooldowns { get; set; }
+    public string Name { get; }
+    public short UserCooldown { get; }
+    public short ChannelCooldown { get; }
 }

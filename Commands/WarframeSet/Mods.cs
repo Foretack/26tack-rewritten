@@ -5,16 +5,17 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Mods : IChatCommand
+internal class Mods : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "modinfo",
         description: "Get the stats of the closest matching mod. Additional options: `rank:number` (highest rank by default)",
         aliases: new string[] {"mod", "mods"},
-        cooldowns: new int[] {10, 3}
-        );
+        userCooldown: 10,
+        channelCooldown: 3
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

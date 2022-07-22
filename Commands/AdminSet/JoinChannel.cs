@@ -4,15 +4,15 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
-internal class JoinChannel : IChatCommand
+internal class JoinChannel : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "join",
         description: "Join the specified channel",
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public async Task Run(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;

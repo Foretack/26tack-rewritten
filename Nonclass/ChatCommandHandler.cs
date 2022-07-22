@@ -3,18 +3,19 @@
 namespace Tack.Nonclass;
 public abstract class ChatCommandHandler : ICooldownOptions
 {
-    public Dictionary<string[], IChatCommand> Commands { get; } = new Dictionary<string[], IChatCommand>();
-    public string Prefix { get; protected set; } = Config.MainPrefix;
-    public bool UseUnifiedCooldowns { get; protected set; } = false;
-    public string Name { get; set; } = default!;
-    public int[] Cooldowns { get; set; } = default!;
-    public PermissionLevels Visibility { get; protected set; } = PermissionLevels.EveryonePlusBlacklisted;
+    public Dictionary<string[], Command> Commands { get; } = new Dictionary<string[], Command>();
+    public abstract string Name { get; }
+    public abstract string Prefix { get; }
+    public virtual bool UseUnifiedCooldowns { get; } = false;
+    public virtual short UserCooldown { get; } = 15;
+    public virtual short ChannelCooldown { get; } = 5;
+    public virtual PermissionLevels Visibility { get; } = PermissionLevels.Everyone;
 
-    protected void AddCommand(IChatCommand command)
+    internal void AddCommand(Command command)
     {
-        List<string> keys = new List<string>(command.Info().Aliases)
+        List<string> keys = new List<string>(command.Info.Aliases)
         {
-            command.Info().Name
+            command.Info.Name
         };
         Commands.Add(keys.ToArray(), command);
     }

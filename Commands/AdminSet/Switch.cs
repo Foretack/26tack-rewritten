@@ -5,14 +5,14 @@ using Tack.Models;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
-internal class Switch : IChatCommand
+internal class Switch : Command
 {
-    public Command Info() => new(
+    public override CommandInfo Info { get; } = new(
         name: "switch",
         permission: PermissionLevels.Whitelisted
-        );
+    );
 
-    public Task Run(CommandContext ctx)
+    public override Task Execute(CommandContext ctx)
     {
         string channel = ctx.IrcMessage.Channel;
         string[] args = ctx.Args;
