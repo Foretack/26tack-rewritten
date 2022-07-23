@@ -12,5 +12,6 @@ internal class BaseHandler : ChatCommandHandler
         AddCommand(new Ping());
         AddCommand(new RandomJoke());
         AddCommand(new Suggest());
+        AddCommand(new LongPing());
     }
 }
