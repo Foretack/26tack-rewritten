@@ -52,7 +52,7 @@ internal class Drops : Command
         });
         if (topDrops.Length > 3) topDrops = topDrops[..3];
 
-        string[] dropsString = topDrops.Select(x => $"{x.place} 🡺 {x.chance}%").ToArray();
+        string[] dropsString = topDrops.Select(x => $"{x.place} ➜ {x.chance}%").ToArray();
         MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].item}\": " +
             string.Join(" ◯ ", dropsString));
     }

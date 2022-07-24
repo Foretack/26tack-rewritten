@@ -78,8 +78,8 @@ internal class Market : Command
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
             string listingsString = $"{totalOrders} " + (activeOnly ? "Active" : "Total") + " orders " +
-                $"◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P (🡳{cheapestSeller}P ◉ 🡱{mostExpensiveSeller}P) " +
-                $"◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P (🡱{mostPayingBuyer}P ◉ 🡳{leastPayingBuyer}P)";
+                $"◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P (▼{cheapestSeller}P ◉ ▲{mostExpensiveSeller}P) " +
+                $"◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P (▲{mostPayingBuyer}P ◉ ▼{leastPayingBuyer}P)";
 
             MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {listingsString}");
         });

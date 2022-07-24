@@ -60,9 +60,9 @@ internal static class CommandHelp
             .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
             .Append(" -- ")
             .Append($"Permission: {cmdinfo.Permission}")
-            .Append(" 🡺 ")
+            .Append(" ➜ ")
             .Append(cmdinfo.Description)
-            .Append(" 🡺 ")
+            .Append(" ➜ ")
             .Append($"{cmdinfo.UserCooldown}s user cooldown, ")
             .Append($"{cmdinfo.ChannelCooldown}s channel cooldown.");
 
