@@ -3,7 +3,8 @@ internal static class Formatting
 {
     public static string FormatException(this Exception exception) => exception.Message;
 
-    public static string FormatDate(DateTime date) { return $"{date.Year}-{date.Month}-{date.Day}"; }
+    public static string AsString<T>(this T[] arr) => $"[\"{string.Join("\", \"", arr)}\"]";
+    public static string AsString<T>(this List<T> list) => $"[\"{string.Join("\", \"", list)}\"]";
 
     public static string FormatTimeLeft(this TimeSpan time) => time switch
     {

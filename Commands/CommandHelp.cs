@@ -3,6 +3,7 @@ using Tack.Handlers;
 using Tack.Nonclass;
 using Tack.Models;
 using Serilog;
+using Tack.Utils;
 
 namespace Tack.Commands;
 internal static class CommandHelp
@@ -56,7 +57,7 @@ internal static class CommandHelp
 
             sb.Append($"Command: {prefix}{cmdinfo.Name}")
             .Append(" -- ")
-            .Append($"Aliases: [{string.Join(", ", cmdinfo.Aliases)}]")
+            .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
             .Append(" -- ")
             .Append($"Permission: {cmdinfo.Permission}")
             .Append(" 🡺 ")

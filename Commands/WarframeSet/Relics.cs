@@ -65,7 +65,7 @@ internal class Relics : Command
 
         if (wantedRelics.Length == 0) return "No Relics containing that item were found.";
         if (wantedRelics.Length >= 15) return "Too many Relics contain that item! (message too big)";
-        return $"Relics containing \"{itemName}\": [{string.Join(" | ", wantedRelics)}] 🥜";
+        return $"Relics containing \"{itemName}\": {wantedRelics.AsString()} 🥜";
     }
     private async Task<string> GetRelicItems(string relicName, RelicData relicData)
     {

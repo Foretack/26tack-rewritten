@@ -3,6 +3,7 @@ using Tack.Handlers;
 using Tack.Nonclass;
 using Tack.Models;
 using Serilog;
+using Tack.Utils;
 
 namespace Tack.Commands;
 internal static class CommandList
@@ -34,7 +35,6 @@ internal static class CommandList
 
         await Task.Run(() => {
             sb.Append(handler.Name + " commands: ");
-            sb.Append('[');
 
             var commandNames = handler.Commands
             .Select(x => prefix + x.Value.Info.Name)
@@ -46,8 +46,7 @@ internal static class CommandList
             .Select(y => y.Key + "commands").AsEnumerable();
             list.AddRange(otherSets);
 
-            sb.Append(string.Join(" | ", list));
-            sb.Append(']');
+            sb.Append(list.AsString());
 
             MessageHandler.SendColoredMessage(channel, sb.ToString(), ChatColor.Green);
         });

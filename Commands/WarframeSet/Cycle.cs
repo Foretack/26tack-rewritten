@@ -60,7 +60,7 @@ internal class Cycle : Command
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want <{string.Join('/', CycleTypes)}>");
+            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want {CycleTypes.AsString()}");
             return;
         }
         if (!CycleTypes.Contains(args[0].ToLower()))

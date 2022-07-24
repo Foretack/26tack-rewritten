@@ -1,7 +1,8 @@
 ﻿using Tack.Handlers;
 using Tack.Nonclass;
 using Tack.Models;
-using Db = Tack.Database.DbQueries;
+using Tack.Database;
+using Tack.Utils;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
@@ -21,37 +22,37 @@ internal class Debug : Command
 
         if (args.Length == 0) return;
 
-        if (args[0] == "throw")
+
+        switch (args[0])
         {
-            Db db = new Db();
-            string message = "none";
-            if (args.Length == 2) message = string.Join(" ", args[1..]);
-            bool s = await db.LogException(new TestException(message));
-            MessageHandler.SendMessage(channel, s.ToString());
-            return;
-        }
-        if (args[0] == "restart")
-        {
-            C.RestartProcess($"manual restart from user `{user}`");
-            return;
-        }
-        if (args[0] == "pull")
-        {
-            string output = await C.GitPull() ?? "Command execution failed, check console :(";
-            MessageHandler.SendMessage(channel, output);
-            return;
-        }
-        if (args[0] == "reloadmonitor")
-        {
-            StreamMonitor.Stop();
-            await ChannelHandler.ReloadFetchedChannels();
-            StreamMonitor.Reset();
-            StreamMonitor.Start();
-            return;
-        }
-        if (args[0] == "reloadtriggers")
-        {
-            MessageHandler.ReloadDiscordTriggers();
+            case "throw":
+                DbQueries db = new DbQueries();
+                string message = "none";
+                if (args.Length == 2) message = string.Join(" ", args[1..]);
+                bool s = await db.LogException(new TestException(message));
+                MessageHandler.SendMessage(channel, s.ToString());
+                break;
+            case "restart":
+                C.RestartProcess($"manual restart from user `{user}`");
+                break;
+            case "pull":
+                string output = await C.GitPull() ?? "Command execution failed, check console :(";
+                MessageHandler.SendMessage(channel, output);
+                break;
+            case "monitor":
+            case "reloadmonitor":
+                StreamMonitor.Stop();
+                await ChannelHandler.ReloadFetchedChannels();
+                StreamMonitor.Reset();
+                StreamMonitor.Start();
+                break;
+            case "triggers":
+            case "reloadtriggers":
+                MessageHandler.ReloadDiscordTriggers();
+                break;
+            case "printarr":
+                MessageHandler.SendMessage(channel, ctx.IrcMessage.Message.Split(' ').AsString());
+                    break;
         }
     }
 
