@@ -74,12 +74,12 @@ internal class LongPing : Command
         'a', 'b', 'c', 'd', 'e', 'f', '1', '2',
         '3', '4', '5', '6', '7', '8', '9', '0' 
     };
-    private async Task<string[]> GenerateMessages()
+    private async Task<string[]> GenerateMessages(int count = 50)
     {
         List<string> messages = new List<string>();
         await Task.Run(() =>
         {
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < count; i++)
             {
                 StringBuilder message = new StringBuilder();
                 for (int j = 0; j < 450; j++)
