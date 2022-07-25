@@ -26,15 +26,16 @@ internal class Cycle : Command
         await SendCycleOf(ctx);
     }
 
-    private async ValueTask SendCycle<T>(CommandContext ctx, string cycleName) where T : IWorldCycle
+    private async ValueTask SendCycle<T>(CommandContext ctx) where T : IWorldCycle, new()
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
+        string queryString = new T().QueryString;
         
-        T? cycle = ObjectCache.Get<T>(cycleName + "_wf");
+        T? cycle = ObjectCache.Get<T>(queryString + "_wf");
         if (cycle is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<T>(cycleName);
+            var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
@@ -49,7 +50,7 @@ internal class Cycle : Command
             return;
         }
         MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put(cycleName + "_wf", cycle, (int)timeLeft.TotalSeconds);
+        ObjectCache.Put(queryString + "_wf", cycle, (int)timeLeft.TotalSeconds);
     }
 
     private async ValueTask Other(CommandContext ctx)
@@ -79,23 +80,20 @@ internal class Cycle : Command
         switch (commandName)
         {
             case "vallis":
-                await SendCycle<VallisCycle>(ctx, "vallisCycle");
+                await SendCycle<VallisCycle>(ctx);
                 break;
 
             case "cambion":
-                await SendCycle<CambionCycle>(ctx, "cambionCycle");
-                break;
-
             case "drift":
-                await SendCycle<CambionCycle>(ctx, "cambionCycle");
+                await SendCycle<CambionCycle>(ctx);
                 break;
 
             case "zariman":
-                await SendCycle<ZarimanCycle>(ctx, "zarimanCycle");
+                await SendCycle<ZarimanCycle>(ctx);
                 break;
 
             default:
-                await SendCycle<CetusCycle>(ctx, "cetusCycle");
+                await SendCycle<CetusCycle>(ctx);
                 break;
         }
     }

@@ -72,15 +72,19 @@ public class CetusCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
-    public bool isDay { get; set; }
-    public string State { get => isDay ? "☀" : "🌙"; }
+    [JsonPropertyName("isDay")]
+    public bool IsDay { get; set; }
+    public string State { get => IsDay ? "☀" : "🌙"; }
+    public string QueryString { get; } = "cetusCycle";
 }
 public class CambionCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
-    public string active { get; set; }
-    public string State { get => active; }
+    [JsonPropertyName("active")]
+    public string Active { get; set; }
+    public string State { get => Active; }
+    public string QueryString { get; } = "cambionCycle";
 }
 public class VallisCycle : IWorldCycle
 {
@@ -88,6 +92,7 @@ public class VallisCycle : IWorldCycle
     public DateTime Expiry { get; set; }
     public bool isWarm { get; set; }
     public string State { get => isWarm ? "🔥" : "❄"; }
+    public string QueryString { get; } = "vallisCycle";
 }
 public class ZarimanCycle : IWorldCycle
 {
@@ -95,6 +100,7 @@ public class ZarimanCycle : IWorldCycle
     public DateTime Expiry { get; set; }
     [JsonPropertyName("state")]
     public string State { get; set; }
+    public string QueryString { get; } = "zarimanCycle";
 }
 
 public class MarketItems
