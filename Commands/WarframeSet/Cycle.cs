@@ -7,7 +7,6 @@ using Tack.Utils;
 namespace Tack.Commands.WarframeSet;
 internal class Cycle : Command
 {
-    private readonly string[] CycleTypes = { "cetus", "vallis", "cambion", "drift", "zariman" };
     public override CommandInfo Info { get; } = new(
         name: "cycle",
         description: "Get the current cycle of the specified open-world node",
@@ -16,6 +15,7 @@ internal class Cycle : Command
         channelCooldown: 3
     );
 
+    private string[] CycleTypes => Info.Aliases;
     public override async Task Execute(CommandContext ctx)
     {
         if (!CycleTypes.Contains(ctx.CommandName))
@@ -82,16 +82,13 @@ internal class Cycle : Command
             case "vallis":
                 await SendCycle<VallisCycle>(ctx);
                 break;
-
             case "cambion":
             case "drift":
                 await SendCycle<CambionCycle>(ctx);
                 break;
-
             case "zariman":
                 await SendCycle<ZarimanCycle>(ctx);
                 break;
-
             default:
                 await SendCycle<CetusCycle>(ctx);
                 break;
