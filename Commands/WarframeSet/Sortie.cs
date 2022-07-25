@@ -38,7 +38,7 @@ internal class Sortie : Command
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
-        string sortieString = $"{sortie.faction} ➜ " +
+        string sortieString = $"{sortie.faction} " +
             $"➜ ● {sortie.variants[0].missionType} [{sortie.variants[0].modifier}] " +
             $"➜ ■ {sortie.variants[1].missionType} [{sortie.variants[1].modifier}] " +
             $"➜ ◆ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
