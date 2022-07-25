@@ -41,7 +41,7 @@ internal class SteelPath : Command
 
         string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) 🏹 ●";
         string nextInRotationString = $" Next in rotation: {rewards.rotation[0].name}";
-        MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➡ in: {timeLeft.FormatTimeLeft()}");
+        MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➜ in: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }
 }
