@@ -24,8 +24,13 @@ internal class PartChannel : Command
         }
 
         string targetChannel = args[0].ToLower();
-        bool successful = await ChannelHandler.PartChannel(targetChannel);
+        if (!ChannelHandler.FetchedChannels.Any(x => x.Name == targetChannel))
+        {
+            MessageHandler.SendMessage(channel, $"I'm not in that channel! (Aborted)");
+            return;
+        }
 
+        bool successful = await ChannelHandler.PartChannel(targetChannel);
         if (successful)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Parted from {targetChannel}");

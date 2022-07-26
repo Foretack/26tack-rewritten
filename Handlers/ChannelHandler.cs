@@ -68,8 +68,10 @@ internal static class ChannelHandler
     #endregion
 
     #region Methods
+    /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
+        if (FetchedChannels.Any(x => x.Name == channel)) return false;
         UserFactory uf = new UserFactory();
         Channel c = new Channel(channel, priority, logged);
         ExtendedChannel? ec = await uf.CreateChannelProfile(c);
@@ -84,8 +86,11 @@ internal static class ChannelHandler
         return s;
     }
 
+    /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> PartChannel(string channel)
     {
+        bool fetched = FetchedChannels.Any(x => x.Name == channel);
+
         try
         {
             Channel target = AnonJoinedChannels.First(x => x.Name == channel);
@@ -95,10 +100,9 @@ internal static class ChannelHandler
             DbQueries db = new DbQueries();
             await db.RemoveChannel(target);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Log.Error(ex, $"AnonymousClient failed to part channel \"{channel}\"");
-            return false;
+            Log.Error($"AnonymousClient failed to part channel \"{channel}\"");
         }
 
         try
@@ -108,12 +112,12 @@ internal static class ChannelHandler
             MainJoinedChannelNames.Remove(channel);
             MainClient.Client.LeaveChannel(channel);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Log.Error(ex, $"MainClient failed to part channel \"{channel}\"");
+            Log.Error($"MainClient failed to part channel \"{channel}\"");
         }
 
-        return true;
+        return fetched;
     }
 
     public static async Task ReloadFetchedChannels()
@@ -124,7 +128,7 @@ internal static class ChannelHandler
 
         if (pCount != cCount)
         {
-            MessageHandler.SendColoredMessage(Config.RelayChannel, $"❕ Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
+            MessageHandler.SendColoredMessage(Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
         }
     }
 
