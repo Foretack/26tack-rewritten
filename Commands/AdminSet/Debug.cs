@@ -19,14 +19,13 @@ internal class Debug : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         string[] args = ctx.Args;
+        DbQueries db = new DbQueries();
 
         if (args.Length == 0) return;
-
 
         switch (args[0])
         {
             case "throw":
-                DbQueries db = new DbQueries();
                 string message = "none";
                 if (args.Length == 2) message = string.Join(" ", args[1..]);
                 bool s = await db.LogException(new TestException(message));
@@ -53,6 +52,20 @@ internal class Debug : Command
             case "printarr":
                 MessageHandler.SendMessage(channel, ctx.IrcMessage.Message.Split(' ').AsString());
                     break;
+            case "channels":
+            case "channelsize":
+                int size = ChannelHandler.FetchedChannels.Count;
+                MessageHandler.SendMessage(channel, size.ToString());
+                break;
+            case "channel":
+                if (args.Length < 2)
+                {
+                    MessageHandler.SendMessage(channel, "specify channel");
+                }
+                string targetChannel = args[1];
+                var echannel = await db.GetExtendedChannel(targetChannel);
+                MessageHandler.SendMessage(channel, $"{echannel}");
+                break;
         }
     }
 

@@ -225,5 +225,33 @@ internal class DbQueries : DbConnection
         return events;
     }
 
+    public async Task<ExtendedChannel?> GetExtendedChannel(string channel)
+    {
+        var q = await
+            Select()
+            .Table("channels")
+            .Schema("*")
+            .Where($"username = '{channel}'")
+            .TryExecute();
+
+        if (!q.Success)
+        {
+            Log.Fatal($"Failed to fetch extended channel `{channel}`");
+            return null;
+        }
+
+        object[] row = q.Results!.First();
+        ExtendedChannel c = new ExtendedChannel(
+            (string)row[0],
+            (string)row[1],
+            ((int)row[2]).ToString(),
+            (string)row[3] + ' ',
+            (DateTime)row[6],
+            (int)row[4],
+            (bool)row[5]);
+
+        return c;
+    }
+
     ~DbQueries() => Dispose();
 }
