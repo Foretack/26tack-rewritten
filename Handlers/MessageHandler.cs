@@ -138,7 +138,10 @@ internal static class MessageHandler
             content += $" [+{embedCount} {"embed".PluralizeOn(embedCount)}]";
         }
 
-        var evs = DiscordEvents.Where(x => x.ChannelID == channelID && author.Contains(x.NameContains)).ToArray();
+        var evs = DiscordEvents.Where(
+            x => x.ChannelID == channelID 
+            && (author.Contains(x.NameContains) || x.NameContains == "_ANY_")
+            ).ToArray();
         foreach (var ev in evs)
         {
             string newContent = content.StripSymbols();
