@@ -44,7 +44,7 @@ internal abstract class DbConnection : IDisposable
     {
         string? query = BuildQueryString();
         Log.Verbose(query ?? "null query");
-        if (query is null) return new ExecutionResult(false, null);
+        if (query is null) return new ExecutionResult(false, Array.Empty<object[]>());
         NpgsqlCommand cmd = new NpgsqlCommand(query, Connection);
 
         if (QueryType == QueryTypes.Insert || QueryType == QueryTypes.Update || QueryType == QueryTypes.Delete)
@@ -53,7 +53,7 @@ internal abstract class DbConnection : IDisposable
             {
                 await cmd.ExecuteNonQueryAsync();
                 await cmd.DisposeAsync();
-                return new ExecutionResult(true, null);
+                return new ExecutionResult(true, Array.Empty<object[]>());
             }
             catch (Exception ex)
             {
@@ -102,7 +102,7 @@ internal abstract class DbConnection : IDisposable
                     $"\n Full Query:\n {query}");
             }
         }
-        return new ExecutionResult(false, null);
+        return new ExecutionResult(false, Array.Empty<object[]>());
     }
 
     private string? BuildQueryString()
@@ -166,7 +166,7 @@ internal abstract class DbConnection : IDisposable
     #endregion
 
     private enum QueryTypes { Insert, Update, Delete, Select }
-    public record ExecutionResult(bool Success, object[][]? Results);
+    public record ExecutionResult(bool Success, object[][] Results);
 
     #region Disposal
     private bool disposedValue;

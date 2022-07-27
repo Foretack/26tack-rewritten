@@ -1,4 +1,5 @@
-﻿using Dasync.Collections;
+﻿using System.Linq;
+using Dasync.Collections;
 using Serilog;
 using Tack.Handlers;
 using Tack.Models;
@@ -56,7 +57,7 @@ internal class DbQueries : DbConnection
         }
 
         List<ChannelHandler.Channel> channels = new List<ChannelHandler.Channel>();
-        foreach (object[] row in q.Results!)
+        foreach (object[] row in q.Results)
         {
             channels.Add(new ChannelHandler.Channel((string)row[0], (int)row[1], (bool)row[2]));
         }
@@ -78,7 +79,7 @@ internal class DbQueries : DbConnection
             throw new MissingFieldException("Whitelisted users could not be loaded");
         }
 
-        string[] users = q.Results!.Select(x => (string)x[0]).ToArray();
+        string[] users = q.Results.Select(x => (string)x[0]).ToArray();
         return users;
     }
 
@@ -96,7 +97,7 @@ internal class DbQueries : DbConnection
             throw new MissingFieldException("Blacklisted users could not be loaded");
         }
 
-        string[] users = q.Results!.Select(x => (string)x[0]).ToArray();
+        string[] users = q.Results.Select(x => (string)x[0]).ToArray();
         return users;
     }
 
@@ -116,11 +117,12 @@ internal class DbQueries : DbConnection
 
         try
         {
-            return new Authorization((string)q.Results![0][0],
-                                     (string)q.Results![0][1],
-                                     (string)q.Results![0][2],
-                                     (string)q.Results![0][3],
-                                     (string)q.Results![0][4]);
+            object[] row = q.Results[0];
+            return new Authorization((string)row[0],
+                                     (string)row[1],
+                                     (string)row[2],
+                                     (string)row[3],
+                                     (string)row[4]);
         }
         catch (Exception ex)
         {
@@ -145,10 +147,11 @@ internal class DbQueries : DbConnection
 
         try
         {
-            return new Discord(ulong.Parse(q.Results![0][0].ToString()!),
-                               ulong.Parse(q.Results![0][1].ToString()!),
-                               ulong.Parse(q.Results![0][2].ToString()!),
-                               (string)q.Results![0][3]);
+            object[] row = q.Results[0];
+            return new Discord((ulong)(long)row[0],
+                               (ulong)(long)row[1],
+                               (ulong)(long)row[2],
+                               (string)row[3]);
         }
         catch (Exception ex)
         {
@@ -213,8 +216,8 @@ internal class DbQueries : DbConnection
             .TryExecute()
             .Result;
 
-        DiscordEvent[] events = q.Results!.Select(x => new DiscordEvent(
-            ulong.Parse(x[0].ToString()!),
+        DiscordEvent[] events = q.Results.Select(x => new DiscordEvent(
+            (ulong)(long)x[0],
             (string)x[1],
             x[2] is DBNull ? null : (string)x[2],
             (string)x[3],
@@ -240,7 +243,7 @@ internal class DbQueries : DbConnection
             return null;
         }
 
-        object[] row = q.Results!.First();
+        object[] row = q.Results[0];
         ExtendedChannel c = new ExtendedChannel(
             (string)row[0],
             (string)row[1],
