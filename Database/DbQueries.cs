@@ -246,7 +246,7 @@ internal class DbQueries : DbConnection
             (string)row[1],
             ((int)row[2]).ToString(),
             (string)row[3] + ' ',
-            (DateTime)row[6],
+            ((DateTime)row[6]).ToLocalTime(),
             (int)row[4],
             (bool)row[5]);
 
