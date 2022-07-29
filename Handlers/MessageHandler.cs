@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using AsyncAwaitBestPractices;
+using Discord;
 using Discord.WebSocket;
 using Serilog;
 using Tack.Core;
@@ -73,7 +74,7 @@ internal static class MessageHandler
     internal static Task OnDiscordMessageReceived(SocketMessage arg)
     {
         Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Channel.Name}: {arg.Content}");
-        HandleDiscordMessage(arg);
+        HandleDiscordMessage(arg).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
         return Task.CompletedTask;
     }
     private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
@@ -113,47 +114,85 @@ internal static class MessageHandler
         }
     }
 
-    private static void HandleDiscordMessage(SocketMessage socketMessage)
+    private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
     {
-        string content = socketMessage.CleanContent.Replace("\n", "[⤶]");
-        ulong channelID = socketMessage.Channel.Id;
-        string author = socketMessage.Author.Username.StripDescriminator();
-        var embeds = socketMessage.Embeds;
-
-        if (content.Length < 50
-        && embeds.Count > 0)
-        {
-            int embedCount = embeds.Count;
-            Embed embed = embeds.First();
-            content = 
-                $"{embed.Title} " +
-                $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
-                $"{(embedCount > 1 ? $"[+{embedCount - 1} {"embed".PluralizeOn(embedCount - 1)}]" : string.Empty)}";
-        }
-        else if (content.Length >= 50
-        && content.Length <= 450
-        && embeds.Count > 0)
-        {
-            int embedCount = embeds.Count;
-            content += $" [+{embedCount} {"embed".PluralizeOn(embedCount)}]";
-        }
-
         var evs = DiscordEvents.Where(
-            x => x.ChannelID == channelID 
-            && (author.Contains(x.NameContains) || x.NameContains == "_ANY_")
+            x => x.ChannelID == socketMessage.Channel.Id
+            && (socketMessage.Author.Username.StripDescriminator().Contains(x.NameContains) 
+            || x.NameContains == "_ANY_")
             ).ToArray();
+        if (evs.Length == 0) return;
         foreach (var ev in evs)
         {
-            string newContent = content.StripSymbols();
-            if (ev is null) return;
+            if (ev.Remove?.Contains(" _SHOW_ALL_") ?? false)
+            {
+                // Remove "_SHOW_ALL_" to properly .Remove()
+                string newRemove = ev.Remove.Replace(" _SHOW_ALL_", "");
+                // Get links of all attachments in message
+                var attachmentLinks = socketMessage.Attachments.Select(x => x.Url + ' ');
+                // Message clean content + attachment links joined with 🔗
+                string m = $"{socketMessage.CleanContent} \n\n" + string.Join(" 🔗 ", attachmentLinks);
+                // Remove operation
+                if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
+                // Prepend operation
+                m = $"{ev.Prepend} " + m;
+                // Message is split by 2 new lines
+                var sMessage = m.Split("\n\n");
 
-            if (ev.Remove is not null) newContent = ev.Remove == "_ALL_" ? string.Empty : newContent.Replace(ev.Remove, string.Empty);
-            if (ev.Prepend is not null) newContent = $"{ev.Prepend} {newContent}";
+                Queue<string> messages = new Queue<string>();
+                foreach (string message in sMessage)
+                {
+                    // Split message into chunks if length is >= 490
+                    if (message.Length >= 490)
+                    {
+                        var chunks = message.Chunk(490);
+                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk).Replace("\n", "[⤶]"));
+                        continue;
+                    }
+                    messages.Enqueue(message.Replace("\n", "[⤶]"));
+                }
+
+                // Get color
+                ChatColor _color;
+                if (Enum.TryParse<ChatColor>(ev.Color, out var _clr)) _color = _clr;
+                else _color = ChatColor.BlueViolet;
+
+                // Send messages every 2.5 seconds
+                while (messages.Count > 0)
+                {
+                    SendColoredMessage(ev.OutputChannel, messages.Dequeue(), _color);
+                    await Task.Delay(2500);
+                }
+                return;
+            }
+            string content = socketMessage.CleanContent.Replace("\n", "[⤶]").StripSymbols();
+            var embeds = socketMessage.Embeds;
+
+            if (content.Length < 50
+            && embeds.Count > 0)
+            {
+                int embedCount = embeds.Count;
+                Embed embed = embeds.First();
+                content =
+                    $"{embed.Title} " +
+                    $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
+                    $"{(embedCount > 1 ? $"[+{embedCount - 1} {"embed".PluralizeOn(embedCount - 1)}]" : string.Empty)}";
+            }
+            else if (content.Length >= 50
+            && content.Length <= 450
+            && embeds.Count > 0)
+            {
+                int embedCount = embeds.Count;
+                content += $" [+{embedCount} {"embed".PluralizeOn(embedCount)}]";
+            }
+
+            if (ev.Remove is not null) content = ev.Remove == "_ALL_" ? string.Empty : content.Replace(ev.Remove, string.Empty);
+            if (ev.Prepend is not null) content = $"{ev.Prepend} {content}";
             ChatColor color;
             if (Enum.TryParse<ChatColor>(ev.Color, out var clr)) color = clr;
             else color = ChatColor.BlueViolet;
 
-            SendColoredMessage(ev.OutputChannel, newContent, color);
+            SendColoredMessage(ev.OutputChannel, content, color);
         }
     }
     #endregion
