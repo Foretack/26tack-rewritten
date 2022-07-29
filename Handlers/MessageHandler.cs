@@ -136,6 +136,8 @@ internal static class MessageHandler
                 if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
                 // Prepend operation
                 m = $"{ev.Prepend} " + m;
+                // Strip formatting symbols & show newlines
+                m = m.StripSymbols().Replace("\n", "[⤶]");
                 // Message is split by 2 new lines
                 var sMessage = m.Split("\n\n");
 
@@ -146,10 +148,10 @@ internal static class MessageHandler
                     if (message.Length >= 490)
                     {
                         var chunks = message.Chunk(490);
-                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk).Replace("\n", "[⤶]"));
+                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk));
                         continue;
                     }
-                    messages.Enqueue(message.Replace("\n", "[⤶]"));
+                    messages.Enqueue(message);
                 }
 
                 // Get color
