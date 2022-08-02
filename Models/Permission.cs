@@ -42,13 +42,14 @@ public class Permission
 
     public bool Permits(Command command) => Level >= (int)command.Info.Permission;
 
+    public static bool IsBlacklisted(string username) => BlacklistedUsers.Contains(username);
     public static void BlacklistUser(string username) { BlacklistedUsers.Add(username); }
     public static void UnBlacklistUser(string username) { BlacklistedUsers.Remove(username); }
     public static void WhitelistUser(string username) { WhitelistedUsers.Add(username); }
     public static void UnWhitelistUser(string username) { WhitelistedUsers.Remove(username); }
 }
 
-public enum PermissionLevels
+public enum PermissionLevels : sbyte
 {
     EveryonePlusBlacklisted = -10,
     Everyone = 0,

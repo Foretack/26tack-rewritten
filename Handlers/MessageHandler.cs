@@ -102,7 +102,8 @@ internal static class MessageHandler
                 CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
                 await CommandHandler.HandleCommand(ctx);
             }
-            if (Regexes.Mention.IsMatch(message))
+            if (!Permission.IsBlacklisted(ircMessage.Username)
+            && Regexes.Mention.IsMatch(message))
             {
                 string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
                 await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
