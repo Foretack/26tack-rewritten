@@ -204,7 +204,7 @@ internal static class StreamMonitor
         StreamData = Channels.ToDictionary(
             x => x.Name,
             y => new Stream(y.Name, false, string.Empty, string.Empty, DateTime.Now));
-        MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
+        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Name).ToList());
 
         MonitoringService.OnServiceStarted += ServiceStarted;
         MonitoringService.OnStreamOnline += StreamOnline;

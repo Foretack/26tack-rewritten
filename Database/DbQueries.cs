@@ -47,6 +47,7 @@ internal class DbQueries : DbConnection
             Select()
             .Table("channels")
             .Schema("username", "priority", "is_logged")
+            .Where("priority > -10")
             .Sort("priority DESC")
             .TryExecute();
 
