@@ -58,6 +58,7 @@ public static class Core
     #endregion
 
     #region Process methods
+    // TODO: Don't rely on restarts
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal($"The program is restarting...");
