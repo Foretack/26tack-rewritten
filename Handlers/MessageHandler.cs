@@ -137,19 +137,19 @@ internal static class MessageHandler
                 if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
                 // Prepend operation
                 m = $"{ev.Prepend} " + m;
-                // Strip formatting symbols & show newlines
-                m = m.StripSymbols().Replace("\n", "[⤶]");
                 // Message is split by 2 new lines
                 var sMessage = m.Split("\n\n");
+                // Strip formatting symbols & show newlines
+                sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶]")).ToArray();
 
                 Queue<string> messages = new Queue<string>();
                 foreach (string message in sMessage)
                 {
-                    // Split message into chunks if length is >= 490
-                    if (message.Length >= 490)
+                    // Split message into chunks if length is >= 488
+                    if (message.Length >= 488)
                     {
-                        var chunks = message.Chunk(490);
-                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk));
+                        var chunks = message.Chunk(488);
+                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
                         continue;
                     }
                     messages.Enqueue(message);
