@@ -177,7 +177,7 @@ internal static class MessageHandler
                 int embedCount = embeds.Count;
                 Embed embed = embeds.First();
                 content =
-                    $"{embed.Title} " +
+                    $"{embed.Title.StripSymbols()} " +
                     $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
                     $"{(embedCount > 1 ? $"[+{embedCount - 1} {"embed".PluralizeOn(embedCount - 1)}]" : string.Empty)}";
             }
