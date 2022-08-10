@@ -38,7 +38,7 @@ internal static class MessageHandler
         if (!LastSentMessage.ContainsKey(channel)) LastSentMessage.Add(channel, message);
         else if (LastSentMessage[channel] == message)
         {
-            message += "󠀀";
+            message += " 󠀀";
         } 
         MainClient.Client.SendMessage(channel, message);
         LastSentMessage[channel] = message;
