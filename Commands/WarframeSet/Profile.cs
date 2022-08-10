@@ -32,7 +32,7 @@ internal class Profile : Command
             MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation. Please report this issue :( ");
             return;
         }
-        ObjectCache.Put("v5_ext_token", token, 300);
+        ObjectCache.Put("v5_ext_token", token, 60);
 
         string target = ctx.Args.Length == 0 ? ctx.IrcMessage.Username : ctx.Args[0];
         var data = await GetProfileDataStream(target, token);
@@ -68,13 +68,13 @@ internal class Profile : Command
 
     private async Task<string?> GetV5Token(int channelId)
     {
-        _requests.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko"); // not mine
-        Stream data = await _requests.GetStreamAsync($"https://api.twitch.tv/v5/channels/{channelId}/extensions");
-        V5Root? v5r = await JsonSerializer.DeserializeAsync<V5Root>(data);
-        if (v5r is null) return null;
-
+        // this is not mine
+        if (!_requests.DefaultRequestHeaders.Contains("client-id")) _requests.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
         try
         {
+            Stream data = await _requests.GetStreamAsync($"https://api.twitch.tv/v5/channels/{channelId}/extensions");
+            V5Root? v5r = await JsonSerializer.DeserializeAsync<V5Root>(data);
+            if (v5r is null) return null;
             return (
                    from ext in v5r.Tokens
                    where ext.ExtensionId == WF_ARSENAL_ID
