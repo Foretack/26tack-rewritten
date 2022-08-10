@@ -179,14 +179,14 @@ internal static class MessageHandler
                 content =
                     $"{embed.Title.StripSymbols()} " +
                     $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
-                    $"{(embedCount > 1 ? $"[+{embedCount - 1} {"embed".PluralizeOn(embedCount - 1)}]" : string.Empty)}";
+                    $"{(embedCount > 1 ? $"[+{"embed".PluralizeWith(embedCount - 1)}]" : string.Empty)}";
             }
             else if (content.Length >= 50
             && content.Length <= 450
             && embeds.Count > 0)
             {
                 int embedCount = embeds.Count;
-                content += $" [+{embedCount} {"embed".PluralizeOn(embedCount)}]";
+                content += $" [+{"Embed".PluralizeWith(embedCount)}]";
             }
 
             if (ev.Remove is not null) content = ev.Remove == "_ALL_" ? string.Empty : content.Replace(ev.Remove, string.Empty);
