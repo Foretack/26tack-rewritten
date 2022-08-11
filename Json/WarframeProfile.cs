@@ -27,8 +27,8 @@ public class Token
 
 #region Profile data
 public record ProfileRoot(
-    [property: JsonPropertyName("accountInfo")] AccountInfo AccountInfo /*,
-    [property: JsonPropertyName("loadOuts")] LoadOuts LoadOuts  | I don't have any use for this data yet */
+    [property: JsonPropertyName("accountInfo")] AccountInfo AccountInfo,
+    [property: JsonPropertyName("loadOuts")] LoadOuts LoadOuts
 );
 
 public record AccountInfo(
@@ -148,13 +148,13 @@ public record HULL(
 );
 
 public record LoadOuts(
-    [property: JsonPropertyName("ARCHWING")] ARCHWING ARCHWING,
+    /*[property: JsonPropertyName("ARCHWING")] ARCHWING ARCHWING,
     [property: JsonPropertyName("DATAKNIFE")] DATAKNIFE DATAKNIFE,
-    [property: JsonPropertyName("MECH")] MECH MECH,
-    [property: JsonPropertyName("NORMAL")] NORMAL NORMAL,
+    [property: JsonPropertyName("MECH")] MECH MECH,*/
+    [property: JsonPropertyName("NORMAL")] NORMAL NORMAL/*,
     [property: JsonPropertyName("OPERATOR")] OPERATOR OPERATOR,
     [property: JsonPropertyName("RAILJACK")] RAILJACK RAILJACK,
-    [property: JsonPropertyName("SENTINEL")] SENTINEL SENTINEL
+    [property: JsonPropertyName("SENTINEL")] SENTINEL SENTINEL*/
 );
 
 public record Markings(
@@ -406,6 +406,5 @@ public record Warframe(
     [property: JsonPropertyName("upgrades")] IReadOnlyList<Upgrade> Upgrades,
     [property: JsonPropertyName("xp")] int Xp
 );
-
 
 #endregion

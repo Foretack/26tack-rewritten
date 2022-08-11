@@ -243,3 +243,8 @@ public class WarframeNewsObj
     [JsonPropertyName("update")]
     public bool Update { get; set; }
 }
+
+public record WarframeItem(
+    [property: JsonPropertyName("uniqueName")] string UniqueName,
+    [property: JsonPropertyName("name")] string NormalName
+);

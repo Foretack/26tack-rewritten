@@ -3,6 +3,7 @@ using Serilog;
 using Tack.Json;
 using Tack.Models;
 using Tack.Database;
+using System.Threading;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
@@ -167,6 +168,22 @@ internal static class ExternalAPIHandler
             Log.Error(ex, $"Exception thrown during api call for `{typeof(T)}`");
             return new Result<T>(default!, false, ex);
         }
+    }
+
+    public static async Task<Result<string>> FindFromUniqueName(string category, string uniqueName, int timeout = 10)
+    {
+        HttpClient caller = new HttpClient();
+        caller.Timeout = TimeSpan.FromSeconds(timeout);
+
+        try
+        {
+            Stream data = await caller.GetStreamAsync($"https://raw.githubusercontent.com/WFCD/warframe-items/master/data/json/{category}.json");
+            WarframeItem[]? items = await JsonSerializer.DeserializeAsync<WarframeItem[]>(data);
+            string name = items!.First(x => x.UniqueName == uniqueName).NormalName;
+            return new Result<string>(name, true, default!);
+        }
+        catch (TaskCanceledException tex) { return new Result<string>(default!, false, tex); }
+        catch (Exception ex) { return new Result<string>(default!, false, ex); }
     }
     #endregion
 }
