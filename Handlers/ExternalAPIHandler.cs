@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 using Serilog;
+using Tack.Database;
 using Tack.Json;
 using Tack.Models;
-using Tack.Database;
-using System.Threading;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
@@ -142,7 +141,7 @@ internal static class ExternalAPIHandler
         }
     }
 
-    public static async Task<Result<T>> WarframeStatusApi<T>(string endpoint, string platform = "pc", string language = "en", int timeout = 5) 
+    public static async Task<Result<T>> WarframeStatusApi<T>(string endpoint, string platform = "pc", string language = "en", int timeout = 5)
     {
         HttpClient caller = new HttpClient();
         caller.Timeout = TimeSpan.FromSeconds(timeout);
@@ -155,7 +154,7 @@ internal static class ExternalAPIHandler
             Stream response = await caller.GetStreamAsync(url);
             Log.Debug($"called {url} [{typeof(T)}]");
             caller.Dispose();
-            T value =  (await JsonSerializer.DeserializeAsync<T>(response))!;
+            T value = (await JsonSerializer.DeserializeAsync<T>(response))!;
             return new Result<T>(value, true, default!);
         }
         catch (TaskCanceledException tex)
