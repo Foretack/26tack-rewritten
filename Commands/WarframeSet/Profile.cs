@@ -61,7 +61,7 @@ internal class Profile : Command
 
         string name = profile.AccountInfo.PlayerName;
         int mr = profile.AccountInfo.MasteryRank;
-        string lastUpdated = (DateTime.Now - DateTimeOffset.FromUnixTimeSeconds(profile.AccountInfo.LastUpdated).LocalDateTime).ToString();
+        string lastUpdated = (DateTime.Now - DateTimeOffset.FromUnixTimeSeconds(profile.AccountInfo.LastUpdated).LocalDateTime).FormatTimeLeft();
         string warframe = (await ExternalAPIHandler.FindFromUniqueName("Warframes", profile.LoadOuts.NORMAL.Warframe.UniqueName)).Value ?? "{unknown}";
         string primary = (await ExternalAPIHandler.FindFromUniqueName("Primary", profile.LoadOuts.NORMAL.Primary.UniqueName)).Value ?? "{unknown}";
         string secondary = (await ExternalAPIHandler.FindFromUniqueName("Secondary", profile.LoadOuts.NORMAL.Secondary.UniqueName)).Value ?? "{unknown}";
