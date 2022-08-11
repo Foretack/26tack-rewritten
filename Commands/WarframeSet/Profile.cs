@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using Tack.Handlers;
 using Tack.Json;
@@ -61,14 +62,22 @@ internal class Profile : Command
 
         string name = profile.AccountInfo.PlayerName;
         int mr = profile.AccountInfo.MasteryRank;
-        string lastUpdated = (DateTime.Now - DateTimeOffset.FromUnixTimeSeconds(profile.AccountInfo.LastUpdated).LocalDateTime).FormatTimeLeft();
+        TimeSpan lastUpdated = (DateTime.Now - DateTimeOffset.FromUnixTimeSeconds(profile.AccountInfo.LastUpdated).LocalDateTime);
         string warframe = (await ExternalAPIHandler.FindFromUniqueName("Warframes", profile.LoadOuts.NORMAL.Warframe.UniqueName)).Value ?? "{unknown}";
         string primary = (await ExternalAPIHandler.FindFromUniqueName("Primary", profile.LoadOuts.NORMAL.Primary.UniqueName)).Value ?? "{unknown}";
         string secondary = (await ExternalAPIHandler.FindFromUniqueName("Secondary", profile.LoadOuts.NORMAL.Secondary.UniqueName)).Value ?? "{unknown}";
         string melee = (await ExternalAPIHandler.FindFromUniqueName("Melee", profile.LoadOuts.NORMAL.Melee.UniqueName)).Value ?? "{unknown}";
 
-        MessageHandler.SendMessage(channel, 
-            $"@{user}, \"{name}\" MasteryRank: {mr}, Equipped: [{warframe}, {primary}, {secondary}, {melee}] (last updated {lastUpdated} ago)");
+        var message = new StringBuilder($"@{user}, ");
+        message
+            .Append($"\"{name}\" ")
+            .Append($"MasteryRank: {mr}, ")
+            .Append("Equipped: [")
+            .Append($"{warframe}, {primary}, {secondary}, {melee}")
+            .Append($"] ")
+            .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated} ago)" : string.Empty);
+
+        MessageHandler.SendMessage(channel,  message.ToString());
     }
 
 
