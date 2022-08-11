@@ -38,7 +38,7 @@ internal static class Formatting
         { Seconds: > 1 }                                => $"{time:s' seconds'}",
         { Seconds: 1 }                                  => $"{time:s' second'}",
 
-        { Milliseconds: > 0 }                           => $"{time.TotalMinutes}ms",
+        { Milliseconds: > 0 }                           => $"{time.Milliseconds}ms",
 
         _                                                => throw new NotImplementedException() // fuck you if you get here
     };
