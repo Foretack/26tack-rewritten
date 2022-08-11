@@ -37,14 +37,9 @@ internal class Profile : Command
 
         string target = ctx.Args.Length == 0 ? ctx.IrcMessage.Username : ctx.Args[0];
         var data = await GetProfileDataStream(target, token);
-        if (data.Code == HttpStatusCode.NoContent && ctx.IrcMessage.Username == target.ToLower())
-        {
-            MessageHandler.SendMessage(channel, $"@{user}, You have loadout sharing disabled. Enable it here under data permissions: https://www.warframe.com/user");
-            return;
-        }
         if (data.Code == HttpStatusCode.NoContent)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, User does not have loadout sharing enabled. :/");
+            MessageHandler.SendMessage(channel, $"@{user}, User does not have loadout sharing enabled. Loudout sharing can be enabled under data permissions on: https://www.warframe.com/user");
             return;
         }
         if (data.Code != HttpStatusCode.OK)
