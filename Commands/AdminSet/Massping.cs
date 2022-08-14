@@ -43,15 +43,15 @@ internal class Massping : Command
 
         if (mods)
         {
-            AppendMods(chatterList.chatters.moderators, ref sb);
+            AppendMods(chatterList.Chatters.Moderators, ref sb);
             MessageHandler.SendMessage(channel, sb.ToString());
             return;
         }
-        AppendViewers(chatterList.chatters.viewers, ref sb);
+        AppendViewers(chatterList.Chatters.Viewers, ref sb);
         MessageHandler.SendMessage(channel, sb.ToString());
     }
 
-    private void AppendMods(string[] modList, ref StringBuilder sb)
+    private void AppendMods(IReadOnlyList<string> modList, ref StringBuilder sb)
     {
         List<string> added = new List<string>();
         for (int i = 0; i < 250; i++)
@@ -64,7 +64,7 @@ internal class Massping : Command
             added.Add(mod);
         }
     }
-    private void AppendViewers(string[] viewerList, ref StringBuilder sb)
+    private void AppendViewers(IReadOnlyList<string> viewerList, ref StringBuilder sb)
     {
         List<string> added = new List<string>();
         for (int i = 0; i < 250; i++)

@@ -148,13 +148,13 @@ public record HULL(
 );
 
 public record LoadOuts(
-    /*[property: JsonPropertyName("ARCHWING")] ARCHWING ARCHWING,
-    [property: JsonPropertyName("DATAKNIFE")] DATAKNIFE DATAKNIFE,
-    [property: JsonPropertyName("MECH")] MECH MECH,*/
+    /*[property: JsonPropertyName("ARCHWING")] ARCHWING     ARCHWING,
+    [property: JsonPropertyName("DATAKNIFE")] DATAKNIFE     DATAKNIFE,
+    [property: JsonPropertyName("MECH")] MECH               MECH,*/
     [property: JsonPropertyName("NORMAL")] NORMAL NORMAL/*,
-    [property: JsonPropertyName("OPERATOR")] OPERATOR OPERATOR,
-    [property: JsonPropertyName("RAILJACK")] RAILJACK RAILJACK,
-    [property: JsonPropertyName("SENTINEL")] SENTINEL SENTINEL*/
+    [property: JsonPropertyName("OPERATOR")] OPERATOR       OPERATOR,
+    [property: JsonPropertyName("RAILJACK")] RAILJACK       RAILJACK,
+    [property: JsonPropertyName("SENTINEL")] SENTINEL       SENTINEL*/
 );
 
 public record Markings(

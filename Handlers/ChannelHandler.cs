@@ -40,7 +40,7 @@ internal static class ChannelHandler
 
         Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
-        JLChannels = (await ExternalAPIHandler.GetIvrChannels()).channels.Select(x => x.name).ToArray();
+        JLChannels = (await ExternalAPIHandler.GetIvrChannels()).Channels.Select(x => x.Name).ToArray();
 
         IAsyncEnumerable<Channel> c = new AsyncEnumerable<Channel>(async y =>
         {

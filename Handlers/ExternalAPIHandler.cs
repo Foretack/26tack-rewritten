@@ -16,7 +16,7 @@ internal static class ExternalAPIHandler
         {
             Stream resp = await reqs.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
             IvrUserData ivrUser = (await JsonSerializer.DeserializeAsync<IvrUserData>(resp))!;
-            User user = new User(ivrUser.displayName, ivrUser.login, ivrUser.id, ivrUser.logo, ivrUser.createdAt);
+            var user = new User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
             return user;
         }
         catch (Exception ex)
@@ -62,7 +62,7 @@ internal static class ExternalAPIHandler
         }
     }
 
-    public static async Task<JustLogLoggedChannels> GetIvrChannels()
+    public static async Task<JustLog> GetIvrChannels()
     {
         HttpClient reqs = new HttpClient();
         reqs.Timeout = TimeSpan.FromMilliseconds(1500);
@@ -70,7 +70,7 @@ internal static class ExternalAPIHandler
         try
         {
             Stream jlcl = await reqs.GetStreamAsync(Config.Links.IvrChannels);
-            JustLogLoggedChannels deserialized = (await JsonSerializer.DeserializeAsync<JustLogLoggedChannels>(jlcl))!;
+            JustLog deserialized = (await JsonSerializer.DeserializeAsync<JustLog>(jlcl))!;
             return deserialized;
         }
         catch (Exception ex)
