@@ -55,9 +55,9 @@ internal class Relics : Command
     {
         string[] wantedRelics = await Task.Run(() =>
         {
-            wantedRelics = relicData.relics
-                .Where(x => x.rewards.Any(y => y.itemName.ToLower().StartsWith(itemName)) && x.state == "Intact")
-                .Select(x => x.tier + ' ' + x.relicName)
+            wantedRelics = relicData.Relics
+                .Where(x => x.Rewards.Any(y => y.ItemName.ToLower().StartsWith(itemName)) && x.State == "Intact")
+                .Select(x => x.Tier + ' ' + x.RelicName)
                 .ToArray();
 
             return wantedRelics;
@@ -71,15 +71,15 @@ internal class Relics : Command
     {
         Relic[] relic = await Task.Run(() =>
         {
-            return relicData.relics
-            .Where(x => (x.tier + ' ' + x.relicName).ToLower() == relicName)
+            return relicData.Relics
+            .Where(x => (x.Tier + ' ' + x.RelicName).ToLower() == relicName)
             .ToArray();
         });
 
         if (relic.Length == 0) return "That Relic was not found!";
         
         Relic r = relic[0];
-        return $"Contents of \"{r.tier} {r.relicName}\": " +
-            $"[{string.Join(" | ", r.rewards.OrderByDescending(x => x.chance).Select(x => x.itemName))}] 🌰";
+        return $"Contents of \"{r.Tier} {r.RelicName}\": " +
+            $"[{string.Join(" | ", r.Rewards.OrderByDescending(x => x.Chance).Select(x => x.ItemName))}] 🌰";
     }
 }

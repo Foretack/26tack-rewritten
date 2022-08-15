@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
@@ -26,7 +26,7 @@ internal class Invasions : Command
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :( ({r.Exception.Message})");
-                return; 
+                return;
             }
             invasionNodes = r.Value;
         }
@@ -43,8 +43,8 @@ internal class Invasions : Command
             Dictionary<string, int> dict = new Dictionary<string, int>();
             foreach (InvasionNode node in invasions)
             {
-                CountedItem[] items = node.attackerReward.countedItems
-                    .Concat(node.defenderReward.countedItems).ToArray();
+                CountedItem[] items = node.AttackerReward.CountedItems
+                    .Concat(node.DefenderReward.CountedItems).ToArray();
 
                 foreach (string item in items.Select(x => x.key))
                 {

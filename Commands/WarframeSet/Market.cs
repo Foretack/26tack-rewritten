@@ -39,8 +39,8 @@ internal class Market : Command
 
         await Task.Run(() =>
         {
-            Order[] orders = listings.payload.orders
-            .Where(x => !activeOnly || x.user.status != "offline")
+            Order[] orders = listings.Payload.Orders
+            .Where(x => !activeOnly || x.User.Status != "offline")
             .ToArray();
 
             int totalOrders = orders.Length;
@@ -59,20 +59,20 @@ internal class Market : Command
 
             foreach (Order o in orders)
             {
-                if (o.order_type == "sell")
+                if (o.OrderType == "sell")
                 {
                     sellersCount++;
-                    sellersTotalPrice += o.platinum * o.quantity;
-                    sellersTotalQuantity += o.quantity;
-                    if (o.platinum < cheapestSeller) cheapestSeller = o.platinum;
-                    if (o.platinum > mostExpensiveSeller) mostExpensiveSeller = o.platinum;
+                    sellersTotalPrice += o.Platinum * o.Platinum;
+                    sellersTotalQuantity += o.Platinum;
+                    if (o.Platinum < cheapestSeller) cheapestSeller = o.Platinum;
+                    if (o.Platinum > mostExpensiveSeller) mostExpensiveSeller = o.Platinum;
                     continue;
                 }
                 buyersCount++;
-                buyersTotalPrice += o.platinum * o.quantity;
-                buyersTotalQuantity += o.quantity;
-                if (o.platinum < leastPayingBuyer) leastPayingBuyer = o.platinum;
-                if (o.platinum > mostPayingBuyer) mostPayingBuyer = o.platinum;
+                buyersTotalPrice += o.Platinum * o.Quantity;
+                buyersTotalQuantity += o.Quantity;
+                if (o.Platinum < leastPayingBuyer) leastPayingBuyer = o.Platinum;
+                if (o.Platinum > mostPayingBuyer) mostPayingBuyer = o.Platinum;
             }
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);

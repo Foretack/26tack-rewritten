@@ -2,12 +2,12 @@
 using Serilog;
 using Tack.Database;
 using Tack.Json;
-using Tack.Models;
+using M = Tack.Models;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
 {
-    public static async Task<User?> GetIvrUser(string username)
+    public static async Task<M::User?> GetIvrUser(string username)
     {
         HttpClient reqs = new HttpClient();
         reqs.Timeout = TimeSpan.FromSeconds(2);
@@ -16,7 +16,7 @@ internal static class ExternalAPIHandler
         {
             Stream resp = await reqs.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
             IvrUserData ivrUser = (await JsonSerializer.DeserializeAsync<IvrUserData>(resp))!;
-            var user = new User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
+            var user = new M::User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
             return user;
         }
         catch (Exception ex)

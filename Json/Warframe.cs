@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS8618
 #pragma warning disable IDE1006
 
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Tack.Nonclass;
 
@@ -103,52 +104,59 @@ public class ZarimanCycle : IWorldCycle
     public string QueryString { get; } = "zarimanCycle";
 }
 
-public class MarketItems
-{
-    public Payload payload { get; set; }
-}
-public class Payload
-{
-    public Order[] orders { get; set; }
-}
-public class Order
-{
-    public int quantity { get; set; }
-    public int platinum { get; set; }
-    public MarketUser user { get; set; }
-    public string order_type { get; set; }
-}
-public class MarketUser
-{
-    public string status { get; set; }
-}
+public record MarketItems(
+    [property: JsonPropertyName("payload")] Payload Payload
+);
+public record Order(
+    [property: JsonPropertyName("quantity")] int Quantity,
+    [property: JsonPropertyName("creation_date")] DateTime CreationDate,
+    [property: JsonPropertyName("visible")] bool Visible,
+    [property: JsonPropertyName("user")] User User,
+    [property: JsonPropertyName("last_update")] DateTime LastUpdate,
+    [property: JsonPropertyName("platinum")] int Platinum,
+    [property: JsonPropertyName("order_type")] string OrderType,
+    [property: JsonPropertyName("region")] string Region,
+    [property: JsonPropertyName("platform")] string Platform,
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("mod_rank")] int ModRank
+);
+public record Payload(
+    [property: JsonPropertyName("orders")] IReadOnlyList<Order> Orders
+);
+public record User(
+    [property: JsonPropertyName("ingame_name")] string IngameName,
+    [property: JsonPropertyName("last_seen")] DateTime LastSeen,
+    [property: JsonPropertyName("reputation")] int Reputation,
+    [property: JsonPropertyName("region")] string Region,
+    [property: JsonPropertyName("avatar")] string Avatar,
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("status")] string Status
+);
 
-public class RelicData
-{
-    public Relic[] relics { get; set; }
-}
-public class Relic
-{
-    public string tier { get; set; }
-    public string relicName { get; set; }
-    public string state { get; set; }
-    public RelicReward[] rewards { get; set; }
-}
-public class RelicReward
-{
-    public string itemName { get; set; }
-    public double chance { get; set; }
-}
+public record RelicData(
+    [property: JsonPropertyName("relics")] IReadOnlyList<Relic> Relics
+);
+public record Relic(
+    [property: JsonPropertyName("tier")] string Tier,
+    [property: JsonPropertyName("relicName")] string RelicName,
+    [property: JsonPropertyName("state")] string State,
+    [property: JsonPropertyName("rewards")] IReadOnlyList<RelicReward> Rewards,
+    [property: JsonPropertyName("_id")] string Id
+);
+public record RelicReward(
+    [property: JsonPropertyName("_id")] string Id,
+    [property: JsonPropertyName("itemName")] string ItemName,
+    [property: JsonPropertyName("rarity")] string Rarity,
+    [property: JsonPropertyName("chance")] float Chance
+);
 
-public class InvasionNode
-{
-    public InvasionReward attackerReward { get; set; }
-    public InvasionReward defenderReward { get; set; }
-}
-public class InvasionReward
-{
-    public CountedItem[] countedItems { get; set; }
-}
+public record InvasionNode(
+    [property: JsonPropertyName("attackerReward")] InvasionReward AttackerReward,
+    [property: JsonPropertyName("defenderReward")] InvasionReward DefenderReward
+);
+public record InvasionReward(
+    [property: JsonPropertyName("countedItems")] IReadOnlyList<CountedItem> CountedItems
+);
 
 public class SPReward
 {
