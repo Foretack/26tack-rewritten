@@ -140,7 +140,7 @@ internal static class MessageHandler
                 // Message is split by 2 new lines
                 var sMessage = m.Split("\n\n");
                 // Strip formatting symbols & show newlines
-                sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶]")).ToArray();
+                sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶] ")).ToArray();
 
                 Queue<string> messages = new Queue<string>();
                 foreach (string message in sMessage)
@@ -168,7 +168,7 @@ internal static class MessageHandler
                 }
                 return;
             }
-            string content = socketMessage.CleanContent.Replace("\n", "[⤶]").StripSymbols();
+            string content = socketMessage.CleanContent.Replace("\n", "[⤶] ").StripSymbols();
             var embeds = socketMessage.Embeds;
 
             if (content.Length < 50
