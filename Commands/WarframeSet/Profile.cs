@@ -20,7 +20,7 @@ internal class Profile : Command
 
     private static readonly HttpClient _requests = new HttpClient();
     private const string WF_ARSENAL_ID = "ud1zj704c0eb1s553jbkayvqxjft97";
-    private const int LeechedChannel = 95178769;
+    private const int LeechedChannel = 35833485;
 
     public override async Task Execute(CommandContext ctx)
     {
