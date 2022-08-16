@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using Serilog;
 using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
@@ -18,40 +19,44 @@ internal class Profile : Command
         channelCooldown: 3
     );
 
-    private static readonly HttpClient _requests = new HttpClient();
-    private const string WF_ARSENAL_ID = "ud1zj704c0eb1s553jbkayvqxjft97";
     private const int LeechedChannel = 35833485;
-
     public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        string? token = ObjectCache.Get<string>("v5_ext_token") ?? await GetV5Token(LeechedChannel);
+        string? token = ObjectCache.Get<string>("v5_ext_token") 
+            ?? (await ExternalAPIHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel)).Value;
         if (token is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation. Please report this issue :( ");
-            return;
+            var t = await ExternalAPIHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel);
+            if (!t.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation. Please report this issue :( ");
+                Log.Error(t.Exception, $"Error generating Warframe extension token");
+                return;
+            }
+            token = t.Value;
         }
         ObjectCache.Put("v5_ext_token", token, 60);
 
         string target = ctx.Args.Length == 0 ? ctx.IrcMessage.Username : ctx.Args[0];
-        var data = await GetProfileDataStream(target, token);
-        if (data.Code == HttpStatusCode.NoContent)
+        var data = await ExternalAPIHandler.GetWarframeProfileData(target, token);
+        if (data.Value.Code == HttpStatusCode.NoContent)
         {
             MessageHandler.SendMessage(channel, $"@{user}, User does not have loadout sharing enabled. Loudout sharing can be enabled under data permissions on: https://www.warframe.com/user");
             return;
         }
-        if (data.Code != HttpStatusCode.OK)
+        if (data.Value.Code != HttpStatusCode.OK)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Account Data Not Found. The requested account doesn't exist or isn't public. :/");
             return;
         }
 
-        ProfileRoot? profile = await JsonSerializer.DeserializeAsync<ProfileRoot>(data.Stream!);
+        ProfileRoot? profile = await JsonSerializer.DeserializeAsync<ProfileRoot>(data.Value.Stream!);
         if (profile is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error parsing your data :( ");
+            MessageHandler.SendMessage(channel, $"@{user}, There was an error parsing your data. Saj ");
             return;
         }
 
@@ -73,36 +78,5 @@ internal class Profile : Command
             .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated} ago)" : string.Empty);
 
         MessageHandler.SendMessage(channel,  message.ToString());
-    }
-
-
-    private async Task<string?> GetV5Token(int channelId)
-    {
-        // this is not mine
-        if (!_requests.DefaultRequestHeaders.Contains("client-id")) _requests.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-        try
-        {
-            Stream data = await _requests.GetStreamAsync($"https://api.twitch.tv/v5/channels/{channelId}/extensions");
-            V5Root? v5r = await JsonSerializer.DeserializeAsync<V5Root>(data);
-            if (v5r is null) return null;
-            return (
-                   from ext in v5r.Tokens
-                   where ext.ExtensionId == WF_ARSENAL_ID
-                   select ext.Key
-                   ).First();
-        }
-        catch { return null; }
-    }
-
-    private async Task<(HttpStatusCode Code, Stream? Stream)> GetProfileDataStream(string username, string token)
-    {
-        HttpClient c = new HttpClient();
-        c.DefaultRequestHeaders.Add("Origin", $"https://{WF_ARSENAL_ID}.ext-twitch.tv");
-        c.DefaultRequestHeaders.Add("Referer", $"https://{WF_ARSENAL_ID}.ext-twitch.tv/");
-        c.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-        var data = await c.GetAsync($"https://content.warframe.com/dynamic/twitch/getActiveLoadout.php?account={username.ToLower()}");
-
-        c.Dispose();
-        return (data.StatusCode, data.Content.ReadAsStream());
     }
 }

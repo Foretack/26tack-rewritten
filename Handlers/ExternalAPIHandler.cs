@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Tack.Database;
 using Tack.Json;
@@ -183,6 +185,42 @@ internal static class ExternalAPIHandler
         }
         catch (TaskCanceledException tex) { return new Result<string>(default!, false, tex); }
         catch (Exception ex) { return new Result<string>(default!, false, ex); }
+    }
+    #endregion
+
+    #region Warframe arsenal
+    private const string WF_ARSENAL_ID = "ud1zj704c0eb1s553jbkayvqxjft97";
+    public static async Task<Result<string>> GetWarframeTwitchExtensionTokenV5(int fromChannel)
+    {
+        HttpClient caller = new HttpClient();
+        caller.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+        caller.Timeout = TimeSpan.FromSeconds(5);
+
+        try
+        {
+            Stream data = await caller.GetStreamAsync($"https://api.twitch.tv/v5/channels/{fromChannel}/extensions");
+            V5Root? v5r = await JsonSerializer.DeserializeAsync<V5Root>(data);
+            return new Result<string>(
+                v5r!.Tokens.First(x => x.ExtensionId == WF_ARSENAL_ID).Key
+                , true, default!);
+        }
+        catch (Exception ex) { return new Result<string>(default!, false, ex); }
+    }
+
+    public static async Task<Result<(Stream? Stream, HttpStatusCode Code)>> GetWarframeProfileData(string username, string extensionKey)
+    {
+        HttpClient caller = new HttpClient();
+        caller.DefaultRequestHeaders.Add("Origin", $"https://{WF_ARSENAL_ID}.ext-twitch.tv");
+        caller.DefaultRequestHeaders.Add("Referer", $"https://{WF_ARSENAL_ID}.ext-twitch.tv/");
+        caller.DefaultRequestHeaders.Add("Authorization", $"Bearer {extensionKey}");
+        caller.Timeout = TimeSpan.FromSeconds(10);
+
+        try
+        {
+            var data = await caller.GetAsync($"https://content.warframe.com/dynamic/twitch/getActiveLoadout.php?account={username.ToLower()}");
+            return new Result<(Stream? Stream, HttpStatusCode Code)>((await data.Content.ReadAsStreamAsync(), data.StatusCode), true, default!);
+        }
+        catch (Exception ex) { return new Result<(Stream? Stream, HttpStatusCode Code)>(default!, false, ex); }
     }
     #endregion
 }
