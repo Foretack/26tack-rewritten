@@ -1,9 +1,9 @@
-﻿using Tack.Nonclass;
-using Tack.Models;
-using AsyncAwaitBestPractices;
+﻿using AsyncAwaitBestPractices;
 using Serilog;
-using TwitchLib.Client.Models;
 using Tack.Commands;
+using Tack.Models;
+using Tack.Nonclass;
+using TwitchLib.Client.Models;
 
 namespace Tack.Handlers;
 internal static class CommandHandler
@@ -43,20 +43,20 @@ internal static class CommandHandler
 
                 if (CommandList.Info.Aliases.Contains(cmdName.Replace(prefix, string.Empty)))
                 {
-                    CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+                    var ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
                     CommandList.Run(ctx2).SafeFireAndForget();
                     return;
                 }
                 if (CommandHelp.Info.Name == cmdName.Replace(prefix, string.Empty))
                 {
-                    CommandContext ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+                    var ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
                     CommandHelp.Run(ctx2).SafeFireAndForget();
                     return;
                 }
 
                 Command command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
                 if (!ctx.Permission.Permits(command)) return;
-                Cooldown cd = new Cooldown(ctx.IrcMessage.Username,
+                var cd = new Cooldown(ctx.IrcMessage.Username,
                                            ctx.IrcMessage.Channel,
                                            handler.UseUnifiedCooldowns ? handler : command.Info);
                 if (!Cooldown.CheckAndHandleCooldown(cd)) return;
@@ -67,7 +67,7 @@ internal static class CommandHandler
             }
             catch (Exception ex)
             {
-                Log.Error(ex,  $"Something went wrong with executing \"{cmdName}\"");
+                Log.Error(ex, $"Something went wrong with executing \"{cmdName}\"");
             }
         });
     }

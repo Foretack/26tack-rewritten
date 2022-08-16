@@ -1,7 +1,7 @@
-﻿using Tack.Handlers;
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
 using Serilog;
+using Tack.Handlers;
 
 namespace Tack.Core;
 internal static class DiscordClient

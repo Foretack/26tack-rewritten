@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
@@ -31,11 +31,11 @@ internal class Cycle : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         string queryString = new T().QueryString;
-        
+
         T? cycle = ObjectCache.Get<T>(queryString + "_wf");
         if (cycle is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
+            Result<T> r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");

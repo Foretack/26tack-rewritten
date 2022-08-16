@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Dasync.Collections;
+﻿using Dasync.Collections;
 using Serilog;
 using Tack.Handlers;
 using Tack.Models;
@@ -8,11 +7,14 @@ using Tack.Utils;
 namespace Tack.Database;
 internal class DbQueries : DbConnection
 {
-    public static DbQueries NewInstance() => new DbQueries();
+    public static DbQueries NewInstance()
+    {
+        return new DbQueries();
+    }
 
     public async Task<bool> LogException(Exception exception)
     {
-        var q = await
+        ExecutionResult q = await
             Insert()
             .Table("errors")
             .Schema("data")
@@ -31,7 +33,7 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> AddChannel(ExtendedChannel channel)
     {
-        var q = await
+        ExecutionResult q = await
             Insert()
             .Table("channels")
             .Schema("display_name", "username", "id", "avatar_url", "priority", "is_logged", "date_joined")
@@ -43,7 +45,7 @@ internal class DbQueries : DbConnection
 
     public async Task<ChannelHandler.Channel[]> GetChannels()
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("channels")
             .Schema("username", "priority", "is_logged")
@@ -57,7 +59,7 @@ internal class DbQueries : DbConnection
             throw new MissingFieldException("Channel list could not be loaded");
         }
 
-        List<ChannelHandler.Channel> channels = new List<ChannelHandler.Channel>();
+        var channels = new List<ChannelHandler.Channel>();
         foreach (object[] row in q.Results)
         {
             channels.Add(new ChannelHandler.Channel((string)row[0], (int)row[1], (bool)row[2]));
@@ -68,7 +70,7 @@ internal class DbQueries : DbConnection
 
     public async Task<string[]> GetWhitelistedUsers()
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("whitelisted_users")
             .Schema("username")
@@ -86,7 +88,7 @@ internal class DbQueries : DbConnection
 
     public async Task<string[]> GetBlacklistedUsers()
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("blacklisted_users")
             .Schema("username")
@@ -104,7 +106,7 @@ internal class DbQueries : DbConnection
 
     public async Task<Authorization> GetAuthorizationData()
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("auth")
             .Schema("*")
@@ -134,7 +136,7 @@ internal class DbQueries : DbConnection
 
     public async Task<Discord> GetDiscordData()
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("discord")
             .Schema("*")
@@ -163,7 +165,7 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> RemoveChannel(ChannelHandler.Channel channel)
     {
-        var q = await
+        ExecutionResult q = await
             Delete()
             .Table("channels")
             .Where($"username = '{channel.Name}'")
@@ -174,7 +176,7 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> CreateSuggestion(PartialUser user, string suggestionText)
     {
-        var q = await
+        ExecutionResult q = await
             Insert()
             .Table("suggestions")
             .Schema("username", "user_id", "suggestion_text")
@@ -186,7 +188,7 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> BlacklistUser(string username, string id)
     {
-        var q = await
+        ExecutionResult q = await
             Insert()
             .Table("blacklisted_users")
             .Schema("username", "id")
@@ -198,7 +200,7 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> WhitelistUser(string username)
     {
-        var q = await
+        ExecutionResult q = await
             Insert()
             .Table("whitelisted_users")
             .Schema("username")
@@ -210,7 +212,7 @@ internal class DbQueries : DbConnection
 
     public DiscordEvent[] GetDiscordEvents()
     {
-        var q =
+        ExecutionResult q =
             Select()
             .Table("discord_triggers")
             .Schema("*")
@@ -225,13 +227,13 @@ internal class DbQueries : DbConnection
             x[4] is DBNull ? null : (string)x[4],
             (string)x[5]
             )).ToArray();
-        
+
         return events;
     }
 
     public async Task<ExtendedChannel?> GetExtendedChannel(string channel)
     {
-        var q = await
+        ExecutionResult q = await
             Select()
             .Table("channels")
             .Schema("*")
@@ -245,7 +247,7 @@ internal class DbQueries : DbConnection
         }
 
         object[] row = q.Results[0];
-        ExtendedChannel c = new ExtendedChannel(
+        var c = new ExtendedChannel(
             (string)row[0],
             (string)row[1],
             ((int)row[2]).ToString(),

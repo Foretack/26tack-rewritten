@@ -19,19 +19,19 @@ internal static class AnonymousClient
     #region Initialization
     public static void Initialize()
     {
-        ClientOptions options = new ClientOptions();
+        var options = new ClientOptions();
         options.MessagesAllowedInPeriod = 1;
         options.ThrottlingPeriod = TimeSpan.FromSeconds(1);
 
-        ReconnectionPolicy policy = new ReconnectionPolicy(10);
+        var policy = new ReconnectionPolicy(10);
         policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
-        WebSocketClient webSocketClient = new WebSocketClient(options);
+        var webSocketClient = new WebSocketClient(options);
         Client = new TwitchClient(webSocketClient);
         Client.AutoReListenOnException = true;
 
-        ConnectionCredentials credentials = new ConnectionCredentials("justinfan123", "justinfan");
+        var credentials = new ConnectionCredentials("justinfan123", "justinfan");
         Client.Initialize(credentials, Config.Auth.Username);
 
         Connect();
@@ -39,7 +39,7 @@ internal static class AnonymousClient
 
     public static void Connect()
     {
-        Client.Connect();
+        _ = Client.Connect();
         Client.OnConnected += ClientConnectedEvent;
         Client.OnDisconnected += ClientDisconnectedEvent;
         Client.OnError += ClientOnErrorEvent;

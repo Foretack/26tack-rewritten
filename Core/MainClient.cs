@@ -18,19 +18,19 @@ public static class MainClient
     #region Initialization
     public static void Initialize()
     {
-        ClientOptions options = new ClientOptions();
+        var options = new ClientOptions();
         options.MessagesAllowedInPeriod = 150;
         options.ThrottlingPeriod = TimeSpan.FromSeconds(30);
 
-        ReconnectionPolicy policy = new ReconnectionPolicy(10);
+        var policy = new ReconnectionPolicy(10);
         policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
-        WebSocketClient webSocketClient = new WebSocketClient(options);
+        var webSocketClient = new WebSocketClient(options);
         Client = new TwitchClient(webSocketClient);
         Client.AutoReListenOnException = true;
 
-        ConnectionCredentials credentials = new ConnectionCredentials(Config.Auth.Username, Config.Auth.AccessToken);
+        var credentials = new ConnectionCredentials(Config.Auth.Username, Config.Auth.AccessToken);
         Client.Initialize(credentials);
 
         Connect();
@@ -38,7 +38,7 @@ public static class MainClient
 
     private static void Connect()
     {
-        Client.Connect();
+        _ = Client.Connect();
         Client.OnConnected += ClientConnectedEvent;
         Client.OnDisconnected += ClientDisconnectedEvent;
         Client.OnError += ClientErrorEvent;

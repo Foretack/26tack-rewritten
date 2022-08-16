@@ -9,7 +9,7 @@ namespace Tack.Handlers;
 internal static class TwitchAPIHandler
 {
     #region Properties
-    public static readonly TwitchAPI API = new TwitchAPI(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
+    public static readonly TwitchAPI API = new(settings: new ApiSettings { AccessToken = Config.Auth.AccessToken, ClientId = Config.Auth.ClientID });
 
     private static readonly Helix Helix = API.Helix;
     #endregion

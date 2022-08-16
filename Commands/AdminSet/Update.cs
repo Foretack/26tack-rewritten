@@ -1,8 +1,8 @@
-﻿using Tack.Handlers;
-using Tack.Nonclass;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Models;
+using Tack.Nonclass;
 using C = Tack.Core.Core;
-using Tack.Database;
 
 namespace Tack.Commands.AdminSet;
 internal class Update : Command
@@ -18,8 +18,8 @@ internal class Update : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        DbQueries db = new DbQueries();
-        await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
+        var db = new DbQueries();
+        _ = await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
 
         string? pullResult = await C.GitPull();
 

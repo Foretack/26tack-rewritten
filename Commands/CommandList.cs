@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using Tack.Handlers;
-using Tack.Nonclass;
-using Tack.Models;
 using Serilog;
+using Tack.Handlers;
+using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands;
@@ -21,9 +21,9 @@ internal static class CommandList
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
-        PermissionLevels perms = (PermissionLevels)ctx.Permission.Level;
-        
-        StringBuilder sb = new StringBuilder($"@{user} ");
+        var perms = (PermissionLevels)ctx.Permission.Level;
+
+        var sb = new StringBuilder($"@{user} ");
         string prefix = ctx.CommandName;
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
         if (!s || handler is null)
@@ -33,20 +33,23 @@ internal static class CommandList
             return;
         }
 
-        await Task.Run(() => {
-            sb.Append(handler.Name + " commands: ");
+        await Task.Run(() =>
+        {
+            _ = sb.Append(handler.Name + " commands: ");
 
-            var commandNames = handler.Commands
+            IEnumerable<string> commandNames = handler.Commands
             .Select(x => prefix + x.Value.Info.Name)
             .AsEnumerable();
-            List<string> list = new List<string>(commandNames);
-            list.Add(prefix + "help");
-            var otherSets = CommandHandler.Handlers
+            var list = new List<string>(commandNames)
+            {
+                prefix + "help"
+            };
+            IEnumerable<string> otherSets = CommandHandler.Handlers
             .Where(x => x.Key != prefix && x.Value.Visibility <= perms)
             .Select(y => y.Key + "commands").AsEnumerable();
             list.AddRange(otherSets);
 
-            sb.Append(list.AsString());
+            _ = sb.Append(list.AsString());
 
             MessageHandler.SendColoredMessage(channel, sb.ToString(), ChatColor.Green);
         });

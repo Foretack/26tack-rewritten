@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
@@ -23,11 +23,11 @@ internal class Sortie : Command
         CurrentSortie? sortie = ObjectCache.Get<CurrentSortie>("current_sortie_wf");
         if (sortie is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
+            Result<CurrentSortie> r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
-                return; 
+                return;
             }
             sortie = r.Value;
         }

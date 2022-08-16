@@ -4,8 +4,8 @@ using Tack.Nonclass;
 namespace Tack.Models;
 public class Cooldown
 {
-    private static readonly List<Cooldown> UserCooldownPool = new List<Cooldown>();
-    private static readonly List<Cooldown> ChannelCooldownPool = new List<Cooldown>();
+    private static readonly List<Cooldown> UserCooldownPool = new();
+    private static readonly List<Cooldown> ChannelCooldownPool = new();
 
     public string User { get; set; }
     public string Channel { get; set; }
@@ -44,7 +44,7 @@ public class Cooldown
         // Remove USER cooldown
         uTimer = new Timer(state =>
         {
-            UserCooldownPool.Remove(cd);
+            _ = UserCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.User};{cd.CooldownOptions.Name}]");
             uTimer?.Dispose();
         }, null, uCD * 1000, Timeout.Infinite);
@@ -52,14 +52,14 @@ public class Cooldown
         // Remove CHANNEL cooldown
         cTimer = new Timer(state =>
         {
-            ChannelCooldownPool.Remove(cd);
+            _ = ChannelCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.Channel};{cd.CooldownOptions.Name}]");
             cTimer?.Dispose();
         }, null, cCD * 1000, Timeout.Infinite);
-        
+
         // Command can't be executed
         return true;
-    } 
+    }
 
     private static void RegisterNewCooldown(Cooldown newCooldown, bool user = true, bool channel = true)
     {

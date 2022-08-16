@@ -17,7 +17,7 @@ internal static class MessageHandler
     #region Properties
     private static ChatColor CurrentColor { get; set; } = ChatColor.FANCY_NOT_SET_STATE_NAME;
     private static DiscordEvent[] DiscordEvents { get; set; } = DbQueries.NewInstance().GetDiscordEvents();
-    private static readonly Dictionary<string, string> LastSentMessage = new Dictionary<string, string>();
+    private static readonly Dictionary<string, string> LastSentMessage = new();
     #endregion
 
     #region Initialization
@@ -32,14 +32,17 @@ internal static class MessageHandler
     #endregion
 
     #region Sending
-    public static void SendMessage(string channel, string message) 
+    public static void SendMessage(string channel, string message)
     {
         message = message.Length >= 500 ? message[..495] + "..." : message;
-        if (!LastSentMessage.ContainsKey(channel)) LastSentMessage.Add(channel, message);
+        if (!LastSentMessage.ContainsKey(channel))
+        {
+            LastSentMessage.Add(channel, message);
+        }
         else if (LastSentMessage[channel] == message)
         {
             message += " 󠀀";
-        } 
+        }
         MainClient.Client.SendMessage(channel, message);
         LastSentMessage[channel] = message;
     }
@@ -58,7 +61,7 @@ internal static class MessageHandler
             ?? DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID);
         ObjectCache.Put(channelID + "_DISCORD_CHANNEL", channel, 36400);
 
-        await channel.SendMessageAsync(message);
+        _ = await channel.SendMessageAsync(message);
     }
     private static void OnMessageSent(object? sender, OnMessageSentArgs e)
     {
@@ -98,8 +101,8 @@ internal static class MessageHandler
             && ChannelHandler.MainJoinedChannelNames.Contains(channel))
             {
                 string commandName = splitMessage[0].Replace(CommandHandler.Prefixes.First(x => message.StartsWith(x)), string.Empty);
-                Permission permission = new Permission(ircMessage);
-                CommandContext ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
+                var permission = new Permission(ircMessage);
+                var ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
                 await CommandHandler.HandleCommand(ctx);
             }
             if (!Permission.IsBlacklisted(ircMessage.Username)
@@ -117,20 +120,20 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
     {
-        var evs = DiscordEvents.Where(
+        DiscordEvent[] evs = DiscordEvents.Where(
             x => x.ChannelID == socketMessage.Channel.Id
-            && (socketMessage.Author.Username.StripDescriminator().Contains(x.NameContains) 
+            && (socketMessage.Author.Username.StripDescriminator().Contains(x.NameContains)
             || x.NameContains == "_ANY_")
             ).ToArray();
         if (evs.Length == 0) return;
-        foreach (var ev in evs)
+        foreach (DiscordEvent? ev in evs)
         {
             if (ev.Remove?.Contains(" _SHOW_ALL_") ?? false)
             {
                 // Remove "_SHOW_ALL_" to properly .Remove()
                 string newRemove = ev.Remove.Replace(" _SHOW_ALL_", "");
                 // Get links of all attachments in message
-                var attachmentLinks = socketMessage.Attachments.Select(x => x.Url + ' ');
+                IEnumerable<string> attachmentLinks = socketMessage.Attachments.Select(x => x.Url + ' ');
                 // Message clean content + attachment links joined with 🔗
                 string m = $"{socketMessage.CleanContent} \n\n" + string.Join(" 🔗 ", attachmentLinks);
                 // Remove operation
@@ -138,27 +141,25 @@ internal static class MessageHandler
                 // Prepend operation
                 m = $"{ev.Prepend} " + m;
                 // Message is split by 2 new lines
-                var sMessage = m.Split("\n\n");
+                string[] sMessage = m.Split("\n\n");
                 // Strip formatting symbols & show newlines
                 sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶] ")).ToArray();
 
-                Queue<string> messages = new Queue<string>();
+                var messages = new Queue<string>();
                 foreach (string message in sMessage)
                 {
                     // Split message into chunks if length is >= 488
                     if (message.Length >= 488)
                     {
-                        var chunks = message.Chunk(488);
-                        foreach (var chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
+                        IEnumerable<char[]> chunks = message.Chunk(488);
+                        foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
                         continue;
                     }
                     messages.Enqueue(message);
                 }
 
                 // Get color
-                ChatColor _color;
-                if (Enum.TryParse<ChatColor>(ev.Color, out var _clr)) _color = _clr;
-                else _color = ChatColor.BlueViolet;
+                ChatColor _color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor _clr) ? _clr : ChatColor.BlueViolet;
 
                 // Send messages every 2.5 seconds
                 while (messages.Count > 0)
@@ -169,7 +170,7 @@ internal static class MessageHandler
                 return;
             }
             string content = socketMessage.CleanContent.Replace("\n", "[⤶] ").StripSymbols();
-            var embeds = socketMessage.Embeds;
+            IReadOnlyCollection<Embed> embeds = socketMessage.Embeds;
 
             if (content.Length < 50
             && embeds.Count > 0)
@@ -191,10 +192,7 @@ internal static class MessageHandler
 
             if (ev.Remove is not null) content = ev.Remove == "_ALL_" ? string.Empty : content.Replace(ev.Remove, string.Empty);
             if (ev.Prepend is not null) content = $"{ev.Prepend} {content}";
-            ChatColor color;
-            if (Enum.TryParse<ChatColor>(ev.Color, out var clr)) color = clr;
-            else color = ChatColor.BlueViolet;
-
+            ChatColor color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor clr) ? clr : ChatColor.BlueViolet;
             SendColoredMessage(ev.OutputChannel, content, color);
         }
     }

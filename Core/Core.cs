@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using Serilog;
-using Serilog.Core;
-using Tack.Handlers;
 using CliWrap;
 using CliWrap.Buffered;
+using Serilog;
+using Serilog.Core;
 using Tack.Database;
+using Tack.Handlers;
 
 namespace Tack.Core;
 public static class Core
@@ -26,7 +26,7 @@ public static class Core
             .WriteTo.Console(outputTemplate: "<<{Timestamp:HH:mm:ss} <~> {Level}>>{NewLine} {Message}{NewLine}{Exception}{NewLine}")
             .CreateLogger();
 
-        DbQueries db = new DbQueries();
+        var db = new DbQueries();
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
         Config.Links = new Links();
@@ -41,8 +41,8 @@ public static class Core
         await DiscordClient.Connect();
 
         int seconds = 0;
-        while (!(AnonymousClient.Connected 
-        && DiscordClient.Connected 
+        while (!(AnonymousClient.Connected
+        && DiscordClient.Connected
         && MainClient.Connected))
         {
             await Task.Delay(1000);
@@ -52,7 +52,7 @@ public static class Core
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
 
-        Console.ReadLine();
+        _ = Console.ReadLine();
         return 0;
     }
     #endregion
@@ -62,11 +62,9 @@ public static class Core
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal($"The program is restarting...");
-        DbQueries db = new DbQueries();
-        #pragma warning disable CS4014
-        db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
-        #pragma warning restore CS4014
-        Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
+        var db = new DbQueries();
+        _ = db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
+        _ = Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
     #endregion
@@ -75,7 +73,7 @@ public static class Core
     {
         try
         {
-            var pullResults = await Cli.Wrap("git").WithArguments("pull").ExecuteBufferedAsync();
+            BufferedCommandResult pullResults = await Cli.Wrap("git").WithArguments("pull").ExecuteBufferedAsync();
             return pullResults.StandardOutput.Split('\n')
                 .First(x => x.Contains("files changed") || x.Contains("file changed") || x.Contains("Already up to date"));
         }

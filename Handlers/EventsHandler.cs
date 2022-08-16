@@ -15,7 +15,7 @@ internal static class EventsHandler
     #region Initialization
     public static void Start()
     {
-        IntervalTimer timer = new IntervalTimer();
+        var timer = new IntervalTimer();
         timer.Interval = TimeSpan.FromMinutes(2.5).TotalMilliseconds;
         timer.AutoReset = true;
         timer.Enabled = true;

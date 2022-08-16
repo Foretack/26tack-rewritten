@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
@@ -19,16 +19,16 @@ internal class Alerts : Command
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
-        StringBuilder ab = new StringBuilder();
+        var ab = new StringBuilder();
 
         Alert[]? alerts = ObjectCache.Get<Alert[]>("alerts_wf");
         if (alerts is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
+            Result<Alert[]> r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad ({r.Exception.Message})");
-                return; 
+                return;
             }
             alerts = r.Value;
         }
@@ -38,7 +38,7 @@ internal class Alerts : Command
             .Select(x => $"{x.mission.faction} / {x.mission.type} [{x.mission.reward.asString}] ")
             .ToArray();
 
-        ab.Append($"{"Alert".PluralizeWith(alerts.Length)} ➜ ")
+        _ = ab.Append($"{"Alert".PluralizeWith(alerts.Length)} ➜ ")
             .Append(string.Join(" ● ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);

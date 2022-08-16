@@ -1,7 +1,7 @@
-﻿using Tack.Handlers;
-using Tack.Nonclass;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Models;
-using Tack.Database;
+using Tack.Nonclass;
 using Tack.Utils;
 using C = Tack.Core.Core;
 
@@ -13,13 +13,13 @@ internal class Debug : Command
         description: "command for testing stuff! Xdxd",
         permission: PermissionLevels.Whitelisted
     );
-    
+
     public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         string[] args = ctx.Args;
-        DbQueries db = new DbQueries();
+        var db = new DbQueries();
 
         if (args.Length == 0) return;
 
@@ -51,7 +51,7 @@ internal class Debug : Command
                 break;
             case "printarr":
                 MessageHandler.SendMessage(channel, ctx.IrcMessage.Message.Split(' ').AsString());
-                    break;
+                break;
             case "channels":
             case "channelsize":
                 int size = ChannelHandler.FetchedChannels.Count;
@@ -63,7 +63,7 @@ internal class Debug : Command
                     MessageHandler.SendMessage(channel, "specify channel");
                 }
                 string targetChannel = args[1];
-                var echannel = await db.GetExtendedChannel(targetChannel);
+                ExtendedChannel? echannel = await db.GetExtendedChannel(targetChannel);
                 MessageHandler.SendMessage(channel, $"{echannel}");
                 break;
         }

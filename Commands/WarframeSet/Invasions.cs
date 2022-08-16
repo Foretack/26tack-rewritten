@@ -22,7 +22,7 @@ internal class Invasions : Command
         InvasionNode[]? invasionNodes = ObjectCache.Get<InvasionNode[]>("invasions_wf");
         if (invasionNodes is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
+            Result<InvasionNode[]> r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :( ({r.Exception.Message})");
@@ -38,9 +38,9 @@ internal class Invasions : Command
 
     private async Task<string> SumItems(InvasionNode[] invasions)
     {
-        Dictionary<string, int> allItems = await Task.Run(() =>
+        var allItems = await Task.Run(() =>
         {
-            Dictionary<string, int> dict = new Dictionary<string, int>();
+            var dict = new Dictionary<string, int>();
             foreach (InvasionNode node in invasions)
             {
                 CountedItem[] items = node.AttackerReward.CountedItems

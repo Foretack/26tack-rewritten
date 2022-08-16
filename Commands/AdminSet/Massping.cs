@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
@@ -20,7 +20,7 @@ internal class Massping : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         string[] args = ctx.Args;
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
         if (args.Length == 0)
         {
@@ -53,26 +53,26 @@ internal class Massping : Command
 
     private void AppendMods(IReadOnlyList<string> modList, ref StringBuilder sb)
     {
-        List<string> added = new List<string>();
+        var added = new List<string>();
         for (int i = 0; i < 250; i++)
         {
             if (sb.Length >= 475) break;
             string mod = modList.Choice();
             if (added.Contains(mod)) continue;
-            sb.Append(mod)
+            _ = sb.Append(mod)
                 .Append(' ');
             added.Add(mod);
         }
     }
     private void AppendViewers(IReadOnlyList<string> viewerList, ref StringBuilder sb)
     {
-        List<string> added = new List<string>();
+        var added = new List<string>();
         for (int i = 0; i < 250; i++)
         {
             if (sb.Length >= 475) break;
             string viewer = viewerList.Choice();
             if (added.Contains(viewer)) continue;
-            sb.Append(viewer)
+            _ = sb.Append(viewer)
                 .Append(' ');
             added.Add(viewer);
         }

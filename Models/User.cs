@@ -1,36 +1,37 @@
-﻿using Tack.Handlers;
+﻿using Serilog;
+using Tack.Handlers;
 using Tack.Utils;
-using Serilog;
+using Tl = TwitchLib.Api.Helix.Models.Users.GetUsers;
 
 namespace Tack.Models;
 internal class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        var c = ObjectCache.Get<User>(username + "_users");
+        User? c = ObjectCache.Get<User>(username + "_users");
         if (c is not null) return c;
-        var call = await TwitchAPIHandler.GetUsers(username);
+        Tl::User? call = await TwitchAPIHandler.GetUsers(username);
         if (call is null)
         {
-            var call2 = await ExternalAPIHandler.GetIvrUser(username);
+            User? call2 = await ExternalAPIHandler.GetIvrUser(username);
             if (call2 is null) return null;
             ObjectCache.Put(username + "_users", call2, 86400);
             return call2;
         }
-        User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
+        var u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
         ObjectCache.Put(username + "_users", u, 86400);
         return u;
     }
     public async Task<User[]?> CreateUserAsync(params string[] usernames)
     {
-        var call = await TwitchAPIHandler.GetUsers(usernames);
+        Tl::User[]? call = await TwitchAPIHandler.GetUsers(usernames);
         if (call is null || call.Length == 0) return null;
-        List<User> users = new List<User>();
-        foreach (var u in call)
+        var users = new List<User>();
+        foreach (Tl::User u in call)
         {
             try
             {
-                User user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
+                var user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
                 users.Add(user);
                 ObjectCache.Put(user.Username + "_user", user, 86400);
             }
@@ -43,21 +44,21 @@ internal class UserFactory
     }
     public async Task<User?> CreateUserByIDAsync(string id)
     {
-        var call = await TwitchAPIHandler.GetUsersByID(id);
+        Tl::User? call = await TwitchAPIHandler.GetUsersByID(id);
         if (call is null) return null;
-        User u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
+        var u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
         return u;
     }
     public async Task<User[]?> CreateUserByIDAsync(params string[] ids)
     {
-        var call = await TwitchAPIHandler.GetUsersByID(ids);
+        Tl::User[]? call = await TwitchAPIHandler.GetUsersByID(ids);
         if (call is null || call.Length == 0) return null;
-        List<User> users = new List<User>();
-        foreach (var u in call)
+        var users = new List<User>();
+        foreach (Tl::User u in call)
         {
             try
             {
-                User user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
+                var user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
                 users.Add(user);
             }
             catch (Exception ex)
@@ -69,9 +70,10 @@ internal class UserFactory
     }
     public async Task<ExtendedChannel?> CreateChannelProfile(ChannelHandler.Channel extender)
     {
-        var call = await TwitchAPIHandler.GetUsers(extender.Name);
-        if (call is null) return null;
-        return new ExtendedChannel(call.DisplayName,
+        Tl::User? call = await TwitchAPIHandler.GetUsers(extender.Name);
+        return call is null
+            ? null
+            : new ExtendedChannel(call.DisplayName,
                                    call.Login,
                                    call.Id,
                                    call.ProfileImageUrl,

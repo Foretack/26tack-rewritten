@@ -40,13 +40,20 @@ public class Permission
         return level;
     }
 
-    public bool Permits(Command command) => Level >= (int)command.Info.Permission;
+    public bool Permits(Command command)
+    {
+        return Level >= (int)command.Info.Permission;
+    }
 
-    public static bool IsBlacklisted(string username) => BlacklistedUsers.Contains(username);
+    public static bool IsBlacklisted(string username)
+    {
+        return BlacklistedUsers.Contains(username);
+    }
+
     public static void BlacklistUser(string username) { BlacklistedUsers.Add(username); }
-    public static void UnBlacklistUser(string username) { BlacklistedUsers.Remove(username); }
+    public static void UnBlacklistUser(string username) { _ = BlacklistedUsers.Remove(username); }
     public static void WhitelistUser(string username) { WhitelistedUsers.Add(username); }
-    public static void UnWhitelistUser(string username) { WhitelistedUsers.Remove(username); }
+    public static void UnWhitelistUser(string username) { _ = WhitelistedUsers.Remove(username); }
 }
 
 public enum PermissionLevels : sbyte

@@ -1,6 +1,6 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
@@ -30,7 +30,7 @@ internal class JoinChannel : Command
             MessageHandler.SendMessage(channel, $"I'm already in that channel! (Aborted)");
             return;
         }
-        int priority =  Options.ParseInt("priority", ctx.IrcMessage.Message) ?? 0;
+        int priority = Options.ParseInt("priority", ctx.IrcMessage.Message) ?? 0;
         bool logged = Options.ParseBool("logged", ctx.IrcMessage.Message) ?? true;
 
         bool successful = await ChannelHandler.JoinChannel(targetChannel, priority, logged);

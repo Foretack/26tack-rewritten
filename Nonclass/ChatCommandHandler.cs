@@ -13,7 +13,7 @@ public abstract class ChatCommandHandler : ICooldownOptions
 
     protected void AddCommand(Command command)
     {
-        List<string> keys = new List<string>(command.Info.Aliases)
+        var keys = new List<string>(command.Info.Aliases)
         {
             command.Info.Name
         };

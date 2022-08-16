@@ -1,6 +1,6 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
 internal class PartChannel : Command
@@ -10,7 +10,7 @@ internal class PartChannel : Command
         description: "Part the specified channel",
         permission: PermissionLevels.Whitelisted
     );
-    
+
     public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;

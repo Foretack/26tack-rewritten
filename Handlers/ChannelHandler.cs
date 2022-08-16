@@ -1,6 +1,7 @@
 ﻿using Dasync.Collections;
 using Serilog;
 using Tack.Core;
+using Tack.Database;
 using Tack.Misc;
 using Tack.Models;
 using Tack.Utils;
@@ -8,7 +9,6 @@ using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using TwitchLib.Client.Events;
-using Tack.Database;
 
 namespace Tack.Handlers;
 internal static class ChannelHandler
@@ -20,7 +20,7 @@ internal static class ChannelHandler
     public static string[] JLChannels { get; private set; } = Array.Empty<string>();
     public static List<Channel> FetchedChannels { get; private set; } = new List<Channel>(DbQueries.NewInstance().GetChannels().Result);
 
-    private static readonly List<Channel> JoinFailureChannels = new List<Channel>();
+    private static readonly List<Channel> JoinFailureChannels = new();
     private static bool IsInProgress { get; set; } = false;
     #endregion
 
@@ -72,8 +72,8 @@ internal static class ChannelHandler
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
         if (FetchedChannels.Any(x => x.Name == channel)) return false;
-        UserFactory uf = new UserFactory();
-        Channel c = new Channel(channel, priority, logged);
+        var uf = new UserFactory();
+        var c = new Channel(channel, priority, logged);
         ExtendedChannel? ec = await uf.CreateChannelProfile(c);
         if (ec is null) return false;
         FetchedChannels.Add(c);
@@ -81,7 +81,7 @@ internal static class ChannelHandler
         if (priority >= 50) MainClient.Client.JoinChannel(channel);
         AnonymousClient.Client.JoinChannel(channel);
 
-        DbQueries db = new DbQueries();
+        var db = new DbQueries();
         bool s = await db.AddChannel(ec);
         return s;
     }
@@ -94,11 +94,11 @@ internal static class ChannelHandler
         try
         {
             Channel target = AnonJoinedChannels.First(x => x.Name == channel);
-            AnonJoinedChannels.Remove(target);
+            _ = AnonJoinedChannels.Remove(target);
             AnonymousClient.Client.LeaveChannel(channel);
 
-            DbQueries db = new DbQueries();
-            await db.RemoveChannel(target);
+            var db = new DbQueries();
+            _ = await db.RemoveChannel(target);
         }
         catch (Exception)
         {
@@ -108,8 +108,8 @@ internal static class ChannelHandler
         try
         {
             Channel target = MainJoinedChannels.First(x => x.Name == channel);
-            MainJoinedChannels.Remove(target);
-            MainJoinedChannelNames.Remove(channel);
+            _ = MainJoinedChannels.Remove(target);
+            _ = MainJoinedChannelNames.Remove(channel);
             MainClient.Client.LeaveChannel(channel);
         }
         catch (Exception)
@@ -155,7 +155,7 @@ internal static class ChannelHandler
     private static void AnonOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
         Log.Information($"[Anon] Left channel {e.Channel}");
-        AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
+        _ = AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
     }
 
     private static void AnonOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
@@ -168,14 +168,14 @@ internal static class ChannelHandler
     {
         Log.Warning($"[Main] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
         JoinFailureChannels.Add(FetchedChannels.First(x => x.Name == e.Exception.Channel));
-        MainJoinedChannelNames.Remove(e.Exception.Channel);
+        _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
     }
 
     private static void MainOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
         Log.Information($"[Main] Left channel {e.Channel}");
-        MainJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
-        MainJoinedChannelNames.Remove(e.Channel);
+        _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
+        _ = MainJoinedChannelNames.Remove(e.Channel);
     }
 
     private static void MainOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
@@ -194,7 +194,7 @@ internal static class StreamMonitor
     #region Properties
     public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
-    private static readonly LiveStreamMonitorService MonitoringService = new LiveStreamMonitorService(TwitchAPIHandler.API, 30);
+    private static readonly LiveStreamMonitorService MonitoringService = new(TwitchAPIHandler.API, 30);
     #endregion
 
     #region Controls
@@ -221,13 +221,13 @@ internal static class StreamMonitor
         MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
     }
 
-    public static void Stop() 
+    public static void Stop()
     {
         MonitoringService.OnServiceStarted -= ServiceStarted;
         MonitoringService.OnStreamOnline -= StreamOnline;
         MonitoringService.OnStreamUpdate -= StreamUpdate;
         MonitoringService.OnStreamOffline -= StreamOffline;
-        MonitoringService.Stop(); 
+        MonitoringService.Stop();
     }
     #endregion
 
@@ -244,7 +244,7 @@ internal static class StreamMonitor
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
-        Stream current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
+        var current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
@@ -259,7 +259,7 @@ internal static class StreamMonitor
 
     private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
-        Stream current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
+        var current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         StreamData[e.Channel] = current;
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,

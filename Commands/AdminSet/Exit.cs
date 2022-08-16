@@ -1,6 +1,6 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
 internal class Exit : Command

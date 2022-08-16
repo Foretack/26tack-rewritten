@@ -1,7 +1,7 @@
-﻿using Tack.Handlers;
-using Tack.Nonclass;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Models;
-using Tack.Database;
+using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
 internal class EditUser : Command
@@ -24,8 +24,8 @@ internal class EditUser : Command
             return;
         }
 
-        UserFactory uf = new UserFactory();
-        var target = await uf.CreateUserAsync(args[0]);
+        var uf = new UserFactory();
+        User? target = await uf.CreateUserAsync(args[0]);
         if (target is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, That user's Twitch account was not found!");
@@ -52,14 +52,14 @@ internal class EditUser : Command
 
     private async Task<bool> BlacklistUser(string username, string id)
     {
-        DbQueries db = new DbQueries();
+        var db = new DbQueries();
         bool s = await db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
         return s;
     }
     private async Task<bool> WhitelistUser(string username)
     {
-        DbQueries db = new DbQueries();
+        var db = new DbQueries();
         bool s = await db.WhitelistUser(username);
         Permission.WhitelistUser(username);
         return s;

@@ -2,8 +2,6 @@
 
 namespace Tack.Json;
 
-#pragma warning disable CS8618
-#pragma warning disable IDE1006
 public record JustLog(
     [property: JsonPropertyName("channels")] IReadOnlyList<Channel> Channels
 );

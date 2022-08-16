@@ -3,7 +3,7 @@
 namespace Tack.Utils;
 public static class ObjectCache
 {
-    private static readonly Dictionary<string, object> CachedObjects = new Dictionary<string, object>();
+    private static readonly Dictionary<string, object> CachedObjects = new();
     public static void Clear() { CachedObjects.Clear(); }
     public static void Put(string key, object obj, int cacheTime)
     {
@@ -15,14 +15,14 @@ public static class ObjectCache
         Timer? remover = null;
         remover = new Timer(callback =>
         {
-            CachedObjects.Remove(key);
+            _ = CachedObjects.Remove(key);
             Log.Debug($"Removed cached object \"{key}\"");
             remover?.Dispose();
         }, null, cacheTime * 1000, Timeout.Infinite);
     }
     public static T? Get<T>(string key)
     {
-        CachedObjects.TryGetValue(key, out object? obj);
+        _ = CachedObjects.TryGetValue(key, out object? obj);
         return (T?)obj;
     }
 }

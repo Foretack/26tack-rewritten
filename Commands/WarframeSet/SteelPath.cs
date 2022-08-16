@@ -1,7 +1,7 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
@@ -23,7 +23,7 @@ internal class SteelPath : Command
         SteelPathRewards? rewards = ObjectCache.Get<SteelPathRewards>("steelpath_wf");
         if (rewards is null)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
+            Result<SteelPathRewards> r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, There was an error getting Steel Path data :( ({r.Exception.Message})");

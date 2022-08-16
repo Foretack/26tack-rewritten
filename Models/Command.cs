@@ -11,7 +11,7 @@ public class CommandInfo : ICooldownOptions
     public short ChannelCooldown { get; private set; }
     public PermissionLevels Permission { get; private set; }
 
-    public CommandInfo(string name, string? description = null, string[]? aliases = null, 
+    public CommandInfo(string name, string? description = null, string[]? aliases = null,
     short? userCooldown = null, short? channelCooldown = null, PermissionLevels? permission = null)
     {
         Name = name;

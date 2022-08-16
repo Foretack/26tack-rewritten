@@ -1,8 +1,8 @@
 ﻿using System.Text;
-using Tack.Handlers;
-using Tack.Nonclass;
-using Tack.Models;
 using Serilog;
+using Tack.Handlers;
+using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands;
@@ -53,9 +53,9 @@ internal static class CommandHelp
             }
 
             CommandInfo cmdinfo = command.Info;
-            StringBuilder sb = new StringBuilder($"@{user}, ");
+            var sb = new StringBuilder($"@{user}, ");
 
-            sb.Append($"Command: {prefix}{cmdinfo.Name}")
+            _ = sb.Append($"Command: {prefix}{cmdinfo.Name}")
             .Append(" -- ")
             .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
             .Append(" -- ")

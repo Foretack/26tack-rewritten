@@ -4,6 +4,7 @@ using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
+using TwitchLib.Client.Models;
 
 namespace Tack.Commands.BaseSet;
 internal class LongPing : Command
@@ -17,7 +18,7 @@ internal class LongPing : Command
     );
 
     private static bool Commencing { get; set; } = false;
-    private static readonly List<string> NotifyList = new List<string>();
+    private static readonly List<string> NotifyList = new();
 
     public override async Task Execute(CommandContext ctx)
     {
@@ -31,7 +32,7 @@ internal class LongPing : Command
             return;
         }
 
-        var prev = ObjectCache.Get<string>("longping_results");
+        string? prev = ObjectCache.Get<string>("longping_results");
         if (prev is not null)
         {
             MessageHandler.SendMessage(channel, $"[Cached] {prev}");
@@ -50,7 +51,7 @@ internal class LongPing : Command
             await Task.Delay(125);
         }
         await Task.Delay(2500);
-        
+
         AnonymousClient.Client.OnMessageReceived -= Read;
         if (!NotifyList.Contains(channel)) NotifyList.Add(channel);
 
@@ -63,28 +64,28 @@ internal class LongPing : Command
         foreach (string c in NotifyList)
         {
             MessageHandler.SendMessage(c, results);
-            NotifyList.Remove(c);
+            _ = NotifyList.Remove(c);
         }
         Commencing = false;
     }
 
-    private static readonly char[] chars = 
-    { 
-        '⣿', '⣷', '⡜', '⢀', '⠂', '⣶', '⣒', 
+    private static readonly char[] chars =
+    {
+        '⣿', '⣷', '⡜', '⢀', '⠂', '⣶', '⣒',
         'a', 'b', 'c', 'd', 'e', 'f', '1', '2',
-        '3', '4', '5', '6', '7', '8', '9', '0' 
+        '3', '4', '5', '6', '7', '8', '9', '0'
     };
     private async Task<string[]> GenerateMessages(int count = 50)
     {
-        List<string> messages = new List<string>();
+        var messages = new List<string>();
         await Task.Run(() =>
         {
             for (int i = 0; i < count; i++)
             {
-                StringBuilder message = new StringBuilder();
+                var message = new StringBuilder();
                 for (int j = 0; j < 450; j++)
                 {
-                    message.Append(chars.Choice());
+                    _ = message.Append(chars.Choice());
                 }
                 messages.Add(message.ToString());
             }
@@ -96,7 +97,7 @@ internal class LongPing : Command
     private static float LatencySum { get; set; } = 0;
     private void Read(object? sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
     {
-        var ircMessage = e.ChatMessage;
+        ChatMessage ircMessage = e.ChatMessage;
         long unixTimeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         if (ircMessage.Channel == Config.Auth.Username
         && ircMessage.Username == Config.Auth.Username)

@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Tack.Database;
 using Tack.Json;
@@ -11,12 +10,12 @@ internal static class ExternalAPIHandler
 {
     public static async Task<M::User?> GetIvrUser(string username)
     {
-        HttpClient reqs = new HttpClient();
-        reqs.Timeout = TimeSpan.FromSeconds(2);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(2);
 
         try
         {
-            Stream resp = await reqs.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
+            Stream resp = await requests.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
             IvrUserData ivrUser = (await JsonSerializer.DeserializeAsync<IvrUserData>(resp))!;
             var user = new M::User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
             return user;
@@ -30,12 +29,12 @@ internal static class ExternalAPIHandler
 
     public static async Task<TMI?> GetChannelChatters(string channel)
     {
-        HttpClient reqs = new HttpClient();
-        reqs.Timeout = TimeSpan.FromSeconds(2);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(2);
 
         try
         {
-            Stream tmiResponse = await reqs.GetStreamAsync($"https://tmi.twitch.tv/group/user/{channel}/chatters");
+            Stream tmiResponse = await requests.GetStreamAsync($"https://tmi.twitch.tv/group/user/{channel}/chatters");
             TMI clist = (await JsonSerializer.DeserializeAsync<TMI>(tmiResponse))!;
             return clist;
         }
@@ -48,12 +47,12 @@ internal static class ExternalAPIHandler
 
     public static async Task<JokeAPI?> GetRandomJoke()
     {
-        HttpClient reqs = new HttpClient();
-        reqs.Timeout = TimeSpan.FromMilliseconds(500);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromMilliseconds(500);
 
         try
         {
-            Stream response = await reqs.GetStreamAsync("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
+            Stream response = await requests.GetStreamAsync("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
             JokeAPI rj = (await JsonSerializer.DeserializeAsync<JokeAPI>(response))!;
             return rj;
         }
@@ -66,12 +65,12 @@ internal static class ExternalAPIHandler
 
     public static async Task<JustLog> GetIvrChannels()
     {
-        HttpClient reqs = new HttpClient();
-        reqs.Timeout = TimeSpan.FromMilliseconds(1500);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromMilliseconds(1500);
 
         try
         {
-            Stream jlcl = await reqs.GetStreamAsync(Config.Links.IvrChannels);
+            Stream jlcl = await requests.GetStreamAsync(Config.Links.IvrChannels);
             JustLog deserialized = (await JsonSerializer.DeserializeAsync<JustLog>(jlcl))!;
             return deserialized;
         }
@@ -87,7 +86,7 @@ internal static class ExternalAPIHandler
 
     public static async Task<CetusCycle?> GetCetusCycle()
     {
-        HttpClient requests = new HttpClient();
+        var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(1);
 
         try
@@ -99,15 +98,15 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, $"Failed to fetch cetus cycle fdm");
-            DbQueries db = new DbQueries();
-            await db.LogException(ex);
+            var db = new DbQueries();
+            _ = await db.LogException(ex);
             return null;
         }
     }
 
     public static async Task<MarketItems?> GetMarketItemListings(string itemName)
     {
-        HttpClient requests = new HttpClient();
+        var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(1);
 
         try
@@ -125,7 +124,7 @@ internal static class ExternalAPIHandler
 
     public static async Task<RelicData?> GetRelicData()
     {
-        HttpClient requests = new HttpClient();
+        var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(5);
 
         try
@@ -137,25 +136,25 @@ internal static class ExternalAPIHandler
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to fetch relic data");
-            DbQueries db = new DbQueries();
-            await db.LogException(ex);
+            var db = new DbQueries();
+            _ = await db.LogException(ex);
             return null;
         }
     }
 
     public static async Task<Result<T>> WarframeStatusApi<T>(string endpoint, string platform = "pc", string language = "en", int timeout = 5)
     {
-        HttpClient caller = new HttpClient();
-        caller.Timeout = TimeSpan.FromSeconds(timeout);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(timeout);
 
         try
         {
             string pStr = string.IsNullOrEmpty(platform) ? string.Empty : $"{platform}/";
             string langStr = string.IsNullOrEmpty(language) ? string.Empty : $"?lang={language}";
             string url = $"{WarframeBaseUrl}{pStr}{endpoint}{langStr}";
-            Stream response = await caller.GetStreamAsync(url);
+            Stream response = await requests.GetStreamAsync(url);
             Log.Debug($"called {url} [{typeof(T)}]");
-            caller.Dispose();
+            requests.Dispose();
             T value = (await JsonSerializer.DeserializeAsync<T>(response))!;
             return new Result<T>(value, true, default!);
         }
@@ -173,12 +172,12 @@ internal static class ExternalAPIHandler
 
     public static async Task<Result<string>> FindFromUniqueName(string category, string uniqueName, int timeout = 10)
     {
-        HttpClient caller = new HttpClient();
-        caller.Timeout = TimeSpan.FromSeconds(timeout);
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(timeout);
 
         try
         {
-            Stream data = await caller.GetStreamAsync($"https://raw.githubusercontent.com/WFCD/warframe-items/master/data/json/{category}.json");
+            Stream data = await requests.GetStreamAsync($"https://raw.githubusercontent.com/WFCD/warframe-items/master/data/json/{category}.json");
             WarframeItem[]? items = await JsonSerializer.DeserializeAsync<WarframeItem[]>(data);
             string name = items!.First(x => x.UniqueName == uniqueName).NormalName;
             return new Result<string>(name, true, default!);
@@ -192,13 +191,13 @@ internal static class ExternalAPIHandler
     private const string WF_ARSENAL_ID = "ud1zj704c0eb1s553jbkayvqxjft97";
     public static async Task<Result<string>> GetWarframeTwitchExtensionTokenV5(int fromChannel)
     {
-        HttpClient caller = new HttpClient();
-        caller.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
-        caller.Timeout = TimeSpan.FromSeconds(5);
+        var requests = new HttpClient();
+        requests.DefaultRequestHeaders.Add("client-id", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+        requests.Timeout = TimeSpan.FromSeconds(5);
 
         try
         {
-            Stream data = await caller.GetStreamAsync($"https://api.twitch.tv/v5/channels/{fromChannel}/extensions");
+            Stream data = await requests.GetStreamAsync($"https://api.twitch.tv/v5/channels/{fromChannel}/extensions");
             V5Root? v5r = await JsonSerializer.DeserializeAsync<V5Root>(data);
             return new Result<string>(
                 v5r!.Tokens.First(x => x.ExtensionId == WF_ARSENAL_ID).Key
@@ -209,15 +208,15 @@ internal static class ExternalAPIHandler
 
     public static async Task<Result<(Stream? Stream, HttpStatusCode Code)>> GetWarframeProfileData(string username, string extensionKey)
     {
-        HttpClient caller = new HttpClient();
-        caller.DefaultRequestHeaders.Add("Origin", $"https://{WF_ARSENAL_ID}.ext-twitch.tv");
-        caller.DefaultRequestHeaders.Add("Referer", $"https://{WF_ARSENAL_ID}.ext-twitch.tv/");
-        caller.DefaultRequestHeaders.Add("Authorization", $"Bearer {extensionKey}");
-        caller.Timeout = TimeSpan.FromSeconds(10);
+        var requests = new HttpClient();
+        requests.DefaultRequestHeaders.Add("Origin", $"https://{WF_ARSENAL_ID}.ext-twitch.tv");
+        requests.DefaultRequestHeaders.Add("Referer", $"https://{WF_ARSENAL_ID}.ext-twitch.tv/");
+        requests.DefaultRequestHeaders.Add("Authorization", $"Bearer {extensionKey}");
+        requests.Timeout = TimeSpan.FromSeconds(10);
 
         try
         {
-            var data = await caller.GetAsync($"https://content.warframe.com/dynamic/twitch/getActiveLoadout.php?account={username.ToLower()}");
+            HttpResponseMessage data = await requests.GetAsync($"https://content.warframe.com/dynamic/twitch/getActiveLoadout.php?account={username.ToLower()}");
             return new Result<(Stream? Stream, HttpStatusCode Code)>((await data.Content.ReadAsStreamAsync(), data.StatusCode), true, default!);
         }
         catch (Exception ex) { return new Result<(Stream? Stream, HttpStatusCode Code)>(default!, false, ex); }

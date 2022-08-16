@@ -1,7 +1,7 @@
 ﻿using Tack.Database;
 using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 
 namespace Tack.Commands.BaseSet;
 internal class Suggest : Command
@@ -26,8 +26,8 @@ internal class Suggest : Command
             return;
         }
 
-        DbQueries db = new DbQueries();
-        PartialUser partialUser = new PartialUser(user, rawname, id);
+        var db = new DbQueries();
+        var partialUser = new PartialUser(user, rawname, id);
         bool success = await db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
 
         if (success)

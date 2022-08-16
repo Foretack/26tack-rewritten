@@ -45,13 +45,13 @@ internal abstract class DbConnection : IDisposable
         string? query = BuildQueryString();
         Log.Verbose(query ?? "null query");
         if (query is null) return new ExecutionResult(false, Array.Empty<object[]>());
-        NpgsqlCommand cmd = new NpgsqlCommand(query, Connection);
+        var cmd = new NpgsqlCommand(query, Connection);
 
-        if (QueryType == QueryTypes.Insert || QueryType == QueryTypes.Update || QueryType == QueryTypes.Delete)
+        if (QueryType is QueryTypes.Insert or QueryTypes.Update or QueryTypes.Delete)
         {
             try
             {
-                await cmd.ExecuteNonQueryAsync();
+                _ = await cmd.ExecuteNonQueryAsync();
                 await cmd.DisposeAsync();
                 return new ExecutionResult(true, Array.Empty<object[]>());
             }
@@ -65,12 +65,12 @@ internal abstract class DbConnection : IDisposable
             try
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
-                List<short> ordinals = new List<short>();
+                var ordinals = new List<short>();
                 if (!ValuesSchema!.Contains("*") && await r.ReadAsync())
                 {
-                    foreach (var column in ValuesSchema!) 
-                    { 
-                        ordinals.Add((short)r.GetOrdinal(column)); 
+                    foreach (string column in ValuesSchema!)
+                    {
+                        ordinals.Add((short)r.GetOrdinal(column));
                     }
                 }
                 else if (await r.ReadAsync())
@@ -81,8 +81,8 @@ internal abstract class DbConnection : IDisposable
                 await r.CloseAsync();
 
                 NpgsqlDataReader r2 = await cmd.ExecuteReaderAsync();
-                List<object[]> values = new List<object[]>();
-                List<object> valuesInner = new List<object>();
+                var values = new List<object[]>();
+                var valuesInner = new List<object>();
                 while (await r2.ReadAsync())
                 {
                     foreach (short o in ordinals) { valuesInner.Add(r.GetValue(o)); }
@@ -108,31 +108,31 @@ internal abstract class DbConnection : IDisposable
     private string? BuildQueryString()
     {
         if (!ValidQuery()) return null;
-        StringBuilder qs = new StringBuilder();
+        var qs = new StringBuilder();
 
         switch (QueryType)
         {
             case QueryTypes.Insert:
                 string sv = string.Join(", ", SelectedValues!);
-                qs.Append($"INSERT INTO {TableName} ")
+                _ = qs.Append($"INSERT INTO {TableName} ")
                     .Append($"({string.Join(", ", ValuesSchema!)}) ")
                     .Append("VALUES " + (sv.Contains('(') ? $"{sv}" : $"({sv})"));
                 break;
 
             case QueryTypes.Update:
-                qs.Append($"UPDATE {TableName} ")
+                _ = qs.Append($"UPDATE {TableName} ")
                     .Append($"SET {string.Join(", ", ValuesSchema!)} ")
                     .Append($"= {string.Join(", ", SelectedValues!)} ")
                     .Append($"{(Conditions is not null && Conditions.Length > 0 ? " WHERE " + string.Join(" AND ", Conditions) : "")}");
                 break;
 
             case QueryTypes.Delete:
-                qs.Append($"DELETE FROM {TableName} ")
+                _ = qs.Append($"DELETE FROM {TableName} ")
                     .Append($"WHERE {string.Join(" AND ", Conditions!)}");
                 break;
 
             case QueryTypes.Select:
-                qs.Append($"SELECT {string.Join(", ", ValuesSchema!)}")
+                _ = qs.Append($"SELECT {string.Join(", ", ValuesSchema!)}")
                       .Append($" FROM {TableName} ")
                       .Append(Conditions is not null ? $"WHERE {string.Join(" AND ", Conditions)} " : "")
                       .Append(SortMethod is not null ? $"ORDER BY {SortMethod} " : "")
@@ -140,7 +140,7 @@ internal abstract class DbConnection : IDisposable
                       .Append(SelectionOffset is not null ? $" OFFSET {SelectionOffset} " : "");
                 break;
         }
-        qs.Append(';');
+        _ = qs.Append(';');
 
         return qs.ToString();
     }
@@ -152,12 +152,12 @@ internal abstract class DbConnection : IDisposable
 
         bool valid = QueryType switch
         {
-            QueryTypes.Delete when Conditions is null     => false,
-            QueryTypes.Select when ValuesSchema is null   => false,
-            QueryTypes.Update when ValuesSchema is null   => false,
+            QueryTypes.Delete when Conditions is null => false,
+            QueryTypes.Select when ValuesSchema is null => false,
+            QueryTypes.Update when ValuesSchema is null => false,
             QueryTypes.Insert when SelectedValues is null => false,
-            QueryTypes.Insert when ValuesSchema is null   => false,
-            _                                             => true
+            QueryTypes.Insert when ValuesSchema is null => false,
+            _ => true
         };
         if (!valid) Log.Error($"An invalid query was attempted! {{ Conditions: {Conditions}, ValuesSchema: {ValuesSchema}, SelectedValues: {SelectedValues} }}");
 

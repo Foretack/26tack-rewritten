@@ -1,47 +1,60 @@
 ﻿namespace Tack.Utils;
 internal static class Formatting
 {
-    public static string FormatException(this Exception exception) => exception.Message;
-
-    public static string AsString<T>(this T[] arr) => $"[\"{string.Join("\", \"", arr)}\"]";
-    public static string AsString<T>(this List<T> list) => $"[\"{string.Join("\", \"", list)}\"]";
-
-    public static string FormatTimeLeft(this TimeSpan time) => time switch
+    public static string FormatException(this Exception exception)
     {
-        { Days: > 1, Hours: > 1 }                       => $"{time:d' days and 'h' hours'}",
-        { Days: 1, Hours: > 1 }                         => $"{time:d' day and 'h' hours'}",
-        { Days: > 1, Hours: 1 }                         => $"{time:d' days and 'h' hour'}",
+        return exception.Message;
+    }
 
-        { Days: > 1 }                                   => $"{time:d' days'}",
-        { Days: 1 }                                     => $"{time:d' day'}",
+    public static string AsString<T>(this T[] arr)
+    {
+        return $"[\"{string.Join("\", \"", arr)}\"]";
+    }
 
-        { Hours: >= 1, Minutes: >= 1, Seconds: >= 1 }   => $"{time:h'h 'm'm 's's'}",
+    public static string AsString<T>(this List<T> list)
+    {
+        return $"[\"{string.Join("\", \"", list)}\"]";
+    }
 
-        { Hours: > 1, Minutes: > 1 }                    => $"{time:h' hours and 'm' minutes'}",
-        { Hours: 1, Minutes: > 1 }                      => $"{time:h' hour and 'm' minutes'}",
-        { Hours: > 1, Minutes: 1 }                      => $"{time:h' hours and 'm' minute'}",
+    public static string FormatTimeLeft(this TimeSpan time)
+    {
+        return time switch
+        {
+            { Days: > 1, Hours: > 1 } => $"{time:d' days and 'h' hours'}",
+            { Days: 1, Hours: > 1 } => $"{time:d' day and 'h' hours'}",
+            { Days: > 1, Hours: 1 } => $"{time:d' days and 'h' hour'}",
 
-        { Hours: > 1, Seconds: > 1 }                    => $"{time:h' hours and 's' seconds'}",
-        { Hours: 1, Seconds: > 1 }                      => $"{time:h' hour and 's' seconds'}",
-        { Hours: > 1, Seconds: 1 }                      => $"{time:h' hours and 's' second'}",
+            { Days: > 1 } => $"{time:d' days'}",
+            { Days: 1 } => $"{time:d' day'}",
 
-        { Hours: > 1 }                                  => $"{time:h' hours'}",
-        { Hours: 1 }                                    => $"{time:h' hour'}",
+            { Hours: >= 1, Minutes: >= 1, Seconds: >= 1 } => $"{time:h'h 'm'm 's's'}",
 
-        { Minutes: > 1, Seconds: > 1}                   => $"{time:m' minutes and 's' seconds'}",
-        { Minutes: 1, Seconds: > 1 }                    => $"{time:m' minute and 's' seconds'}",
-        { Minutes: > 1, Seconds: 1 }                    => $"{time:m' minutes and 's' second'}",
+            { Hours: > 1, Minutes: > 1 } => $"{time:h' hours and 'm' minutes'}",
+            { Hours: 1, Minutes: > 1 } => $"{time:h' hour and 'm' minutes'}",
+            { Hours: > 1, Minutes: 1 } => $"{time:h' hours and 'm' minute'}",
 
-        { Minutes: > 1 }                                => $"{time:m' minutes'}",
-        { Minutes: 1 }                                  => $"{time:m' minute'}",
+            { Hours: > 1, Seconds: > 1 } => $"{time:h' hours and 's' seconds'}",
+            { Hours: 1, Seconds: > 1 } => $"{time:h' hour and 's' seconds'}",
+            { Hours: > 1, Seconds: 1 } => $"{time:h' hours and 's' second'}",
 
-        { Seconds: > 1 }                                => $"{time:s' seconds'}",
-        { Seconds: 1 }                                  => $"{time:s' second'}",
+            { Hours: > 1 } => $"{time:h' hours'}",
+            { Hours: 1 } => $"{time:h' hour'}",
 
-        { Milliseconds: > 0 }                           => $"{time.Milliseconds}ms",
+            { Minutes: > 1, Seconds: > 1 } => $"{time:m' minutes and 's' seconds'}",
+            { Minutes: 1, Seconds: > 1 } => $"{time:m' minute and 's' seconds'}",
+            { Minutes: > 1, Seconds: 1 } => $"{time:m' minutes and 's' second'}",
 
-        _                                                => throw new NotImplementedException() // fuck you if you get here
-    };
+            { Minutes: > 1 } => $"{time:m' minutes'}",
+            { Minutes: 1 } => $"{time:m' minute'}",
+
+            { Seconds: > 1 } => $"{time:s' seconds'}",
+            { Seconds: 1 } => $"{time:s' second'}",
+
+            { Milliseconds: > 0 } => $"{time.Milliseconds}ms",
+
+            _ => throw new NotImplementedException() // fuck you if you get here
+        };
+    }
 
     public static string StripDescriminator(this string str)
     {
@@ -67,23 +80,30 @@ internal static class Formatting
 
     public static string ShortenSource(this string str)
     {
-        if (str.StartsWith("channel:"))
-        {
-            return "#" + str.Split(':')[1];
-        }
-        if (str.StartsWith("discord_channel:"))
-        {
-            return "###" + str.Split(':')[1];
-        }
-        if (str.StartsWith("internal:"))
-        {
-            return "<I>" + str.Split(':')[1];
-        }
-        return "@" + str.Split(':')[1];
+        return str.StartsWith("channel:")
+            ? "#" + str.Split(':')[1]
+            : str.StartsWith("discord_channel:")
+            ? "###" + str.Split(':')[1]
+            : str.StartsWith("internal:") ? "<I>" + str.Split(':')[1] : "@" + str.Split(':')[1];
     }
 
-    public static string PluralizeWith(this string str, int num) => num == 1 ? $"{num} {str}" : $"{num} {str}s";
-    public static string PluralizeOn(this string str, int count) => count == 1 ? str : str + 's';
-    public static string PluralizeOn(this string str, int count, bool withE) => count == 1 && withE ? str : str + "es";
-    public static string PluralizeOn(this string str, int count, string specialCase) => count == 1 ? str : specialCase;
+    public static string PluralizeWith(this string str, int num)
+    {
+        return num == 1 ? $"{num} {str}" : $"{num} {str}s";
+    }
+
+    public static string PluralizeOn(this string str, int count)
+    {
+        return count == 1 ? str : str + 's';
+    }
+
+    public static string PluralizeOn(this string str, int count, bool withE)
+    {
+        return count == 1 && withE ? str : str + "es";
+    }
+
+    public static string PluralizeOn(this string str, int count, string specialCase)
+    {
+        return count == 1 ? str : specialCase;
+    }
 }

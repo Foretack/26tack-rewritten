@@ -1,6 +1,6 @@
 ﻿using Tack.Commands.AdminSet;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 
 namespace Tack.Commands;
 internal class AdminHandler : ChatCommandHandler

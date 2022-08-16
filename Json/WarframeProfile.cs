@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 #pragma warning disable CS8618
-#pragma warning disable IDE1006
 
 namespace Tack.Json;
 

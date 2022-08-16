@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS8618
 #pragma warning disable IDE1006
 
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Tack.Nonclass;
 
@@ -75,7 +74,7 @@ public class CetusCycle : IWorldCycle
     public DateTime Expiry { get; set; }
     [JsonPropertyName("isDay")]
     public bool IsDay { get; set; }
-    public string State { get => IsDay ? "☀" : "🌙"; }
+    public string State => IsDay ? "☀" : "🌙";
     public string QueryString { get; } = "cetusCycle";
 }
 public class CambionCycle : IWorldCycle
@@ -84,7 +83,7 @@ public class CambionCycle : IWorldCycle
     public DateTime Expiry { get; set; }
     [JsonPropertyName("active")]
     public string Active { get; set; }
-    public string State { get => Active; }
+    public string State => Active;
     public string QueryString { get; } = "cambionCycle";
 }
 public class VallisCycle : IWorldCycle
@@ -92,7 +91,7 @@ public class VallisCycle : IWorldCycle
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
     public bool isWarm { get; set; }
-    public string State { get => isWarm ? "🔥" : "❄"; }
+    public string State => isWarm ? "🔥" : "❄";
     public string QueryString { get; } = "vallisCycle";
 }
 public class ZarimanCycle : IWorldCycle

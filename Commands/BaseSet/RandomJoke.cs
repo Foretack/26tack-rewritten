@@ -1,6 +1,7 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
+using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.BaseSet;
@@ -17,7 +18,7 @@ internal class RandomJoke : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        var rj = await ExternalAPIHandler.GetRandomJoke();
+        JokeAPI? rj = await ExternalAPIHandler.GetRandomJoke();
 
         if (rj is null)
         {

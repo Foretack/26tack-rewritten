@@ -1,15 +1,15 @@
 ﻿using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Json;
 using Tack.Models;
+using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
 internal class Fissures : Command
 {
     public override CommandInfo Info { get; } = new(
-        name: "fissures", 
-        description: "Get information about active void fissures. Additional options: `storms:true/false` (true default)", 
+        name: "fissures",
+        description: "Get information about active void fissures. Additional options: `storms:true/false` (true default)",
         aliases: new string[] { "fissure", "f" }
     );
 

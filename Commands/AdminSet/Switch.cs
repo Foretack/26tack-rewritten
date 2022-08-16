@@ -1,7 +1,7 @@
 ﻿using Serilog.Events;
 using Tack.Handlers;
-using Tack.Nonclass;
 using Tack.Models;
+using Tack.Nonclass;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
