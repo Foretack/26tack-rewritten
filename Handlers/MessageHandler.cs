@@ -168,7 +168,7 @@ internal static class MessageHandler
                 }
                 return;
             }
-            string content = socketMessage.CleanContent.Replace("\n", "[⤶]").StripSymbols();
+            string content = socketMessage.CleanContent.Replace("\n", "[⤶] ").StripSymbols();
             var embeds = socketMessage.Embeds;
 
             if (content.Length < 50
