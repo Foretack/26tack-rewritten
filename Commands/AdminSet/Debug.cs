@@ -61,6 +61,7 @@ internal class Debug : Command
                 if (args.Length < 2)
                 {
                     MessageHandler.SendMessage(channel, "specify channel");
+                    return;
                 }
                 string targetChannel = args[1];
                 ExtendedChannel? echannel = await db.GetExtendedChannel(targetChannel);
