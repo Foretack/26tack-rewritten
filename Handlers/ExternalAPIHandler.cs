@@ -188,7 +188,7 @@ internal static class ExternalAPIHandler
     #endregion
 
     #region Warframe arsenal
-    private const string WF_ARSENAL_ID = "ud1zj704c0eb1s553jbkayvqxjft97";
+    private const string WF_ARSENAL_ID = "3yumzvi6r4wfycsk7vt1kbtto9s0n3";
     public static async Task<Result<string>> GetWarframeTwitchExtensionTokenV5(int fromChannel)
     {
         var requests = new HttpClient();
