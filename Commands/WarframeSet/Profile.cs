@@ -75,7 +75,7 @@ internal class Profile : Command
             .Append("Equipped: [")
             .Append($"{warframe}, {primary}, {secondary}, {melee}")
             .Append($"] ")
-            .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated} ago)" : string.Empty);
+            .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated.FormatTimeLeft()} ago)" : string.Empty);
 
         MessageHandler.SendMessage(channel, message.ToString());
     }
