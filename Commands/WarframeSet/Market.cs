@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using System.Text;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -15,7 +16,7 @@ internal class Market : Command
         channelCooldown: 3
     );
 
-    public override async Task Execute(CommandContext ctx)
+    public override async Task<bool> Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
@@ -24,7 +25,7 @@ internal class Market : Command
         if (args.Length == 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, you need to specify the item... FeelsDankMan");
-            return;
+            return false;
         }
 
         string option1 = "activeOnly";
@@ -34,7 +35,7 @@ internal class Market : Command
         if (listings is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :(");
-            return;
+            return false;
         }
 
         await Task.Run(() =>
@@ -77,11 +78,25 @@ internal class Market : Command
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
-            string listingsString = $"{totalOrders} " + (activeOnly ? "Active" : "Total") + " orders " +
-                $"◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P (▼{cheapestSeller}P ◉ ▲{mostExpensiveSeller}P) " +
-                $"◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P (▲{mostPayingBuyer}P ◉ ▼{leastPayingBuyer}P)";
+            var sb = new StringBuilder();
+            _ = sb.Append($"{totalOrders} ")
+            .Append(activeOnly ? "Active" : "Total")
+            .Append(" orders")
+            .Append(sellersCount == 0
+                ? String.Empty
+                : $" ◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P")
+            .Append(sellersCount == 1
+                ? String.Empty
+                : $" (▼{cheapestSeller}P ◉ ▲{mostExpensiveSeller}P)")
+            .Append(buyersCount == 0
+                ? String.Empty
+                : $" ◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P")
+            .Append(buyersCount == 1
+                ? String.Empty
+                : $" (▲{mostPayingBuyer}P ◉ ▼{leastPayingBuyer}P)");
 
-            MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {listingsString}");
+            MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");
         });
+        return true;
     }
 }
