@@ -239,18 +239,6 @@ public class VoidTrader
     public List<object> Schedule { get; set; }
 }
 
-public class WarframeNewsObj
-{
-    [JsonPropertyName("message")]
-    public string Message { get; set; }
-
-    [JsonPropertyName("link")]
-    public string Link { get; set; }
-
-    [JsonPropertyName("update")]
-    public bool Update { get; set; }
-}
-
 public record WarframeItem(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("name")] string NormalName

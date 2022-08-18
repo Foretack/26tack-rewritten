@@ -9,7 +9,6 @@ internal static class EventsHandler
 {
     #region Properties
     private static bool BaroActive { get; set; } = false;
-    private static WarframeNewsObj LatestNews { get; set; } = new WarframeNewsObj();
     #endregion
 
     #region Initialization
@@ -34,15 +33,12 @@ internal static class EventsHandler
     {
         VoidTrader? baro = ObjectCache.Get<VoidTrader>("baro_data")
             ?? (await ExternalAPIHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
-        WarframeNewsObj[]? news = (await ExternalAPIHandler.WarframeStatusApi<WarframeNewsObj[]>("news")).Value;
 
-        if (baro is null || news is null) return;
+        if (baro is null) return;
         // Don't trigger anything in first 10 minutes
         if ((DateTime.Now - C.StartupTime).TotalMinutes < 10)
         {
             BaroActive = baro.Active;
-            LatestNews = news[0];
-            Log.Debug($"Set: news = {news[0].Message}, baro = {baro.Active}");
             return;
         }
 
@@ -62,28 +58,7 @@ internal static class EventsHandler
             BaroActive = false;
         }
 
-        // Lazy fix
-        try
-        {
-            // Skip if nothing changes
-            if (LatestNews.Message == news[0].Message) return;
-            // If the news is an update, send to pajlada's chat
-            if (news[0].Update)
-            {
-                MessageHandler.SendColoredMessage(
-                    "pajlada",
-                    $"Warframe update 🚨 {news[0].Message} ( {news[0].Link} ) 🚨 ",
-                    ChatColor.Red);
-            }
-            // Send news regardless to relay channel
-            MessageHandler.SendColoredMessage(
-                Config.RelayChannel,
-                $"Warframe news updated! {news[0].Message} ( {news[0].Link} )",
-                ChatColor.CadetBlue);
-            // Set new news as latest
-            LatestNews = news[0];
-        }
-        catch (InvalidOperationException) { Log.Warning("Error processing Warframe news"); }
+        
     }
     #endregion
 }
