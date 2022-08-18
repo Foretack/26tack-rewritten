@@ -1,5 +1,5 @@
-﻿#pragma warning disable CS8618
-#pragma warning disable IDE1006
+﻿
+#pragma warning disable CS8618
 
 using System.Text.Json.Serialization;
 using Tack.Nonclass;
