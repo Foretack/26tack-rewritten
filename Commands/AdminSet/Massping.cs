@@ -12,7 +12,7 @@ internal class Massping : Command
         name: "massping",
         description: " :tf: ",
         aliases: new string[] { "mp" },
-        permission: PermissionLevels.Whitelisted
+        permission: PermissionLevels.Everyone
     );
 
     public override async Task Execute(CommandContext ctx)
@@ -28,8 +28,14 @@ internal class Massping : Command
             return;
         }
 
-        string targetChannel = args[0];
+        string targetChannel = args[0].ToLower();
         bool mods = false;
+
+        if (channel != Config.RelayChannel || targetChannel == Config.RelayChannel)
+        {
+            MessageHandler.SendMessage(channel, "Can't do that in this channel!");
+            return;
+        }
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
