@@ -1,11 +1,11 @@
 ﻿namespace Tack;
 public static class Config
 {
-    public const string Host = "";
-    public const string DbUsername = "";
-    public const string Password = "";
-    public const string DatabaseName = "";
-    public const string RelayChannel = "";
+    public const string Host = "localhost";
+    public const string DbUsername = "postgres";
+    public const string Password = "uou12345";
+    public const string DatabaseName = "teststuffone";
+    public const string RelayChannel = "login_unavailable";
 
     public static string MainPrefix { get; set; } = "|>";
     public static int MinimumTimeoutTimeForRelay { get; set; } = 28800;

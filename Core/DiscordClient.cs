@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Discord;
 using Discord.WebSocket;
 using Serilog;
@@ -57,26 +58,38 @@ internal static class DiscordClient
 
         await Task.Run(() =>
         {
-            var activities = arg2.Activities;
-            foreach (var activity in activities)
-            {
-                if (activity is null) continue;
+            var activity = arg2.Activities.FirstOrDefault();
 
-                var sb = new StringBuilder(user.Username);
-                switch (activity.Type)
-                {
-                    case ActivityType.Listening:
-                        sb.Append($" is listening to: {activity.Details}");
+            if (activity is null) return;
+
+            var sb = new StringBuilder(user.Username);
+            switch (activity.Type)
+            {
+                case ActivityType.Listening:
+                    if (activity is SpotifyGame sSong)
+                    {
+                        sb.Append($" is listening to: \"{sSong.TrackTitle}\" by {string.Join(", ", sSong.Artists)}");
                         break;
-                    case ActivityType.Streaming:
-                        sb.Append($" is streaming: {activity.Name} ({activity.Details})");
+                    }
+                    return;
+                case ActivityType.Streaming:
+                    if (activity is StreamingGame sGame)
+                    {
+                        sb.Append($" is streaming: {sGame.Name} ({sGame.Url})");
                         break;
-                    default:
-                        sb.Append($" is playing: {activity.Name} " + (string.IsNullOrEmpty(activity.Details) ? String.Empty : $"({activity.Details})"));
+                    }
+                    return;
+                default:
+                    if (activity is RichGame game)
+                    {
+                        sb.Append($" is playing: {game.Name} | {game.Details} | {game.State}");
                         break;
-                }
-                MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
+                    }
+                    sb.Append($" is playing: {activity.Name} " + (string.IsNullOrEmpty(activity.Details) ? String.Empty : $"({activity.Details})"));
+                    break;
             }
+
+            MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
         });
     }
     #endregion
