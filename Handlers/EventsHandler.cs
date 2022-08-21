@@ -58,7 +58,7 @@ internal static class EventsHandler
             BaroActive = false;
         }
 
-        
+
     }
     #endregion
 }
