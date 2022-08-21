@@ -9,7 +9,7 @@ internal static class DiscordClient
 {
     #region Properties
     public static bool Connected { get; private set; } = false;
-    public static DiscordSocketClient? Client { get; private set; }
+    public static DiscordSocketClient Client { get; private set; } = default!;
 
     private static readonly DiscordSocketConfig ClientConfig = new()
     {
