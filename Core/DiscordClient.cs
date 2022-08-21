@@ -75,7 +75,7 @@ internal static class DiscordClient
                         sb.Append($" is playing: {activity.Name} " + (string.IsNullOrEmpty(activity.Details) ? String.Empty : $"({activity.Details})"));
                         break;
                 }
-                MessageHandler.SendMessage(Config.RelayChannel, $"{user.Username} {activity.Type}: {activity.Name} ({activity.Details}) ");
+                MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
             }
         });
     }
