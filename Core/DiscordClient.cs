@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using Discord;
 using Discord.WebSocket;
 using Serilog;
@@ -12,16 +11,18 @@ internal static class DiscordClient
     public static bool Connected { get; private set; } = false;
     public static DiscordSocketClient Client { get; private set; } = default!;
 
-    private static readonly DiscordSocketConfig ClientConfig = new()
+    private static bool OnCooldown { get; set; } = false;
+    private static readonly DiscordSocketConfig _config = new()
     {
         GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildPresences
     };
+    private static readonly Dictionary<byte, string> _rpcData = new();
     #endregion
 
     #region Initialization
     public static async Task Connect()
     {
-        Client = new DiscordSocketClient(ClientConfig);
+        Client = new DiscordSocketClient(_config);
         await Client.LoginAsync(TokenType.Bot, Config.Auth.DiscordToken);
         await Client.StartAsync();
         RegisterEvents(Client);
@@ -52,45 +53,68 @@ internal static class DiscordClient
         return Task.CompletedTask;
     }
 
-    private static async Task PresenceUpdated(SocketUser user, SocketPresence arg2, SocketPresence arg3)
+    private static async Task PresenceUpdated(SocketUser _user, SocketPresence arg2, SocketPresence arg3)
     {
-        if (user.IsBot) return;
+        if (OnCooldown) return;
+        if (_user.IsBot) return;
 
         await Task.Run(() =>
         {
+            var user = (SocketGuildUser)_user;
             var activity = arg2.Activities.FirstOrDefault();
-
             if (activity is null) return;
+            var type = (byte)activity.Type;
+            if (!_rpcData.ContainsKey(type)) _rpcData.Add(type, string.Empty);
 
-            var sb = new StringBuilder(user.Username);
+            var sb = new StringBuilder(user.DisplayName);
             switch (activity.Type)
             {
                 case ActivityType.Listening:
                     if (activity is SpotifyGame sSong)
                     {
+                        if (_rpcData[type] == $"{user.DisplayName}:{sSong.TrackTitle}") return;
+
                         sb.Append($" is listening to: \"{sSong.TrackTitle}\" by {string.Join(", ", sSong.Artists)}");
+                        _rpcData[type] = $"{user.DisplayName}:{sSong.TrackTitle}";
                         break;
                     }
                     return;
                 case ActivityType.Streaming:
                     if (activity is StreamingGame sGame)
                     {
+                        if (_rpcData[type] == $"{user.DisplayName}:{sGame.Name}") return;
+
                         sb.Append($" is streaming: {sGame.Name} ({sGame.Url})");
+                        _rpcData[type] = $"{user.DisplayName}:{sGame.Name}";
                         break;
                     }
                     return;
                 default:
                     if (activity is RichGame game)
                     {
+                        if (_rpcData[type] == $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}") return;
+
                         sb.Append($" is playing: {game.Name} | {game.Details} | {game.State}");
+                        _rpcData[type] = $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}";
                         break;
                     }
+                    if (_rpcData[type] == $"{user.DisplayName}:{activity.Name}") return;
+
                     sb.Append($" is playing: {activity.Name} " + (string.IsNullOrEmpty(activity.Details) ? String.Empty : $"({activity.Details})"));
+                    _rpcData[type] = $"{user.DisplayName}:{activity.Name}";
                     break;
             }
 
             MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
         });
+
+        OnCooldown = true;
+        Timer? t = null;
+        t = new Timer(c =>
+        {
+            OnCooldown = false;
+            t?.Dispose();
+        }, null, 30 * 1000, Timeout.Infinite);
     }
     #endregion
 }
