@@ -114,7 +114,7 @@ internal static class DiscordClient
         {
             OnCooldown = false;
             t?.Dispose();
-        }, null, 30 * 1000, Timeout.Infinite);
+        }, null, 120 * 1000, Timeout.Infinite);
     }
     #endregion
 }
