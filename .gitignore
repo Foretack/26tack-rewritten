@@ -363,4 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Custom shit
-[Cc]onfig.cs
+Config.cs
