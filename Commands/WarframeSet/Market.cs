@@ -87,13 +87,13 @@ internal class Market : Command
                 : $" ◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P")
             .Append(sellersCount == 1
                 ? String.Empty
-                : $" (▼{cheapestSeller}P ◉ ▲{mostExpensiveSeller}P)")
+                : $" (▼{cheapestSeller}P · ▲{mostExpensiveSeller}P)")
             .Append(buyersCount == 0
                 ? String.Empty
                 : $" ◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P")
             .Append(buyersCount == 1
                 ? String.Empty
-                : $" (▲{mostPayingBuyer}P ◉ ▼{leastPayingBuyer}P)");
+                : $" (▲{mostPayingBuyer}P · ▼{leastPayingBuyer}P)");
 
             MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");
         });
