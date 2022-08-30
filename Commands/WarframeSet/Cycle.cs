@@ -38,7 +38,7 @@ internal class Cycle : Command
             Result<T> r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, An unexpected error occured :( ({r.Exception.Message})");
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
                 return;
             }
             cycle = r.Value;

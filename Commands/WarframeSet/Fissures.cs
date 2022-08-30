@@ -21,13 +21,14 @@ internal class Fissures : Command
 
         string fissuresString;
 
-        Fissure[]? fissures = (await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures")).Value;
-        if (fissures is null)
+        var r = await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures");
+        if (!r.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving fissure data PoroSad");
+            MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
             return;
         }
 
+        var fissures = r.Value;
         fissures = fissures.Where(x => x.active).ToArray();
 
         if (args.Length == 0)

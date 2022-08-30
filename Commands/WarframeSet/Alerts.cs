@@ -27,7 +27,7 @@ internal class Alerts : Command
             Result<Alert[]> r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, There was an error retrieving alert data PoroSad ({r.Exception.Message})");
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
                 return;
             }
             alerts = r.Value;

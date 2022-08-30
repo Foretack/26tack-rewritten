@@ -84,26 +84,6 @@ internal static class ExternalAPIHandler
     #region Warframe
     private const string WarframeBaseUrl = "https://api.warframestat.us/";
 
-    public static async Task<CetusCycle?> GetCetusCycle()
-    {
-        var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream cResponse = await requests.GetStreamAsync(WarframeBaseUrl + "/cetusCycle");
-            CetusCycle cycle = (await JsonSerializer.DeserializeAsync<CetusCycle>(cResponse))!;
-            return cycle;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch cetus cycle fdm");
-            var db = new DbQueries();
-            _ = await db.LogException(ex);
-            return null;
-        }
-    }
-
     public static async Task<MarketItems?> GetMarketItemListings(string itemName)
     {
         var requests = new HttpClient();

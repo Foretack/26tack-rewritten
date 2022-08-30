@@ -26,7 +26,7 @@ internal class SteelPath : Command
             Result<SteelPathRewards> r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, There was an error getting Steel Path data :( ({r.Exception.Message})");
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
                 return;
             }
             rewards = r.Value;
