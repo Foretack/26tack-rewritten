@@ -29,7 +29,7 @@ internal class LinkCollection : ChatModule
             _ = await db
                 .Table("collected_links")
                 .Insert()
-                .Schema("username", "channel", "link")
+                .Schema("username", "channel", "link_text")
                 .Values(
                     $"'{ircMessage.Username}'",
                     $"'{ircMessage.Channel}'",
