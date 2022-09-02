@@ -22,6 +22,7 @@ internal class LinkCollection : ChatModule
         var ircMessage = e.ChatMessage;
         if (ircMessage.Message.Length < 10) return;
         if (ircMessage.Username.Contains("bot") || ircMessage.Username == "streamelements") return;
+        if (ircMessage.Username == Config.Auth.Username) return;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null) return;
