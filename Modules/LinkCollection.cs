@@ -15,7 +15,7 @@ internal class LinkCollection : ChatModule
         OnDisabled = _ => AnonymousClient.Client.OnMessageReceived -= OnMessage;
     }
 
-    private static readonly Regex _regex = new(@"(https:[\\/][\\/])?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
     private async void OnMessage(object? sender, OnMessageReceivedArgs e)
     {
