@@ -37,7 +37,7 @@ internal class RandomLink : Command
                 return;
             }
 
-            var row = query.Results[1];
+            var row = query.Results[0];
             randomlink = ((string)row[0], (string)row[1], (string)row[2], (DateTime)row[3]);
         }
 
