@@ -20,6 +20,7 @@ internal static class Formatting
     {
         return time switch
         {
+            { Days: > 7 } => $"{time:d' days'}",
             { Days: > 1, Hours: > 1 } => $"{time:d' days and 'h' hours'}",
             { Days: 1, Hours: > 1 } => $"{time:d' day and 'h' hours'}",
             { Days: > 1, Hours: 1 } => $"{time:d' days and 'h' hour'}",

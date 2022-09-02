@@ -13,5 +13,6 @@ internal class BaseHandler : ChatCommandHandler
         AddCommand(new RandomJoke());
         AddCommand(new Suggest());
         //AddCommand(new LongPing()); Note: Don't uncomment until bot is verified. This causes issues with ratelimit buckets
+        AddCommand(new RandomLink());
     }
 }
