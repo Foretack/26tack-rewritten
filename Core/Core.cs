@@ -38,6 +38,7 @@ public static class Core
         MessageHandler.Initialize();
         CommandHandler.Initialize();
         EventsHandler.Start();
+        ModulesHandler.Initialize();
         await DiscordClient.Connect();
 
         int seconds = 0;
