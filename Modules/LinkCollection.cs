@@ -14,15 +14,15 @@ internal class LinkCollection : ChatModule
         OnDisabled = _ => AnonymousClient.Client.OnMessageReceived -= OnMessage;
     }
 
-    private static readonly Regex _regex = new(@"^(http|https|ftp|)\://|[a-zA-Z0-9\-\.]+\.[a-zA-Z](:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$", RegexOptions.Compiled | RegexOptions.Multiline, TimeSpan.FromMilliseconds(200));
+    private static readonly Regex _regex = new(@"(https:[\\/][\\/])?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
     private async void OnMessage(object? sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
     {
         var ircMessage = e.ChatMessage;
         if (ircMessage.Username.Contains("bot")) return;
 
-        var match = _regex.Match(ircMessage.Message);
-        if (!match.Success) return;
+        string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
+        if (link is null) return;
 
         using (DbQueries db = new DbQueries())
         {
@@ -33,7 +33,7 @@ internal class LinkCollection : ChatModule
                 .Values(
                     $"'{ircMessage.Username}'",
                     $"'{ircMessage.Channel}'",
-                    $"'{match.Value}'"
+                    $"'{link}'"
                         )
                 .TryExecute();
         }
