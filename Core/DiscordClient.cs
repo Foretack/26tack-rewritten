@@ -98,10 +98,6 @@ internal static class DiscordClient
                         _rpcData[type] = $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}";
                         break;
                     }
-                    if (_rpcData[type] == $"{user.DisplayName}:{activity.Name}") return;
-
-                    sb.Append($" is playing: {activity.Name} " + (string.IsNullOrEmpty(activity.Details) ? String.Empty : $"({activity.Details})"));
-                    _rpcData[type] = $"{user.DisplayName}:{activity.Name}";
                     break;
             }
 
