@@ -100,6 +100,7 @@ internal static class DiscordClient
                     }
                     break;
             }
+            if (sb.ToString() == user.DisplayName) return;
 
             MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
         });
