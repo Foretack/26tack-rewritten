@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Tack.Core;
 using Tack.Database;
+using Tack.Handlers;
 using Tack.Nonclass;
 using TwitchLib.Client.Events;
 
@@ -21,8 +22,9 @@ internal class LinkCollection : ChatModule
     {
         var ircMessage = e.ChatMessage;
         if (ircMessage.Message.Length < 10) return;
-        if (ircMessage.Username.Contains("bot") || ircMessage.Username == "streamelements") return;
         if (ircMessage.Username == Config.Auth.Username) return;
+        if (ircMessage.Username.Contains("bot") || ircMessage.Username == "streamelements") return;
+        if (ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Name == ircMessage.Channel)) return;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null) return;
