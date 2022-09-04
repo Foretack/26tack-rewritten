@@ -24,12 +24,11 @@ internal class RandomLink : Command
         using (var db = new DbQueries())
         {
             var query = await db
-                .Select()
-                .Table("collected_links")
-                .Schema("*")
-                .Sort("random()")
-                .Limit(1)
-                .TryExecute();
+                .Execute(
+                "SELECT * FROM collected_links " +
+                "OFFSET floor(random() * (" +
+                    "SELECT COUNT(*) FROM collected_links)" +
+                ") LIMIT 1;");
 
             if (!query.Success)
             {
@@ -37,7 +36,7 @@ internal class RandomLink : Command
                 return;
             }
 
-            var row = query.Results[0];
+            var row = query.Results.First();
             randomlink = ((string)row[0], (string)row[1], (string)row[2], (DateTime)row[3]);
         }
 

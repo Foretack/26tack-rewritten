@@ -40,6 +40,82 @@ internal abstract class DbConnection : IDisposable
     #endregion
 
     #region Execution
+    public async Task<ExecutionResult> Execute(string query)
+    {
+        var cmd = new NpgsqlCommand(query, Connection);
+        QueryTypes type = query.Split(' ')[0] switch
+        {
+            "INSERT" => QueryTypes.Insert,
+            "UPDATE" => QueryTypes.Update,
+            "DELETE" => QueryTypes.Delete,
+            "SELECT" => QueryTypes.Select,
+            _ => QueryTypes.Insert
+        };
+
+        if (type is QueryTypes.Insert or QueryTypes.Update or QueryTypes.Delete)
+        {
+            try
+            {
+                _ = await cmd.ExecuteNonQueryAsync();
+                await cmd.DisposeAsync();
+                return new ExecutionResult(true, Array.Empty<object[]>());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Exception was thrown during {QueryType} query");
+            }
+        }
+        if (type == QueryTypes.Select)
+        {
+            try
+            {
+                NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
+                var ordinals = new List<int>();
+                // Selected columns from table
+
+                // FIXME: Won't work, need to find column names from query string
+                // & replace ValuesSchema
+                if (query.Split(' ')[1] != "*" && await r.ReadAsync())
+                {
+                    foreach (string column in ValuesSchema!)
+                    {
+                        ordinals.Add(r.GetOrdinal(column));
+                    }
+                }
+                // All columns (*)
+                else if (await r.ReadAsync())
+                {
+                    // Get column count & add it as ordinals
+                    int columnCount = r.GetColumnSchema().Count;
+                    for (short i = 0; i < columnCount; i++) ordinals.Add(i);
+                }
+                await r.CloseAsync();
+                await r.DisposeAsync();
+
+                NpgsqlDataReader r2 = await cmd.ExecuteReaderAsync();
+                var values = new List<object[]>();
+                var valuesInner = new List<object>();
+                while (await r2.ReadAsync())
+                {
+                    foreach (short o in ordinals) { valuesInner.Add(r.GetValue(o)); }
+                    values.Add(valuesInner.ToArray());
+                    valuesInner.Clear();
+                }
+                await r2.CloseAsync();
+                await r2.DisposeAsync();
+                await cmd.DisposeAsync();
+
+                return new ExecutionResult(true, values.ToArray());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, $"Exception was thrown during {QueryType} query" +
+                    $"\n Full Query:\n {query}");
+            }
+        }
+        return new ExecutionResult(false, Array.Empty<object[]>());
+    }
+
     public async Task<ExecutionResult> TryExecute()
     {
         string? query = BuildQueryString();
@@ -65,12 +141,12 @@ internal abstract class DbConnection : IDisposable
             try
             {
                 NpgsqlDataReader r = await cmd.ExecuteReaderAsync();
-                var ordinals = new List<short>();
+                var ordinals = new List<int>();
                 if (!ValuesSchema!.Contains("*") && await r.ReadAsync())
                 {
                     foreach (string column in ValuesSchema!)
                     {
-                        ordinals.Add((short)r.GetOrdinal(column));
+                        ordinals.Add(r.GetOrdinal(column));
                     }
                 }
                 else if (await r.ReadAsync())
@@ -79,21 +155,21 @@ internal abstract class DbConnection : IDisposable
                     for (short i = 0; i < columnCount; i++) ordinals.Add(i);
                 }
                 await r.CloseAsync();
+                await r.DisposeAsync();
 
                 NpgsqlDataReader r2 = await cmd.ExecuteReaderAsync();
                 var values = new List<object[]>();
                 var valuesInner = new List<object>();
                 while (await r2.ReadAsync())
                 {
-                    foreach (short o in ordinals) { valuesInner.Add(r.GetValue(o)); }
+                    foreach (int o in ordinals) { valuesInner.Add(r.GetValue(o)); }
                     values.Add(valuesInner.ToArray());
                     valuesInner.Clear();
                 }
                 await r2.CloseAsync();
-
-                await r.DisposeAsync();
                 await r2.DisposeAsync();
                 await cmd.DisposeAsync();
+
                 return new ExecutionResult(true, values.ToArray());
             }
             catch (Exception ex)
