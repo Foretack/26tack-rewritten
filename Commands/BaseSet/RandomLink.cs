@@ -40,7 +40,9 @@ internal class RandomLink : Command
             randomlink = ((string)row[0], (string)row[1], (string)row[2], (DateTime)row[3]);
         }
 
-        MessageHandler.SendMessage(channel, $"#{randomlink.Channel} @{randomlink.Username} {randomlink.Link} ({FormatTimePosted(randomlink.TimePosted)})");
+        MessageHandler.SendMessage(channel, $"@{randomlink.Username} " +
+            $"linked: {randomlink.Link} in #{randomlink.Channel} " +
+            $"{FormatTimePosted(randomlink.TimePosted)}");
     }
 
     private string FormatTimePosted(DateTime time)
