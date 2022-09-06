@@ -1,4 +1,5 @@
-﻿using Tack.Database;
+﻿using System.Text;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
@@ -9,9 +10,9 @@ internal class RandomLink : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "randomlink",
-        description: "Get a random link posted in Twitch chat",
+        description: "Get a random link posted in Twitch chat. Additional options: `contains:string`, `channel:string`, `user:string`",
         aliases: new string[] { "rl", "link" },
-        userCooldown: 15,
+        userCooldown: 10,
         channelCooldown: 3
     );
 
@@ -20,15 +21,42 @@ internal class RandomLink : Command
         string user = ctx.IrcMessage.Username;
         string channel = ctx.IrcMessage.Channel;
 
+        string? contains = Options.ParseString("contains", ctx.IrcMessage.Message);
+        string? targetUser = Options.ParseString("user", ctx.IrcMessage.Message)?.ToLower();
+        string? targetChannel = Options.ParseString("channel", ctx.IrcMessage.Message)?.ToLower();
+
         (string Username, string Channel, string Link, DateTime TimePosted) randomlink;
         using (var db = new DbQueries())
         {
-            var query = await db
-                .Execute(
-                "SELECT * FROM collected_links " +
-                "OFFSET floor(random() * (" +
-                    "SELECT COUNT(*) FROM collected_links)" +
-                ") LIMIT 1;");
+            var queryString = new StringBuilder();
+            queryString.Append("SELECT * FROM collected_links ");
+
+            var options = new[]
+            {
+                contains is null ? null : $"link_text LIKE '%{contains}%'",
+                targetUser is null ? null : $"username LIKE '%{targetUser}%'",
+                targetChannel is null ? null : $"channel LIKE '%{targetChannel}%'"
+            };
+            var queryConditions = new StringBuilder();
+            var selectedOptions = options.Where(x => x is not null).ToArray();
+            if (selectedOptions.Length > 0)
+            {
+                _ = queryConditions
+                    .Append("WHERE ")
+                    .Append(
+                    string.Join(" AND ", selectedOptions));
+            }
+
+            _ = queryString.Append(queryConditions)
+                .Append(" OFFSET floor")
+                .Append('(')
+                .Append("random()")
+                .Append('*')
+                .Append($"(SELECT COUNT(*) FROM collected_links {queryConditions})")
+                .Append(')')
+                .Append("LIMIT 1;");
+
+            var query = await db.Execute(queryString.ToString());
 
             if (!query.Success)
             {
