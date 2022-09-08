@@ -29,6 +29,7 @@ internal class LinkCollection : ChatModule
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null) return;
         if (link.Length < 10) return;
+        if (link.Length > 400) return;
 
         using (DbQueries db = new DbQueries())
         {

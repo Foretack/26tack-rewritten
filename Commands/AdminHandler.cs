@@ -6,7 +6,7 @@ namespace Tack.Commands;
 internal class AdminHandler : ChatCommandHandler
 {
     public override string Name => "Admin";
-    public override string Prefix => "func_";
+    public override string Prefix => "f_";
     public override bool UseUnifiedCooldowns => true;
     public override short UserCooldown => 0;
     public override short ChannelCooldown => 0;

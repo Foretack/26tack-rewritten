@@ -39,6 +39,7 @@ internal abstract class DbConnection : IDisposable
     public DbConnection Offset(int offset) { SelectionOffset = offset; return this; }
     #endregion
 
+    // TODO: Use SqlKata
     #region Execution
     public async Task<ExecutionResult> Execute(string query)
     {
