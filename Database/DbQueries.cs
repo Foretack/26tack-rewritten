@@ -44,6 +44,7 @@ internal class DbQueries : DbConnection
         var query = await QueryFactory.Query("channels")
             .Where("priority", ">", -10)
             .Select("username", "priority", "is_logged")
+            .OrderByDesc("priority")
             .GetAsync();
 
         var channels = query.Select(
