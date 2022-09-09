@@ -1,5 +1,6 @@
 ﻿using Dasync.Collections;
 using Serilog;
+using SqlKata.Execution;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Utils;
@@ -14,249 +15,173 @@ internal class DbQueries : DbConnection
 
     public async Task<bool> LogException(Exception exception)
     {
-        ExecutionResult q = await
-            Insert()
-            .Table("errors")
-            .Schema("data")
-            .Values($"'{exception.FormatException()}'")
-            .TryExecute();
-
-        if (!q.Success)
+        int inserted = await QueryFactory.Query("errors").InsertAsync(new
         {
-            await MessageHandler.SendDiscordMessage(Config.Discord.GuildID,
-                                                    Config.Discord.PingsChannelID,
-                                                    $"[{DateTime.Now.ToLocalTime()}] {Config.Discord.DiscordPing} an exception failed to be logged!");
-            return false;
-        }
-        return true;
+            data = exception.FormatException()
+        });
+
+        return inserted > 0;
     }
 
     public async Task<bool> AddChannel(ExtendedChannel channel)
     {
-        ExecutionResult q = await
-            Insert()
-            .Table("channels")
-            .Schema("display_name", "username", "id", "avatar_url", "priority", "is_logged", "date_joined")
-            .Values($"'{channel.Displayname}'", $"'{channel.Username}'", $"{channel.ID}", $"'{channel.AvatarUrl}'", $"{channel.Priority}", $"{channel.Logged}", "CURRENT_DATE")
-            .TryExecute();
+        int inserted = await QueryFactory.Query("channels").InsertAsync(new
+        {
+            display_name = channel.Displayname,
+            username = channel.Username,
+            id = int.Parse(channel.ID),
+            avatar_url = channel.AvatarUrl,
+            priority = channel.Priority,
+            is_logged = channel.Logged,
+            date_joined = DateTime.Now
+        });
 
-        return q.Success;
+        return inserted > 0;
     }
 
     public async Task<ChannelHandler.Channel[]> GetChannels()
     {
-        ExecutionResult q = await
-            Select()
-            .Table("channels")
-            .Schema("username", "priority", "is_logged")
-            .Where("priority > -10")
-            .Sort("priority DESC")
-            .TryExecute();
+        var query = await QueryFactory.Query("channels")
+            .Where("priority", ">", -10)
+            .Select("username", "priority", "is_logged")
+            .GetAsync();
 
-        if (!q.Success)
+        var channels = query.Select(
+            x => new ChannelHandler.Channel(x.username, x.priority, x.is_logged)
+            ).ToArray();
+        if (channels is null || channels.Length == 0)
         {
             Log.Fatal("Failed to fetch channel list");
             throw new MissingFieldException("Channel list could not be loaded");
         }
 
-        var channels = new List<ChannelHandler.Channel>();
-        foreach (object[] row in q.Results)
-        {
-            channels.Add(new ChannelHandler.Channel((string)row[0], (int)row[1], (bool)row[2]));
-        }
-
-        return channels.ToArray();
+        return channels;
     }
 
     public async Task<string[]> GetWhitelistedUsers()
     {
-        ExecutionResult q = await
-            Select()
-            .Table("whitelisted_users")
-            .Schema("username")
-            .TryExecute();
+        var query = await QueryFactory.Query("whitelisted_users")
+            .Select("username")
+            .GetAsync();
 
-        if (!q.Success)
-        {
-            Log.Fatal("Failed to fetch whitelisted users");
-            throw new MissingFieldException("Whitelisted users could not be loaded");
-        }
-
-        string[] users = q.Results.Select(x => (string)x[0]).ToArray();
-        return users;
+        return query.Select(x => (string)x.username).ToArray();
     }
 
     public async Task<string[]> GetBlacklistedUsers()
     {
-        ExecutionResult q = await
-            Select()
-            .Table("blacklisted_users")
-            .Schema("username")
-            .TryExecute();
+        var query = await QueryFactory.Query("blacklisted_users")
+            .Select("username")
+            .GetAsync();
 
-        if (!q.Success)
-        {
-            Log.Fatal("Failed to fetch blacklisted users");
-            throw new MissingFieldException("Blacklisted users could not be loaded");
-        }
-
-        string[] users = q.Results.Select(x => (string)x[0]).ToArray();
-        return users;
+        return query.Select(x => (string)x.username).ToArray();
     }
 
     public async Task<Authorization> GetAuthorizationData()
     {
-        ExecutionResult q = await
-            Select()
-            .Table("auth")
-            .Schema("*")
-            .TryExecute();
+        var query = await QueryFactory.Query("auth")
+            .GetAsync();
 
-        if (!q.Success)
-        {
-            Log.Fatal("Failed to fetch authorization data from the database");
-            throw new MissingFieldException("Failed to fetch authorization data from the database");
-        }
+        var row = query.First();
+        var auth = new Authorization(row.username, row.access_token, row.client_id, row.supibot_token, row.discord_token);
 
-        try
-        {
-            object[] row = q.Results[0];
-            return new Authorization((string)row[0],
-                                     (string)row[1],
-                                     (string)row[2],
-                                     (string)row[3],
-                                     (string)row[4]);
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "There was an error processing authorization data");
-            throw;
-        }
+        return auth;
     }
 
     public async Task<Discord> GetDiscordData()
     {
-        ExecutionResult q = await
-            Select()
-            .Table("discord")
-            .Schema("*")
-            .TryExecute();
+        var query = await QueryFactory.Query("discord")
+            .GetAsync();
 
-        if (!q.Success)
-        {
-            Log.Fatal("Failed to fetch discord data from the database");
-            throw new MissingFieldException("Failed to fetch discord data from the database");
-        }
+        var row = query.First();
+        var data = new Discord(row.guild_id, row.pings_channelid, row.news_channelid, row.ping_string);
 
-        try
-        {
-            object[] row = q.Results[0];
-            return new Discord((ulong)(long)row[0],
-                               (ulong)(long)row[1],
-                               (ulong)(long)row[2],
-                               (string)row[3]);
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "There was an error processing discord data");
-            throw;
-        }
+        return data;
     }
 
     public async Task<bool> RemoveChannel(ChannelHandler.Channel channel)
     {
-        ExecutionResult q = await
-            Delete()
-            .Table("channels")
-            .Where($"username = '{channel.Name}'")
-            .TryExecute();
+        int deleted = await QueryFactory.Query("channels")
+            .Where("username", channel.Name)
+            .DeleteAsync();
 
-        return q.Success;
+        return deleted > 0;
     }
 
     public async Task<bool> CreateSuggestion(PartialUser user, string suggestionText)
     {
-        ExecutionResult q = await
-            Insert()
-            .Table("suggestions")
-            .Schema("username", "user_id", "suggestion_text")
-            .Values($"'{user.Username}'", $"{user.ID}", $"'{suggestionText}'")
-            .TryExecute();
+        int inserted = await QueryFactory.Query("suggestions").InsertAsync(new
+        {
+            username = user.Username,
+            user_id = int.Parse(user.ID),
+            suggestion_text = suggestionText
+        });
 
-        return q.Success;
+        return inserted > 0;
     }
 
     public async Task<bool> BlacklistUser(string username, string id)
     {
-        ExecutionResult q = await
-            Insert()
-            .Table("blacklisted_users")
-            .Schema("username", "id")
-            .Values($"'{username}'", id)
-            .TryExecute();
+        int inserted = await QueryFactory.Query("blacklisted_users").InsertAsync(new
+        {
+            username = username,
+            id = int.Parse(id)
+        });
 
-        return q.Success;
+        return inserted > 0;
     }
 
     public async Task<bool> WhitelistUser(string username)
     {
-        ExecutionResult q = await
-            Insert()
-            .Table("whitelisted_users")
-            .Schema("username")
-            .Values($"'{username}'")
-            .TryExecute();
+        int inserted = await QueryFactory.Query("blacklisted_users").InsertAsync(new
+        {
+            username = username
+        });
 
-        return q.Success;
+        return inserted > 0;
     }
 
     public DiscordEvent[] GetDiscordEvents()
     {
-        ExecutionResult q =
-            Select()
-            .Table("discord_triggers")
-            .Schema("*")
-            .TryExecute()
-            .Result;
+        var query = QueryFactory.Query("discord_triggers")
+            .Get();
 
-        DiscordEvent[] events = q.Results.Select(x => new DiscordEvent(
-            (ulong)(long)x[0],
-            (string)x[1],
-            x[2] is DBNull ? null : (string)x[2],
-            (string)x[3],
-            x[4] is DBNull ? null : (string)x[4],
-            (string)x[5]
-            )).ToArray();
+        var events = query.Select(
+            x => new DiscordEvent(
+                x.channel_id,
+                x.name_contains,
+                x.remove_text,
+                x.output_channel,
+                x.prepend_text,
+                x.color
+                )
+            ).ToArray();
 
         return events;
     }
 
     public async Task<ExtendedChannel?> GetExtendedChannel(string channel)
     {
-        ExecutionResult q = await
-            Select()
-            .Table("channels")
-            .Schema("*")
-            .Where($"username = '{channel}'")
-            .TryExecute();
+        var query = await QueryFactory.Query("channels")
+            .Where("username", channel)
+            .GetAsync();
 
-        if (!q.Success)
+        var row = query.FirstOrDefault();
+        if (row is null)
         {
-            Log.Fatal($"Failed to fetch extended channel `{channel}`");
+            Log.Error($"Could not get extended channel \"{channel}\"");
             return null;
         }
+        var extd = new ExtendedChannel(
+            row.display_name,
+            row.username,
+            ((int)row.id).ToString(),
+            row.avatar_url,
+            row.date_joined,
+            row.priority,
+            row.is_logged
+            );
 
-        object[] row = q.Results[0];
-        var c = new ExtendedChannel(
-            (string)row[0],
-            (string)row[1],
-            ((int)row[2]).ToString(),
-            (string)row[3] + ' ',
-            ((DateTime)row[6]).ToLocalTime(),
-            (int)row[4],
-            (bool)row[5]);
-
-        return c;
+        return extd;
     }
 
     ~DbQueries() => Dispose();
