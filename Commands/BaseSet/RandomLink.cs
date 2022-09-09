@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using SqlKata.Execution;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -54,18 +55,34 @@ internal class RandomLink : Command
                 .Append('*')
                 .Append($"(SELECT COUNT(*) FROM collected_links {queryConditions})")
                 .Append(')')
-                .Append("LIMIT 1;");
+                .Append("LIMIT 1");
 
-            var query = await db.Execute(queryString.ToString());
+            var query = await db.QueryFactory.Query()
+                .SelectRaw($"* FROM collected_links {queryConditions} OFFSET floor(" +
+                $"random() * (SELECT COUNT(*) FROM collected_links {queryConditions})" +
+                ") LIMIT 1").GetAsync();
 
-            if (!query.Success)
+            //var q2 = await db.QueryFactory.Query("collected_links")
+            //    .When(contains is not null, q => q.WhereRaw("link_text LIKE", $"%{contains}%"))
+            //    .When(targetUser is not null, q => q.WhereRaw("username LIKE", $"%{targetUser}%"))
+            //    .When(targetChannel is not null, q => q.WhereRaw("channel LIKE", $"%{targetChannel}%"))
+            //    .Offset(
+            //        await db.QueryFactory.Query("collected_links")
+            //        .When(contains is not null, q => q.WhereRaw("link_text LIKE", $"%{contains}%"))
+            //        .When(targetUser is not null, q => q.WhereRaw("username LIKE", $"%{targetUser}%"))
+            //        .When(targetChannel is not null, q => q.WhereRaw("channel LIKE", $"%{targetChannel}%"))
+            //        .CountAsync<int>()
+            //    )
+            //    .Take(1).GetAsync();
+
+            var row = query.FirstOrDefault();
+            if (row is null)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");
                 return;
             }
 
-            var row = query.Results.First();
-            randomlink = ((string)row[0], (string)row[1], (string)row[2], (DateTime)row[3]);
+            randomlink = ((string)row.username, (string)row.channel, (string)row.link_text, (DateTime)row.time_posted);
         }
 
         MessageHandler.SendMessage(channel, $"@{randomlink.Username} " +

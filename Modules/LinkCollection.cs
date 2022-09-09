@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using SqlKata.Execution;
 using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
@@ -33,16 +34,12 @@ internal class LinkCollection : ChatModule
 
         using (DbQueries db = new DbQueries())
         {
-            _ = await db
-                .Table("collected_links")
-                .Insert()
-                .Schema("username", "channel", "link_text")
-                .Values(
-                    $"'{ircMessage.Username}'",
-                    $"'{ircMessage.Channel}'",
-                    $"'{link}'"
-                        )
-                .TryExecute();
+            _ = await db.QueryFactory.Query("collected_links").InsertAsync(new
+            {
+                username = ircMessage.Username,
+                channel = ircMessage.Channel,
+                link_text = link
+            });
         }
     }
 }

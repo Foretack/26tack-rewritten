@@ -93,7 +93,7 @@ internal class DbQueries : DbConnection
             .GetAsync();
 
         var row = query.First();
-        var data = new Discord(row.guild_id, row.pings_channelid, row.news_channelid, row.ping_string);
+        var data = new Discord((ulong)row.guild_id, (ulong)row.pings_channelid, (ulong)row.news_channelid, row.ping_string);
 
         return data;
     }
@@ -147,7 +147,7 @@ internal class DbQueries : DbConnection
 
         var events = query.Select(
             x => new DiscordEvent(
-                x.channel_id,
+                (ulong)x.channel_id,
                 x.name_contains,
                 x.remove_text,
                 x.output_channel,
