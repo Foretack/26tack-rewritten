@@ -4,7 +4,6 @@ using Discord.WebSocket;
 using Serilog;
 using Tack.Core;
 using Tack.Database;
-using Tack.Misc;
 using Tack.Models;
 using Tack.Utils;
 using TwitchLib.Client.Events;
@@ -94,7 +93,7 @@ internal static class MessageHandler
         {
             string message = ircMessage.Message;
             string channel = ircMessage.Channel;
-            string[] splitMessage = message.Replace("󠀀", " ").Split(' ');
+            string[] splitMessage = message.Replace("\U000E0000", " ").Split(' ');
             string[] commandArgs = splitMessage.Skip(1).ToArray();
 
             if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
@@ -104,12 +103,6 @@ internal static class MessageHandler
                 var permission = new Permission(ircMessage);
                 var ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
                 await CommandHandler.HandleCommand(ctx);
-            }
-            if (!Permission.IsBlacklisted(ircMessage.Username)
-            && Regexes.Mention.IsMatch(message))
-            {
-                string msg = $"`[{DateTime.Now.ToLocalTime():F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
-                await SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
             }
         }
         catch (Exception ex)

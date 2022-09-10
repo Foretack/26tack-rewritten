@@ -10,6 +10,7 @@ internal static class ModulesHandler
     public static void Initialize()
     {
         AddChatModule(new LinkCollection());
+        AddChatModule(new MentionsRelay());
     }
 
     public static bool EnableChatModule(string name)
