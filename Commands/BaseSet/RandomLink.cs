@@ -62,19 +62,6 @@ internal class RandomLink : Command
                 $"random() * (SELECT COUNT(*) FROM collected_links {queryConditions})" +
                 ") LIMIT 1").GetAsync();
 
-            //var q2 = await db.QueryFactory.Query("collected_links")
-            //    .When(contains is not null, q => q.WhereRaw("link_text LIKE", $"%{contains}%"))
-            //    .When(targetUser is not null, q => q.WhereRaw("username LIKE", $"%{targetUser}%"))
-            //    .When(targetChannel is not null, q => q.WhereRaw("channel LIKE", $"%{targetChannel}%"))
-            //    .Offset(
-            //        await db.QueryFactory.Query("collected_links")
-            //        .When(contains is not null, q => q.WhereRaw("link_text LIKE", $"%{contains}%"))
-            //        .When(targetUser is not null, q => q.WhereRaw("username LIKE", $"%{targetUser}%"))
-            //        .When(targetChannel is not null, q => q.WhereRaw("channel LIKE", $"%{targetChannel}%"))
-            //        .CountAsync<int>()
-            //    )
-            //    .Take(1).GetAsync();
-
             var row = query.FirstOrDefault();
             if (row is null)
             {
