@@ -14,10 +14,40 @@ internal abstract class DbConnection : IDisposable
     private NpgsqlConnection Connection { get; set; } = new(ConnectionString);
     private PostgresCompiler Compiler { get; set; } = new();
 
-    protected DbConnection()
+    protected DbConnection(int logLevel = 1)
     {
         QueryFactory = new QueryFactory(Connection, Compiler);
-        QueryFactory.Logger = compiled => Log.Debug(compiled.ToString());
+        QueryFactory.Logger = compiled =>
+        {
+            switch (logLevel)
+            {
+                // Fatal
+                case 5:
+                    Log.Fatal(compiled.ToString());
+                    break;
+                // Error
+                case 4:
+                    Log.Error(compiled.ToString());
+                    break;
+                // Warning
+                case 3:
+                    Log.Warning(compiled.ToString());
+                    break;
+                // Information
+                case 2:
+                    Log.Information(compiled.ToString());
+                    break;
+                // Debug (Default)
+                default:
+                case 1:
+                    Log.Debug(compiled.ToString());
+                    break;
+                // Verbose
+                case 0:
+                    Log.Verbose(compiled.ToString());
+                    break;
+            }
+        };
     }
 
     private bool disposedValue;
