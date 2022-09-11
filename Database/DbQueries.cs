@@ -32,8 +32,7 @@ internal class DbQueries : DbConnection
             id = int.Parse(channel.ID),
             avatar_url = channel.AvatarUrl,
             priority = channel.Priority,
-            is_logged = channel.Logged,
-            date_joined = DateTime.Now
+            is_logged = channel.Logged
         });
 
         return inserted > 0;
