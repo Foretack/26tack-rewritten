@@ -5,12 +5,12 @@ using System.Text.Json.Serialization;
 using Tack.Nonclass;
 
 namespace Tack.Json;
-public class Alert
+public sealed class Alert
 {
     public bool active { get; set; }
     public Mission mission { get; set; }
 }
-public class Mission
+public sealed class Mission
 {
     public string description { get; set; }
     public string node { get; set; }
@@ -29,20 +29,20 @@ public class Mission
     public object[] requiredItems { get; set; }
     public object[] levelAuras { get; set; }
 }
-public class Reward
+public sealed class Reward
 {
     public CountedItem[] countedItems { get; set; }
     public int credits { get; set; }
     public string asString { get; set; }
 }
-public class CountedItem
+public sealed class CountedItem
 {
     public int count { get; set; }
     public string type { get; set; }
     public string key { get; set; }
 }
 
-public class Fissure
+public sealed class Fissure
 {
     public bool active { get; set; }
     public string missionType { get; set; }
@@ -52,7 +52,7 @@ public class Fissure
     public bool isStorm { get; set; }
 }
 
-public class CurrentSortie
+public sealed class CurrentSortie
 {
     public DateTime expiry { get; set; }
     public Variant[] variants { get; set; }
@@ -61,14 +61,14 @@ public class CurrentSortie
     public bool expired { get; set; }
     public string eta { get; set; }
 }
-public class Variant
+public sealed class Variant
 {
     public string missionType { get; set; }
     public string modifier { get; set; }
     public string modifierDescription { get; set; }
 }
 
-public class CetusCycle : IWorldCycle
+public sealed class CetusCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
@@ -77,7 +77,7 @@ public class CetusCycle : IWorldCycle
     public string State => IsDay ? "☀" : "🌙";
     public string QueryString { get; } = "cetusCycle";
 }
-public class CambionCycle : IWorldCycle
+public sealed class CambionCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
@@ -86,7 +86,7 @@ public class CambionCycle : IWorldCycle
     public string State => Active;
     public string QueryString { get; } = "cambionCycle";
 }
-public class VallisCycle : IWorldCycle
+public sealed class VallisCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
@@ -94,7 +94,7 @@ public class VallisCycle : IWorldCycle
     public string State => isWarm ? "🔥" : "❄";
     public string QueryString { get; } = "vallisCycle";
 }
-public class ZarimanCycle : IWorldCycle
+public sealed class ZarimanCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
@@ -103,10 +103,10 @@ public class ZarimanCycle : IWorldCycle
     public string QueryString { get; } = "zarimanCycle";
 }
 
-public record MarketItems(
+public sealed record MarketItems(
     [property: JsonPropertyName("payload")] Payload Payload
 );
-public record Order(
+public sealed record Order(
     [property: JsonPropertyName("quantity")] int Quantity,
     [property: JsonPropertyName("creation_date")] DateTime CreationDate,
     [property: JsonPropertyName("visible")] bool Visible,
@@ -119,10 +119,10 @@ public record Order(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("mod_rank")] int ModRank
 );
-public record Payload(
+public sealed record Payload(
     [property: JsonPropertyName("orders")] IReadOnlyList<Order> Orders
 );
-public record User(
+public sealed record User(
     [property: JsonPropertyName("ingame_name")] string IngameName,
     [property: JsonPropertyName("last_seen")] DateTime LastSeen,
     [property: JsonPropertyName("reputation")] int Reputation,
@@ -132,55 +132,55 @@ public record User(
     [property: JsonPropertyName("status")] string Status
 );
 
-public record RelicData(
+public sealed record RelicData(
     [property: JsonPropertyName("relics")] IReadOnlyList<Relic> Relics
 );
-public record Relic(
+public sealed record Relic(
     [property: JsonPropertyName("tier")] string Tier,
     [property: JsonPropertyName("relicName")] string RelicName,
     [property: JsonPropertyName("state")] string State,
     [property: JsonPropertyName("rewards")] IReadOnlyList<RelicReward> Rewards,
     [property: JsonPropertyName("_id")] string Id
 );
-public record RelicReward(
+public sealed record RelicReward(
     [property: JsonPropertyName("_id")] string Id,
     [property: JsonPropertyName("itemName")] string ItemName,
     [property: JsonPropertyName("rarity")] string Rarity,
     [property: JsonPropertyName("chance")] float Chance
 );
 
-public record InvasionNode(
+public sealed record InvasionNode(
     [property: JsonPropertyName("attackerReward")] InvasionReward AttackerReward,
     [property: JsonPropertyName("defenderReward")] InvasionReward DefenderReward
 );
-public record InvasionReward(
+public sealed record InvasionReward(
     [property: JsonPropertyName("countedItems")] IReadOnlyList<CountedItem> CountedItems
 );
 
-public class SPReward
+public sealed class SPReward
 {
     public string name { get; set; }
     public int cost { get; set; }
 }
-public class SteelPathRewards
+public sealed class SteelPathRewards
 {
     public DateTime expiry { get; set; }
     public SPReward currentReward { get; set; }
     public SPReward[] rotation { get; set; }
 }
 
-public class ItemDropData
+public sealed class ItemDropData
 {
     public string item { get; set; }
     public float chance { get; set; }
     public string place { get; set; }
 }
 
-public class LevelStat
+public sealed class LevelStat
 {
     public string[] stats { get; set; }
 }
-public class ModInfo
+public sealed class ModInfo
 {
     public string name { get; set; }
     public string type { get; set; }
@@ -189,7 +189,7 @@ public class ModInfo
     public LevelStat[] levelStats { get; set; }
 }
 
-public class Inventory
+public sealed class Inventory
 {
     [JsonPropertyName("item")]
     public string Item { get; set; }
@@ -200,7 +200,7 @@ public class Inventory
     [JsonPropertyName("credits")]
     public int Credits { get; set; }
 }
-public class VoidTrader
+public sealed class VoidTrader
 {
     [JsonPropertyName("id")]
     public string Id { get; set; }
@@ -239,7 +239,7 @@ public class VoidTrader
     public List<object> Schedule { get; set; }
 }
 
-public record WarframeItem(
+public sealed record WarframeItem(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("name")] string NormalName
 );

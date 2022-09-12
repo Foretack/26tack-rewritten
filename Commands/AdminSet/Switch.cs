@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
-internal class Switch : Command
+internal sealed class Switch : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "switch",

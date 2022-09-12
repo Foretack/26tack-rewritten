@@ -192,7 +192,7 @@ internal static class MessageHandler
     #endregion
 }
 
-internal record DiscordEvent(ulong ChannelID, string NameContains, string? Remove, string OutputChannel, string? Prepend, string Color);
+internal sealed record DiscordEvent(ulong ChannelID, string NameContains, string? Remove, string OutputChannel, string? Prepend, string Color);
 internal enum ChatColor
 {
     FANCY_NOT_SET_STATE_NAME,

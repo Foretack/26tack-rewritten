@@ -4,7 +4,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
-internal class JoinChannel : Command
+internal sealed class JoinChannel : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "join",

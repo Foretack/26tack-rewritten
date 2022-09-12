@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Relics : Command
+internal sealed class Relics : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "relics",

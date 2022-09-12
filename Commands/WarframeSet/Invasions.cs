@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Invasions : Command
+internal sealed class Invasions : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "invasions",

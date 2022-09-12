@@ -3,7 +3,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
-internal class PartChannel : Command
+internal sealed class PartChannel : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "part",

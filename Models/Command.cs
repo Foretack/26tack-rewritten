@@ -2,7 +2,7 @@
 
 namespace Tack.Models;
 
-public class CommandInfo : ICooldownOptions
+public sealed class CommandInfo : ICooldownOptions
 {
     public string Name { get; private set; }
     public string Description { get; private set; }

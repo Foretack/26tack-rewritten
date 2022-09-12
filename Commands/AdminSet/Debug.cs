@@ -6,7 +6,7 @@ using Tack.Utils;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
-internal class Debug : Command
+internal sealed class Debug : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "debug",
@@ -70,7 +70,7 @@ internal class Debug : Command
         }
     }
 
-    public class TestException : Exception
+    public sealed class TestException : Exception
     {
         public TestException() { }
         public TestException(string message) : base(message) { }

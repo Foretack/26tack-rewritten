@@ -3,7 +3,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands;
-internal class AdminHandler : ChatCommandHandler
+internal sealed class AdminHandler : ChatCommandHandler
 {
     public override string Name => "Admin";
     public override string Prefix => "f_";

@@ -3,7 +3,7 @@ using Tack.Nonclass;
 using TwitchLib.Client.Models;
 
 namespace Tack.Models;
-public class Permission
+public sealed class Permission
 {
     public int Level { get; set; } // forsenLevel
     public string Username { get; set; }

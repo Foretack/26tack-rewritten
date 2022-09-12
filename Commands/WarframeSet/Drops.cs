@@ -4,7 +4,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.WarframeSet;
-internal class Drops : Command
+internal sealed class Drops : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "drops",

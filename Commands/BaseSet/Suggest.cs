@@ -4,7 +4,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.BaseSet;
-internal class Suggest : Command
+internal sealed class Suggest : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "suggest",

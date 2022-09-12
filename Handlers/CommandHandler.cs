@@ -74,4 +74,4 @@ internal static class CommandHandler
     #endregion
 }
 
-public record CommandContext(ChatMessage IrcMessage, string[] Args, string CommandName, Permission Permission);
+public sealed record CommandContext(ChatMessage IrcMessage, string[] Args, string CommandName, Permission Permission);

@@ -4,7 +4,7 @@ using Tack.Utils;
 using Tl = TwitchLib.Api.Helix.Models.Users.GetUsers;
 
 namespace Tack.Models;
-internal class UserFactory
+internal sealed class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
@@ -83,6 +83,6 @@ internal class UserFactory
     }
 }
 
-public record PartialUser(string Displayname, string Username, string ID);
-public record User(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateCreated);
-public record ExtendedChannel(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateJoined, int Priority, bool Logged);
+public sealed record PartialUser(string Displayname, string Username, string ID);
+public sealed record User(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateCreated);
+public sealed record ExtendedChannel(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateJoined, int Priority, bool Logged);

@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.BaseSet;
-internal class RandomJoke : Command
+internal sealed class RandomJoke : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "randomjoke",

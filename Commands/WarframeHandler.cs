@@ -2,7 +2,7 @@
 using Tack.Nonclass;
 
 namespace Tack.Commands;
-internal class WarframeHandler : ChatCommandHandler
+internal sealed class WarframeHandler : ChatCommandHandler
 {
     public override string Name => "Warframe";
     public override string Prefix => "wf>";

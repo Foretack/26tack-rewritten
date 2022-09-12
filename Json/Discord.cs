@@ -3,14 +3,14 @@
 
 namespace Tack.Json;
 
-public class DiscordMessage
+public sealed class DiscordMessage
 {
     public string? content { get; set; }
     public Embed[]? embeds { get; set; }
     public string? username { get; set; }
     public string? avatar_url { get; set; }
 
-    public class Embed
+    public sealed class Embed
     {
         public string? title { get; set; }
         public string? type { get; set; }
@@ -27,46 +27,46 @@ public class DiscordMessage
         public Field[]? fields { get; set; }
 
 
-        public class Footer
+        public sealed class Footer
         {
             public string text { get; set; }
             public string? icon_url { get; set; }
             public string? proxy_icon_url { get; set; }
         }
-        public class Image
+        public sealed class Image
         {
             public string url { get; set; }
             public string? proxy_url { get; set; }
             public int? height { get; set; }
             public int? width { get; set; }
         }
-        public class Thumbnail
+        public sealed class Thumbnail
         {
             public string url { get; set; }
             public string? proxy_url { get; set; }
             public int? height { get; set; }
             public int? width { get; set; }
         }
-        public class Video
+        public sealed class Video
         {
             public string? url { get; set; }
             public string? proxy_url { get; set; }
             public int? height { get; set; }
             public int? width { get; set; }
         }
-        public class Provider
+        public sealed class Provider
         {
             public string? name { get; set; }
             public string? url { get; set; }
         }
-        public class Author
+        public sealed class Author
         {
             public string name { get; set; }
             public string? url { get; set; }
             public string? icon_url { get; set; }
             public string? proxy_icon_url { get; set; }
         }
-        public class Field
+        public sealed class Field
         {
             public string name { get; set; }
             public string value { get; set; }

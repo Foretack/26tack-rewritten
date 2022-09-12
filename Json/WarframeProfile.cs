@@ -5,13 +5,13 @@
 namespace Tack.Json;
 
 #region Token stuff
-public class V5Root
+public sealed class V5Root
 {
     [JsonPropertyName("tokens")]
     public Token[] Tokens { get; set; }
 }
 
-public class Token
+public sealed class Token
 {
     [JsonPropertyName("extension_id")]
     public string ExtensionId { get; set; }
@@ -25,12 +25,12 @@ public class Token
 #endregion
 
 #region Profile data
-public record ProfileRoot(
+public sealed record ProfileRoot(
     [property: JsonPropertyName("accountInfo")] AccountInfo AccountInfo,
     [property: JsonPropertyName("loadOuts")] LoadOuts LoadOuts
 );
 
-public record AccountInfo(
+public sealed record AccountInfo(
     [property: JsonPropertyName("focus")] string Focus,
     [property: JsonPropertyName("glyph")] string Glyph,
     [property: JsonPropertyName("lastUpdated")] int LastUpdated,
@@ -38,7 +38,7 @@ public record AccountInfo(
     [property: JsonPropertyName("playerName")] string PlayerName
 );
 
-public record Amp(
+public sealed record Amp(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("focus")] string Focus,
     [property: JsonPropertyName("itemName")] string ItemName,
@@ -50,13 +50,13 @@ public record Amp(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record ARCHWING(
+public sealed record ARCHWING(
     [property: JsonPropertyName("archwing")] Archwing Archwing,
     [property: JsonPropertyName("melee")] Melee Melee,
     [property: JsonPropertyName("primary")] Primary Primary
 );
 
-public record Archwing(
+public sealed record Archwing(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("pricol")] Pricol Pricol,
     [property: JsonPropertyName("uniqueName")] string UniqueName,
@@ -64,11 +64,11 @@ public record Archwing(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record Armaments(
+public sealed record Armaments(
     [property: JsonPropertyName("modularParts")] ModularParts ModularParts
 );
 
-public record Attcol(
+public sealed record Attcol(
     [property: JsonPropertyName("en")] string En,
     [property: JsonPropertyName("m0")] string M0,
     [property: JsonPropertyName("m1")] string M1,
@@ -79,15 +79,15 @@ public record Attcol(
     [property: JsonPropertyName("e1")] string E1
 );
 
-public record COMBAT(
+public sealed record COMBAT(
     [property: JsonPropertyName("Assigned")] int Assigned
 );
 
-public record Crew(
+public sealed record Crew(
     [property: JsonPropertyName("members")] Members Members
 );
 
-public record Crewweapon(
+public sealed record Crewweapon(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("polarized")] int Polarized,
     [property: JsonPropertyName("uniqueName")] string UniqueName,
@@ -97,20 +97,20 @@ public record Crewweapon(
     [property: JsonPropertyName("upgradeType")] string UpgradeType
 );
 
-public record DATAKNIFE(
+public sealed record DATAKNIFE(
     [property: JsonPropertyName("parazon")] Parazon Parazon,
     [property: JsonPropertyName("primary")] Primary Primary
 );
 
-public record ENGINEERING(
+public sealed record ENGINEERING(
     [property: JsonPropertyName("Assigned")] int Assigned
 );
 
-public record ENGINES(
+public sealed record ENGINES(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record Eyecol(
+public sealed record Eyecol(
     [property: JsonPropertyName("en")] string En,
     [property: JsonPropertyName("m0")] string M0,
     [property: JsonPropertyName("m1")] string M1,
@@ -120,21 +120,21 @@ public record Eyecol(
     [property: JsonPropertyName("t3")] string T3
 );
 
-public record Facial(
+public sealed record Facial(
     [property: JsonPropertyName("t0")] string T0,
     [property: JsonPropertyName("t1")] string T1
 );
 
-public record GUNNERY(
+public sealed record GUNNERY(
     [property: JsonPropertyName("Assigned")] int Assigned
 );
 
-public record Haircol(
+public sealed record Haircol(
     [property: JsonPropertyName("t0")] string T0,
     [property: JsonPropertyName("t2")] string T2
 );
 
-public record Heavy(
+public sealed record Heavy(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("polarized")] int Polarized,
     [property: JsonPropertyName("uniqueName")] string UniqueName,
@@ -142,11 +142,11 @@ public record Heavy(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record HULL(
+public sealed record HULL(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record LoadOuts(
+public sealed record LoadOuts(
     /*[property: JsonPropertyName("ARCHWING")] ARCHWING     ARCHWING,
     [property: JsonPropertyName("DATAKNIFE")] DATAKNIFE     DATAKNIFE,
     [property: JsonPropertyName("MECH")] MECH               MECH,*/
@@ -156,17 +156,17 @@ public record LoadOuts(
     [property: JsonPropertyName("SENTINEL")] SENTINEL       SENTINEL*/
 );
 
-public record Markings(
+public sealed record Markings(
     [property: JsonPropertyName("en")] string En,
     [property: JsonPropertyName("t0")] string T0,
     [property: JsonPropertyName("t1")] string T1
 );
 
-public record MECH(
+public sealed record MECH(
 
 );
 
-public record Melee(
+public sealed record Melee(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("upgrades")] IReadOnlyList<Upgrade> Upgrades,
     [property: JsonPropertyName("xp")] int Xp,
@@ -174,13 +174,13 @@ public record Melee(
     [property: JsonPropertyName("pricol")] Pricol Pricol
 );
 
-public record Members(
+public sealed record Members(
     [property: JsonPropertyName("SLOT_A")] SLOTA SLOTA,
     [property: JsonPropertyName("SLOT_B")] SLOTB SLOTB,
     [property: JsonPropertyName("SLOT_C")] SLOTC SLOTC
 );
 
-public record ModularParts(
+public sealed record ModularParts(
     [property: JsonPropertyName("LWPT_AMP_BRACE")] string LWPTAMPBRACE,
     [property: JsonPropertyName("LWPT_AMP_CORE")] string LWPTAMPCORE,
     [property: JsonPropertyName("LWPT_AMP_OCULUS")] string LWPTAMPOCULUS,
@@ -193,7 +193,7 @@ public record ModularParts(
     [property: JsonPropertyName("SHIELD")] SHIELD SHIELD
 );
 
-public record NORMAL(
+public sealed record NORMAL(
     [property: JsonPropertyName("heavy")] Heavy Heavy,
     [property: JsonPropertyName("melee")] Melee Melee,
     [property: JsonPropertyName("primary")] Primary Primary,
@@ -201,12 +201,12 @@ public record NORMAL(
     [property: JsonPropertyName("warframe")] Warframe Warframe
 );
 
-public record OPERATOR(
+public sealed record OPERATOR(
 [property: JsonPropertyName("amp")] Amp Amp,
     [property: JsonPropertyName("operator")] Operator Operator
 );
 
-public record Operator(
+public sealed record Operator(
     [property: JsonPropertyName("attcol")] Attcol Attcol,
     [property: JsonPropertyName("eyecol")] Eyecol Eyecol,
     [property: JsonPropertyName("facial")] Facial Facial,
@@ -218,34 +218,34 @@ public record Operator(
     [property: JsonPropertyName("upgrades")] IReadOnlyList<Upgrade> Upgrades
 );
 
-public record ORDINANCE(
+public sealed record ORDINANCE(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record Parazon(
+public sealed record Parazon(
     [property: JsonPropertyName("pricol")] Pricol Pricol,
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("upgrades")] IReadOnlyList<Upgrade> Upgrades,
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record PILOT(
+public sealed record PILOT(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("upgradeType")] string UpgradeType,
     [property: JsonPropertyName("upgrades")] IReadOnlyList<object> Upgrades
 );
 
-public record PILOTING(
+public sealed record PILOTING(
     [property: JsonPropertyName("Assigned")] int Assigned
 );
 
-public record PORTGUNS(
+public sealed record PORTGUNS(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
     [property: JsonPropertyName("upgradeType")] string UpgradeType,
     [property: JsonPropertyName("upgrades")] IReadOnlyList<object> Upgrades
 );
 
-public record Pricol(
+public sealed record Pricol(
     [property: JsonPropertyName("en")] string En,
     [property: JsonPropertyName("m0")] string M0,
     [property: JsonPropertyName("m1")] string M1,
@@ -256,7 +256,7 @@ public record Pricol(
     [property: JsonPropertyName("e1")] string E1
 );
 
-public record Primary(
+public sealed record Primary(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("polarized")] int Polarized,
     [property: JsonPropertyName("uniqueName")] string UniqueName,
@@ -265,13 +265,13 @@ public record Primary(
     [property: JsonPropertyName("pricol")] Pricol Pricol
 );
 
-public record RAILJACK(
+public sealed record RAILJACK(
     [property: JsonPropertyName("armaments")] Armaments Armaments,
     [property: JsonPropertyName("crew")] Crew Crew,
     [property: JsonPropertyName("railjack")] Railjack Railjack
 );
 
-public record Railjack(
+public sealed record Railjack(
     [property: JsonPropertyName("itemName")] string ItemName,
     [property: JsonPropertyName("modularParts")] ModularParts ModularParts,
     [property: JsonPropertyName("pricol")] Pricol Pricol,
@@ -280,11 +280,11 @@ public record Railjack(
     [property: JsonPropertyName("upgrades")] IReadOnlyList<object> Upgrades
 );
 
-public record REACTOR(
+public sealed record REACTOR(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record Secondary(
+public sealed record Secondary(
     [property: JsonPropertyName("features")] int Features,
     [property: JsonPropertyName("itemName")] string ItemName,
     [property: JsonPropertyName("polarized")] int Polarized,
@@ -295,15 +295,15 @@ public record Secondary(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record SENTINEL(
+public sealed record SENTINEL(
 
 );
 
-public record SHIELD(
+public sealed record SHIELD(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record Sigcol(
+public sealed record Sigcol(
     [property: JsonPropertyName("en")] string En,
     [property: JsonPropertyName("m1")] string M1,
     [property: JsonPropertyName("t2")] string T2,
@@ -311,7 +311,7 @@ public record Sigcol(
     [property: JsonPropertyName("t0")] string T0
 );
 
-public record Skills(
+public sealed record Skills(
     [property: JsonPropertyName("COMBAT")] COMBAT COMBAT,
     [property: JsonPropertyName("ENGINEERING")] ENGINEERING ENGINEERING,
     [property: JsonPropertyName("GUNNERY")] GUNNERY GUNNERY,
@@ -319,11 +319,11 @@ public record Skills(
     [property: JsonPropertyName("SURVIVABILITY")] SURVIVABILITY SURVIVABILITY
 );
 
-public record Skin(
+public sealed record Skin(
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record SLOTA(
+public sealed record SLOTA(
     [property: JsonPropertyName("attcol")] Attcol Attcol,
     [property: JsonPropertyName("crewweapon")] Crewweapon Crewweapon,
     [property: JsonPropertyName("eyecol")] Eyecol Eyecol,
@@ -337,7 +337,7 @@ public record SLOTA(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record SLOTB(
+public sealed record SLOTB(
     [property: JsonPropertyName("attcol")] Attcol Attcol,
     [property: JsonPropertyName("crewweapon")] Crewweapon Crewweapon,
     [property: JsonPropertyName("eyecol")] Eyecol Eyecol,
@@ -351,7 +351,7 @@ public record SLOTB(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record SLOTC(
+public sealed record SLOTC(
     [property: JsonPropertyName("attcol")] Attcol Attcol,
     [property: JsonPropertyName("crewweapon")] Crewweapon Crewweapon,
     [property: JsonPropertyName("eyecol")] Eyecol Eyecol,
@@ -366,7 +366,7 @@ public record SLOTC(
     [property: JsonPropertyName("xp")] int Xp
 );
 
-public record SlotLevels(
+public sealed record SlotLevels(
     [property: JsonPropertyName("0")] int _0,
     [property: JsonPropertyName("1")] int _1,
     [property: JsonPropertyName("10")] int _10,
@@ -384,16 +384,16 @@ public record SlotLevels(
     [property: JsonPropertyName("9")] int _9
 );
 
-public record SURVIVABILITY(
+public sealed record SURVIVABILITY(
     [property: JsonPropertyName("Assigned")] int Assigned
 );
 
-public record Upgrade(
+public sealed record Upgrade(
     [property: JsonPropertyName("rank")] int Rank,
     [property: JsonPropertyName("uniqueName")] string UniqueName
 );
 
-public record Warframe(
+public sealed record Warframe(
     [property: JsonPropertyName("attcol")] Attcol Attcol,
     [property: JsonPropertyName("eyecol")] Eyecol Eyecol,
     [property: JsonPropertyName("features")] int Features,

@@ -2,7 +2,7 @@
 using Tack.Nonclass;
 
 namespace Tack.Models;
-public class Cooldown
+public sealed class Cooldown
 {
     private static readonly List<Cooldown> UserCooldownPool = new();
     private static readonly List<Cooldown> ChannelCooldownPool = new();

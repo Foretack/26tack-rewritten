@@ -186,7 +186,7 @@ internal static class ChannelHandler
     }
     #endregion
 
-    public record Channel(string Name, int Priority, bool Logged);
+    public sealed record Channel(string Name, int Priority, bool Logged);
 }
 
 internal static class StreamMonitor
@@ -273,5 +273,5 @@ internal static class StreamMonitor
     }
     #endregion
 
-    internal record Stream(string Username, bool IsOnline, string Title, string GameName, DateTime Started);
+    internal sealed record Stream(string Username, bool IsOnline, string Title, string GameName, DateTime Started);
 }

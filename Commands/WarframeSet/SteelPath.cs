@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class SteelPath : Command
+internal sealed class SteelPath : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "steelpath",

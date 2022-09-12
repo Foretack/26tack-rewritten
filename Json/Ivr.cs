@@ -2,16 +2,16 @@
 
 namespace Tack.Json;
 
-public record JustLog(
+public sealed record JustLog(
     [property: JsonPropertyName("channels")] IReadOnlyList<Channel> Channels
 );
-public record Channel(
+public sealed record Channel(
         [property: JsonPropertyName("userID")] string UserID,
         [property: JsonPropertyName("name")] string Name
     );
 
 
-public record IvrUserData(
+public sealed record IvrUserData(
     [property: JsonPropertyName("banned")] bool Banned,
     [property: JsonPropertyName("displayName")] string DisplayName,
     [property: JsonPropertyName("login")] string Login,
@@ -30,13 +30,13 @@ public record IvrUserData(
     [property: JsonPropertyName("settings")] Settings Settings,
     [property: JsonPropertyName("panels")] IReadOnlyList<Panel> Panels
 );
-public record Badge(
+public sealed record Badge(
         [property: JsonPropertyName("setID")] string SetID,
         [property: JsonPropertyName("title")] string Title,
         [property: JsonPropertyName("description")] string Description,
         [property: JsonPropertyName("version")] int Version
     );
-public record ChatSettings(
+public sealed record ChatSettings(
     [property: JsonPropertyName("chatDelayMs")] int ChatDelayMs,
     [property: JsonPropertyName("followersOnlyDurationMinutes")] int FollowersOnlyDurationMinutes,
     [property: JsonPropertyName("slowModeDurationSeconds")] int SlowModeDurationSeconds,
@@ -48,16 +48,16 @@ public record ChatSettings(
     [property: JsonPropertyName("requireVerifiedAccount")] bool RequireVerifiedAccount,
     [property: JsonPropertyName("rules")] IReadOnlyList<string> Rules
 );
-public record Panel(
+public sealed record Panel(
     [property: JsonPropertyName("id")] int Id
 );
-public record Roles(
+public sealed record Roles(
     [property: JsonPropertyName("isAffiliate")] bool IsAffiliate,
     [property: JsonPropertyName("isPartner")] bool IsPartner,
     [property: JsonPropertyName("isSiteAdmin")] object IsSiteAdmin,
     [property: JsonPropertyName("isStaff")] object IsStaff
 );
-public record Settings(
+public sealed record Settings(
     [property: JsonPropertyName("preferredLanguageTag")] string PreferredLanguageTag,
     [property: JsonPropertyName("channelFeedEnabled")] bool ChannelFeedEnabled
 );

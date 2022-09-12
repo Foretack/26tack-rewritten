@@ -6,7 +6,7 @@ using Tack.Utils;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.BaseSet;
-internal class Ping : Command
+internal sealed class Ping : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "ping",

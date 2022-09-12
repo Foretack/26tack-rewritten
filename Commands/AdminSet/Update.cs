@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
-internal class Update : Command
+internal sealed class Update : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "update",

@@ -9,7 +9,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Profile : Command
+internal sealed class Profile : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "profile",

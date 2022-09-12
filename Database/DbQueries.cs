@@ -6,7 +6,7 @@ using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Database;
-internal class DbQueries : DbConnection
+internal sealed class DbQueries : DbConnection
 {
     public static DbQueries NewInstance()
     {

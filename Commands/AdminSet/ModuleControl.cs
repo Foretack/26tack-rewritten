@@ -3,7 +3,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
-internal class ModuleControl : Command
+internal sealed class ModuleControl : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "module",

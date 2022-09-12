@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Cycle : Command
+internal sealed class Cycle : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "cycle",

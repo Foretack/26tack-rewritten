@@ -6,7 +6,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Alerts : Command
+internal sealed class Alerts : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "alerts",

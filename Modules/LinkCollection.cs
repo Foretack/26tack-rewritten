@@ -7,7 +7,7 @@ using Tack.Nonclass;
 using TwitchLib.Client.Events;
 
 namespace Tack.Modules;
-internal class LinkCollection : ChatModule
+internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {

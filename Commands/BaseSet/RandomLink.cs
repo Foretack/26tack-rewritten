@@ -7,7 +7,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.BaseSet;
-internal class RandomLink : Command
+internal sealed class RandomLink : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "randomlink",

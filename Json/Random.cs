@@ -2,7 +2,7 @@
 
 namespace Tack.Json;
 
-public record JokeAPI(
+public sealed record JokeAPI(
     [property: JsonPropertyName("category")] string Category,
     [property: JsonPropertyName("joke")] string Joke
 );

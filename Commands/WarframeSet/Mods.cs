@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Mods : Command
+internal sealed class Mods : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "modinfo",

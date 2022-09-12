@@ -2,7 +2,7 @@
 using Tack.Nonclass;
 
 namespace Tack.Commands;
-internal class BaseHandler : ChatCommandHandler
+internal sealed class BaseHandler : ChatCommandHandler
 {
     public override string Name => "Base";
     public override string Prefix => Config.MainPrefix;

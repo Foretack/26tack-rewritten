@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Sortie : Command
+internal sealed class Sortie : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "sortie",

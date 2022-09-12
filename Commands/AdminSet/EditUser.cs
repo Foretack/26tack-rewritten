@@ -4,7 +4,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
-internal class EditUser : Command
+internal sealed class EditUser : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "edituser",

@@ -7,7 +7,7 @@ using Tack.Utils;
 using TwitchLib.Client.Models;
 
 namespace Tack.Commands.BaseSet;
-internal class LongPing : Command
+internal sealed class LongPing : Command
 {
     public override CommandInfo Info { get; } = new(
     name: "longping",

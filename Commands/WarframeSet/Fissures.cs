@@ -5,7 +5,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
-internal class Fissures : Command
+internal sealed class Fissures : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "fissures",

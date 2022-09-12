@@ -3,7 +3,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Commands.AdminSet;
-internal class Exit : Command
+internal sealed class Exit : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "exit",

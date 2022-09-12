@@ -7,7 +7,7 @@ using Tack.Nonclass;
 using TwitchLib.Client.Events;
 
 namespace Tack.Modules;
-internal class MentionsRelay : ChatModule
+internal sealed class MentionsRelay : ChatModule
 {
     public MentionsRelay()
     {

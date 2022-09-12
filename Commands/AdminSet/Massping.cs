@@ -6,7 +6,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Commands.AdminSet;
-internal class Massping : Command
+internal sealed class Massping : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "massping",
