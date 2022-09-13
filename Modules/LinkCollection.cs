@@ -34,7 +34,7 @@ internal sealed class LinkCollection : ChatModule
 
         using (DbQueries db = new DbQueries())
         {
-            _ = await db.QueryFactory.Query("collected_links").InsertAsync(new
+            _ = await db["collected_links"].InsertAsync(new
             {
                 username = ircMessage.Username,
                 channel = ircMessage.Channel,

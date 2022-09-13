@@ -15,7 +15,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> LogException(Exception exception)
     {
-        int inserted = await QueryFactory.Query("errors").InsertAsync(new
+        int inserted = await base["errors"].InsertAsync(new
         {
             data = exception.FormatException()
         });
@@ -25,7 +25,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> AddChannel(ExtendedChannel channel)
     {
-        int inserted = await QueryFactory.Query("channels").InsertAsync(new
+        int inserted = await base["channels"].InsertAsync(new
         {
             display_name = channel.Displayname,
             username = channel.Username,
@@ -40,7 +40,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<ChannelHandler.Channel[]> GetChannels()
     {
-        var query = await QueryFactory.Query("channels")
+        var query = await base["channels"]
             .Where("priority", ">", -10)
             .Select("username", "priority", "is_logged")
             .OrderByDesc("priority")
@@ -60,7 +60,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<string[]> GetWhitelistedUsers()
     {
-        var query = await QueryFactory.Query("whitelisted_users")
+        var query = await base["whitelisted_users"]
             .Select("username")
             .GetAsync();
 
@@ -69,7 +69,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<string[]> GetBlacklistedUsers()
     {
-        var query = await QueryFactory.Query("blacklisted_users")
+        var query = await base["blacklisted_users"]
             .Select("username")
             .GetAsync();
 
@@ -78,7 +78,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<Authorization> GetAuthorizationData()
     {
-        var query = await QueryFactory.Query("auth")
+        var query = await base["auth"]
             .GetAsync();
 
         var row = query.First();
@@ -89,7 +89,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<Discord> GetDiscordData()
     {
-        var query = await QueryFactory.Query("discord")
+        var query = await base["discord"]
             .GetAsync();
 
         var row = query.First();
@@ -100,7 +100,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> RemoveChannel(ChannelHandler.Channel channel)
     {
-        int deleted = await QueryFactory.Query("channels")
+        int deleted = await base["channels"]
             .Where("username", channel.Name)
             .DeleteAsync();
 
@@ -109,7 +109,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> CreateSuggestion(PartialUser user, string suggestionText)
     {
-        int inserted = await QueryFactory.Query("suggestions").InsertAsync(new
+        int inserted = await base["suggestions"].InsertAsync(new
         {
             username = user.Username,
             user_id = int.Parse(user.ID),
@@ -121,7 +121,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> BlacklistUser(string username, string id)
     {
-        int inserted = await QueryFactory.Query("blacklisted_users").InsertAsync(new
+        int inserted = await base["blacklisted_users"].InsertAsync(new
         {
             username = username,
             id = int.Parse(id)
@@ -132,7 +132,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<bool> WhitelistUser(string username)
     {
-        int inserted = await QueryFactory.Query("blacklisted_users").InsertAsync(new
+        int inserted = await base["blacklisted_users"].InsertAsync(new
         {
             username = username
         });
@@ -142,7 +142,7 @@ internal sealed class DbQueries : DbConnection
 
     public DiscordEvent[] GetDiscordEvents()
     {
-        var query = QueryFactory.Query("discord_triggers")
+        var query = base["discord_triggers"]
             .Get();
 
         var events = query.Select(
@@ -161,7 +161,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<ExtendedChannel?> GetExtendedChannel(string channel)
     {
-        var query = await QueryFactory.Query("channels")
+        var query = await base["channels"]
             .Where("username", channel)
             .GetAsync();
 

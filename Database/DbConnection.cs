@@ -50,6 +50,8 @@ internal abstract class DbConnection : IDisposable
         };
     }
 
+    public SqlKata.Query this[string table] => QueryFactory.Query(table);
+
     private bool disposedValue;
     protected virtual void Dispose(bool disposing)
     {
