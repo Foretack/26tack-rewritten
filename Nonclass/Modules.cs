@@ -16,14 +16,14 @@ public abstract class ChatModule
     public void Enable()
     {
         Enabled = true;
-        Log.Information($"Enabled module: {Name}");
+        Log.Debug($"Enabled module: {Name}");
         OnEnabled.Invoke(this);
     }
 
     public void Disable()
     {
         Enabled = false;
-        Log.Information($"Disabled module: {Name}");
+        Log.Debug($"Disabled module: {Name}");
         OnDisabled.Invoke(this);
     }
 }
