@@ -5,6 +5,9 @@ using TwitchLib.Client;
 namespace Tack.Nonclass;
 public abstract class ChatModule
 {
+    /// <summary>
+    /// The name of the class that is derived from ChatModule
+    /// </summary>
     public string Name => this.GetType().Name;
     public bool Enabled { get; protected set; } = true;
 
