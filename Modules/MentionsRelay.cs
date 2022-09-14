@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Serilog;
-using Tack.Core;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
@@ -11,17 +10,17 @@ internal sealed class MentionsRelay : ChatModule
 {
     public MentionsRelay()
     {
-        AnonymousClient.Client.OnMessageReceived += OnMessage;
+        base[true].OnMessageReceived += OnMessage;
 
         OnEnabled = x =>
         {
             Log.Information($"{x.Name} enabled");
-            AnonymousClient.Client.OnMessageReceived += OnMessage;
+            base[true].OnMessageReceived += OnMessage;
         };
         OnDisabled = x =>
         {
             Log.Warning($"{x.Name} has been disabled!");
-            AnonymousClient.Client.OnMessageReceived -= OnMessage;
+            base[true].OnMessageReceived -= OnMessage;
         };
     }
 

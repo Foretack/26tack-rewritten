@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using SqlKata.Execution;
-using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Nonclass;
@@ -11,10 +10,10 @@ internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {
-        AnonymousClient.Client.OnMessageReceived += OnMessage;
+        base[true].OnMessageReceived += OnMessage;
 
-        OnEnabled = _ => AnonymousClient.Client.OnMessageReceived += OnMessage;
-        OnDisabled = _ => AnonymousClient.Client.OnMessageReceived -= OnMessage;
+        OnEnabled = _ => base[true].OnMessageReceived += OnMessage;
+        OnDisabled = _ => base[true].OnMessageReceived -= OnMessage;
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
