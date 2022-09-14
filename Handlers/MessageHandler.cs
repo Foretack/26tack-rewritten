@@ -162,7 +162,7 @@ internal static class MessageHandler
                 }
                 return;
             }
-            string content = socketMessage.CleanContent.Replace("\n", "[⤶] ").StripSymbols();
+            string content = socketMessage.CleanContent.Replace("\n", " ⤶ ").StripSymbols();
             IReadOnlyCollection<Embed> embeds = socketMessage.Embeds;
 
             if (content.Length < 50
