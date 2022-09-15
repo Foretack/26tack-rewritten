@@ -34,8 +34,8 @@ internal sealed class Alerts : Command
         }
 
         string[] rewards = alerts
-            .Where(x => x.active)
-            .Select(x => $"{x.mission.faction} / {x.mission.type} [{x.mission.reward.asString}] ")
+            .Where(x => x.Active)
+            .Select(x => $"{x.Mission.Faction} / {x.Mission.Type} [{x.Mission.Reward.AsString}] ")
             .ToArray();
 
         _ = ab.Append($"{"Alert".PluralizeWith(alerts.Length)} ➜ ")

@@ -32,15 +32,15 @@ internal sealed class SteelPath : Command
             rewards = r.Value;
         }
 
-        TimeSpan timeLeft = rewards.expiry - DateTime.Now;
+        TimeSpan timeLeft = rewards.Expiry - DateTime.Now;
         if (timeLeft.TotalSeconds <= 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Data is outdated. Try again later?");
             return;
         }
 
-        string rewardsString = $"Current item in rotation: {rewards.currentReward.name} ({rewards.currentReward.cost} Steel Essence) 🏹 ●";
-        string nextInRotationString = $" Next in rotation: {rewards.rotation[0].name}";
+        string rewardsString = $"Current item in rotation: {rewards.CurrentReward.Name} ({rewards.CurrentReward.Cost} Steel Essence) 🏹 ●";
+        string nextInRotationString = $" Next in rotation: {rewards.Rotation[0].Name}";
         MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➜ in: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }

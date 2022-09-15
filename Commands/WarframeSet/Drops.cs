@@ -48,12 +48,12 @@ internal sealed class Drops : Command
 
         ItemDropData[] topDrops = await Task.Run(() =>
         {
-            return itemDrops.OrderByDescending(x => x.chance).ToArray();
+            return itemDrops.OrderByDescending(x => x.Chance).ToArray();
         });
         if (topDrops.Length > 3) topDrops = topDrops[..3];
 
-        string[] dropsString = topDrops.Select(x => $"{x.place} ➜ {x.chance}%").ToArray();
-        MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].item}\": " +
+        string[] dropsString = topDrops.Select(x => $"{x.Place} ➜ {x.Chance}%").ToArray();
+        MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].Item}\": " +
             string.Join(" ◯ ", dropsString));
     }
 }

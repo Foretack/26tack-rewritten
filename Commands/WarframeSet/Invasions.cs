@@ -46,7 +46,7 @@ internal sealed class Invasions : Command
                 CountedItem[] items = node.AttackerReward.CountedItems
                     .Concat(node.DefenderReward.CountedItems).ToArray();
 
-                foreach (string item in items.Select(x => x.key))
+                foreach (string item in items.Select(x => x.Key))
                 {
                     bool s = dict.TryAdd(item, 1);
                     if (!s) dict[item] += 1;

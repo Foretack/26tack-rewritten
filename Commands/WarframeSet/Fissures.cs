@@ -29,7 +29,7 @@ internal sealed class Fissures : Command
         }
 
         var fissures = r.Value;
-        fissures = fissures.Where(x => x.active).ToArray();
+        fissures = fissures.Where(x => x.Active).ToArray();
 
         if (args.Length == 0)
         {
@@ -53,11 +53,11 @@ internal sealed class Fissures : Command
 
     private string ListAllFissures(Fissure[] fissures, bool includeStorms)
     {
-        int lCount = fissures.Count(x => includeStorms ? x.tierNum == 1 : x.tierNum == 1 && !x.isStorm);
-        int mCount = fissures.Count(x => includeStorms ? x.tierNum == 2 : x.tierNum == 2 && !x.isStorm);
-        int nCount = fissures.Count(x => includeStorms ? x.tierNum == 3 : x.tierNum == 3 && !x.isStorm);
-        int aCount = fissures.Count(x => includeStorms ? x.tierNum == 4 : x.tierNum == 4 && !x.isStorm);
-        int rCount = fissures.Count(x => includeStorms ? x.tierNum == 5 : x.tierNum == 5 && !x.isStorm);
+        int lCount = fissures.Count(x => includeStorms ? x.TierNum == 1 : x.TierNum == 1 && !x.IsStorm);
+        int mCount = fissures.Count(x => includeStorms ? x.TierNum == 2 : x.TierNum == 2 && !x.IsStorm);
+        int nCount = fissures.Count(x => includeStorms ? x.TierNum == 3 : x.TierNum == 3 && !x.IsStorm);
+        int aCount = fissures.Count(x => includeStorms ? x.TierNum == 4 : x.TierNum == 4 && !x.IsStorm);
+        int rCount = fissures.Count(x => includeStorms ? x.TierNum == 5 : x.TierNum == 5 && !x.IsStorm);
 
         return $"{lCount} Lith, {mCount} Meso, {nCount} Neo, {aCount} Axi, {rCount} Requiem 🥜";
     }
@@ -65,8 +65,8 @@ internal sealed class Fissures : Command
     private string ListFissureMissions(Fissure[] fissures, int tierNum, bool includeStorms)
     {
         string[] missions = fissures
-            .Where(x => includeStorms ? x.tierNum == tierNum : x.tierNum == tierNum && !x.isStorm)
-            .Select(m => $"{m.enemy} {m.missionType} ({m.eta})")
+            .Where(x => includeStorms ? x.TierNum == tierNum : x.TierNum == tierNum && !x.IsStorm)
+            .Select(m => $"{m.Enemy} {m.MissionKey} ({m.Eta})")
             .ToArray();
         string mString = string.Join(" ◯ ", missions) + " 🥜";
         return mString;

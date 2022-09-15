@@ -41,12 +41,12 @@ internal sealed class Mods : Command
             ObjectCache.Put(modName + "_modobj", mod, 150);
         }
 
-        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.fusionLimit;
-        if (level > mod.fusionLimit) level = mod.fusionLimit;
+        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.FusionLimit;
+        if (level > mod.FusionLimit) level = mod.FusionLimit;
         string modString =
-            $"{mod.type} \"{mod.name}\" " +
-            $"▣ [Rank:{level}/{mod.fusionLimit}] drain:{mod.baseDrain + level} " +
-            $"▣ {string.Join(" | ", mod.levelStats[level].stats)} ";
+            $"{mod.Type} \"{mod.Name}\" " +
+            $"▣ [Rank:{level}/{mod.FusionLimit}] drain:{mod.BaseDrain + level} " +
+            $"▣ {string.Join(" | ", mod.LevelStats[level].Stats)} ";
 
         MessageHandler.SendMessage(channel, $"@{user}, {modString}");
     }

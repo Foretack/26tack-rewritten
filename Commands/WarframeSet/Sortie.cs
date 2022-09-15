@@ -32,16 +32,16 @@ internal sealed class Sortie : Command
             sortie = r.Value;
         }
 
-        TimeSpan timeLeft = sortie.expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
+        TimeSpan timeLeft = sortie.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
         if (timeLeft.TotalSeconds < 0)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
-        string sortieString = $"{sortie.faction} " +
-            $"➜ ● {sortie.variants[0].missionType} [{sortie.variants[0].modifier}] " +
-            $"➜ ■ {sortie.variants[1].missionType} [{sortie.variants[1].modifier}] " +
-            $"➜ ◆ {(sortie.variants[2].missionType == "Assassination" ? $"{sortie.boss} Assassination" : sortie.variants[2].missionType)} [{sortie.variants[2].modifier}]";
+        string sortieString = $"{sortie.Faction} " +
+            $"➜ ● {sortie.Variants[0].MissionType} [{sortie.Variants[0].Modifier}] " +
+            $"➜ ■ {sortie.Variants[1].MissionType} [{sortie.Variants[1].Modifier}] " +
+            $"➜ ◆ {(sortie.Variants[2].MissionType == "Assassination" ? $"{sortie.Boss} Assassination" : sortie.Variants[2].MissionType)} [{sortie.Variants[2].Modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {timeLeft.FormatTimeLeft()}");
         ObjectCache.Put("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);
