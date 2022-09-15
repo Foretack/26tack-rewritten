@@ -3,7 +3,16 @@ using Tack.Core;
 using TwitchLib.Client;
 
 namespace Tack.Nonclass;
-public abstract class ChatModule
+
+public interface IModule
+{
+    public string Name { get; }
+    public bool Enabled { get; }
+    public void Enable();
+    public void Disable();
+}
+
+public abstract class ChatModule : IModule
 {
     /// <summary>
     /// The name of the class that is derived from ChatModule

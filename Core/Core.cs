@@ -20,13 +20,13 @@ public static class Core
     #region Main
     public static async Task<int> Main()
     {
-        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
             .CreateLogger();
 
-        var db = new DbQueries();
+        var db = new DbQueries(0);
         Config.Auth = await db.GetAuthorizationData();
         Config.Discord = await db.GetDiscordData();
         Config.Links = new Links();
@@ -37,7 +37,6 @@ public static class Core
         AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
-        EventsHandler.Start();
         ModulesHandler.Initialize();
         await DiscordClient.Connect();
 

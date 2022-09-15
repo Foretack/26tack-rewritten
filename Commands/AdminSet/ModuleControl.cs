@@ -33,11 +33,11 @@ internal sealed class ModuleControl : Command
 
         if (action == "enable")
         {
-            bool enabled = ModulesHandler.EnableChatModule(moduleName);
+            bool enabled = ModulesHandler.EnableModule(moduleName);
             MessageHandler.SendMessage(channel, $"{(enabled ? "Enabled" : "Error enabling")} {moduleName}");
             return Task.CompletedTask;
         }
-        bool disabled = ModulesHandler.DisableChatModule(moduleName);
+        bool disabled = ModulesHandler.DisableModule(moduleName);
         MessageHandler.SendMessage(channel, $"{(disabled ? "Disabled" : "Error disabling")} {moduleName}");
         return Task.CompletedTask;
     }

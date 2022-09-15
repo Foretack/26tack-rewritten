@@ -133,9 +133,9 @@ internal static class ExternalAPIHandler
             string langStr = string.IsNullOrEmpty(language) ? string.Empty : $"?lang={language}";
             string url = $"{WarframeBaseUrl}{pStr}{endpoint}{langStr}";
             Stream response = await requests.GetStreamAsync(url);
-            Log.Debug($"called {url} [{typeof(T)}]");
             requests.Dispose();
             T value = (await JsonSerializer.DeserializeAsync<T>(response))!;
+            Log.Debug($"called {url} [{typeof(T)}]");
             return new Result<T>(value, true, default!);
         }
         catch (TaskCanceledException tex)
