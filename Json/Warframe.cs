@@ -1,72 +1,99 @@
-﻿
-#pragma warning disable CS8618
-
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Tack.Nonclass;
 
+#pragma warning disable CS8618
+
 namespace Tack.Json;
-public sealed class Alert
-{
-    public bool active { get; set; }
-    public Mission mission { get; set; }
-}
-public sealed class Mission
-{
-    public string description { get; set; }
-    public string node { get; set; }
-    public string type { get; set; }
-    public string faction { get; set; }
-    public Reward reward { get; set; }
-    public int minEnemyLevel { get; set; }
-    public int maxEnemyLevel { get; set; }
-    public int maxWaveNum { get; set; }
-    public bool nightmare { get; set; }
-    public bool archwingRequired { get; set; }
-    public bool isSharkwing { get; set; }
-    public string levelOverride { get; set; }
-    public string enemySpec { get; set; }
-    public object[] advancedSpawners { get; set; }
-    public object[] requiredItems { get; set; }
-    public object[] levelAuras { get; set; }
-}
-public sealed class Reward
-{
-    public CountedItem[] countedItems { get; set; }
-    public int credits { get; set; }
-    public string asString { get; set; }
-}
-public sealed class CountedItem
-{
-    public int count { get; set; }
-    public string type { get; set; }
-    public string key { get; set; }
-}
+public sealed record Alert(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("startString")] string StartString,
+        [property: JsonPropertyName("active")] bool Active,
+        [property: JsonPropertyName("mission")] Mission Mission,
+        [property: JsonPropertyName("expired")] bool Expired,
+        [property: JsonPropertyName("eta")] string Eta,
+        [property: JsonPropertyName("rewardTypes")] IReadOnlyList<string> RewardTypes
+    );
+public record Mission(
+        [property: JsonPropertyName("reward")] Reward Reward,
+        [property: JsonPropertyName("node")] string Node,
+        [property: JsonPropertyName("nodeKey")] string NodeKey,
+        [property: JsonPropertyName("faction")] string Faction,
+        [property: JsonPropertyName("factionKey")] string FactionKey,
+        [property: JsonPropertyName("maxEnemyLevel")] int MaxEnemyLevel,
+        [property: JsonPropertyName("minEnemyLevel")] int MinEnemyLevel,
+        [property: JsonPropertyName("maxWaveNum")] int MaxWaveNum,
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("typeKey")] string TypeKey,
+        [property: JsonPropertyName("nightmare")] bool Nightmare,
+        [property: JsonPropertyName("archwingRequired")] bool ArchwingRequired,
+        [property: JsonPropertyName("isSharkwing")] bool IsSharkwing,
+        [property: JsonPropertyName("enemySpec")] string EnemySpec,
+        [property: JsonPropertyName("levelOverride")] string LevelOverride,
+        [property: JsonPropertyName("advancedSpawners")] IReadOnlyList<string> AdvancedSpawners,
+        [property: JsonPropertyName("requiredItems")] IReadOnlyList<string> RequiredItems,
+        [property: JsonPropertyName("consumeRequiredItems")] bool ConsumeRequiredItems,
+        [property: JsonPropertyName("leadersAlwaysAllowed")] bool LeadersAlwaysAllowed,
+        [property: JsonPropertyName("levelAuras")] IReadOnlyList<string> LevelAuras,
+        [property: JsonPropertyName("description")] string Description
+    );
+public sealed record Reward(
+        [property: JsonPropertyName("countedItems")] IReadOnlyList<CountedItem> CountedItems,
+        [property: JsonPropertyName("thumbnail")] string Thumbnail,
+        [property: JsonPropertyName("color")] int Color,
+        [property: JsonPropertyName("credits")] int Credits,
+        [property: JsonPropertyName("asString")] string AsString,
+        [property: JsonPropertyName("items")] IReadOnlyList<string> Items,
+        [property: JsonPropertyName("itemString")] string ItemString
+    );
+public sealed record CountedItem(
+        [property: JsonPropertyName("count")] int Count,
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("key")] string Key
+    );
 
-public sealed class Fissure
-{
-    public bool active { get; set; }
-    public string missionType { get; set; }
-    public string enemy { get; set; }
-    public int tierNum { get; set; }
-    public string eta { get; set; }
-    public bool isStorm { get; set; }
-}
+public sealed record Fissure(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("startString")] string StartString,
+        [property: JsonPropertyName("active")] bool Active,
+        [property: JsonPropertyName("node")] string Node,
+        [property: JsonPropertyName("expired")] bool Expired,
+        [property: JsonPropertyName("eta")] string Eta,
+        [property: JsonPropertyName("missionType")] string MissionType,
+        [property: JsonPropertyName("missionKey")] string MissionKey,
+        [property: JsonPropertyName("tier")] string Tier,
+        [property: JsonPropertyName("tierNum")] int TierNum,
+        [property: JsonPropertyName("enemy")] string Enemy,
+        [property: JsonPropertyName("enemyKey")] string EnemyKey,
+        [property: JsonPropertyName("isStorm")] bool IsStorm,
+        [property: JsonPropertyName("isHard")] bool IsHard
+    );
 
-public sealed class CurrentSortie
-{
-    public DateTime expiry { get; set; }
-    public Variant[] variants { get; set; }
-    public string boss { get; set; }
-    public string faction { get; set; }
-    public bool expired { get; set; }
-    public string eta { get; set; }
-}
-public sealed class Variant
-{
-    public string missionType { get; set; }
-    public string modifier { get; set; }
-    public string modifierDescription { get; set; }
-}
+public sealed record CurrentSortie(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("startString")] string StartString,
+        [property: JsonPropertyName("active")] bool Active,
+        [property: JsonPropertyName("rewardPool")] string RewardPool,
+        [property: JsonPropertyName("variants")] IReadOnlyList<Variant> Variants,
+        [property: JsonPropertyName("boss")] string Boss,
+        [property: JsonPropertyName("faction")] string Faction,
+        [property: JsonPropertyName("factionKey")] string FactionKey,
+        [property: JsonPropertyName("expired")] bool Expired,
+        [property: JsonPropertyName("eta")] string Eta
+    );
+public sealed record Variant(
+        [property: JsonPropertyName("node")] string Node,
+        [property: JsonPropertyName("boss")] string Boss,
+        [property: JsonPropertyName("missionType")] string MissionType,
+        [property: JsonPropertyName("planet")] string Planet,
+        [property: JsonPropertyName("modifier")] string Modifier,
+        [property: JsonPropertyName("modifierDescription")] string ModifierDescription
+    );
 
 public sealed class CetusCycle : IWorldCycle
 {
@@ -157,87 +184,81 @@ public sealed record InvasionReward(
     [property: JsonPropertyName("countedItems")] IReadOnlyList<CountedItem> CountedItems
 );
 
-public sealed class SPReward
-{
-    public string name { get; set; }
-    public int cost { get; set; }
-}
-public sealed class SteelPathRewards
-{
-    public DateTime expiry { get; set; }
-    public SPReward currentReward { get; set; }
-    public SPReward[] rotation { get; set; }
-}
+public sealed record SteelPathRewards(
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("currentReward")] SPReward CurrentReward,
+        [property: JsonPropertyName("remaining")] string Remaining,
+        [property: JsonPropertyName("rotation")] IReadOnlyList<Rotation> Rotation,
+        [property: JsonPropertyName("evergreens")] IReadOnlyList<Evergreen> Evergreens,
+        [property: JsonPropertyName("incursions")] Incursions Incursions
+);
+public sealed record SPReward(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("cost")] int Cost
+);
+public sealed record Evergreen(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("cost")] int Cost
+);
+public sealed record Incursions(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("startString")] string StartString,
+        [property: JsonPropertyName("active")] bool Active
+);
+public sealed record Rotation(
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("cost")] int Cost
+);
 
-public sealed class ItemDropData
-{
-    public string item { get; set; }
-    public float chance { get; set; }
-    public string place { get; set; }
-}
+public sealed record ItemDropData(
+        [property: JsonPropertyName("place")] string Place,
+        [property: JsonPropertyName("item")] string Item,
+        [property: JsonPropertyName("rarity")] string Rarity,
+        [property: JsonPropertyName("chance")] double Chance
+    );
 
-public sealed class LevelStat
-{
-    public string[] stats { get; set; }
-}
-public sealed class ModInfo
-{
-    public string name { get; set; }
-    public string type { get; set; }
-    public int baseDrain { get; set; }
-    public int fusionLimit { get; set; }
-    public LevelStat[] levelStats { get; set; }
-}
+public sealed record ModInfo(
+        [property: JsonPropertyName("baseDrain")] int BaseDrain,
+        [property: JsonPropertyName("category")] string Category,
+        [property: JsonPropertyName("compatName")] string CompatName,
+        [property: JsonPropertyName("fusionLimit")] int FusionLimit,
+        [property: JsonPropertyName("imageName")] string ImageName,
+        [property: JsonPropertyName("levelStats")] IReadOnlyList<LevelStat> LevelStats,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("polarity")] string Polarity,
+        [property: JsonPropertyName("rarity")] string Rarity,
+        [property: JsonPropertyName("releaseDate")] string ReleaseDate,
+        [property: JsonPropertyName("tradable")] bool Tradable,
+        [property: JsonPropertyName("transmutable")] bool Transmutable,
+        [property: JsonPropertyName("type")] string Type,
+        [property: JsonPropertyName("uniqueName")] string UniqueName,
+        [property: JsonPropertyName("wikiaThumbnail")] string WikiaThumbnail,
+        [property: JsonPropertyName("wikiaUrl")] string WikiaUrl
+);
+public sealed record LevelStat(
+        [property: JsonPropertyName("stats")] IReadOnlyList<string> Stats
+);
 
-public sealed class Inventory
-{
-    [JsonPropertyName("item")]
-    public string Item { get; set; }
-
-    [JsonPropertyName("ducats")]
-    public int Ducats { get; set; }
-
-    [JsonPropertyName("credits")]
-    public int Credits { get; set; }
-}
-public sealed class VoidTrader
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; }
-
-    [JsonPropertyName("activation")]
-    public DateTime Activation { get; set; }
-
-    [JsonPropertyName("startString")]
-    public string StartString { get; set; }
-
-    [JsonPropertyName("expiry")]
-    public DateTime Expiry { get; set; }
-
-    [JsonPropertyName("active")]
-    public bool Active { get; set; }
-
-    [JsonPropertyName("character")]
-    public string Character { get; set; }
-
-    [JsonPropertyName("location")]
-    public string Location { get; set; }
-
-    [JsonPropertyName("inventory")]
-    public List<Inventory> Inventory { get; set; }
-
-    [JsonPropertyName("psId")]
-    public string PsId { get; set; }
-
-    [JsonPropertyName("endString")]
-    public string EndString { get; set; }
-
-    [JsonPropertyName("initialStart")]
-    public DateTime InitialStart { get; set; }
-
-    [JsonPropertyName("schedule")]
-    public List<object> Schedule { get; set; }
-}
+public record Inventory(
+        [property: JsonPropertyName("item")] string Item,
+        [property: JsonPropertyName("ducats")] int Ducats,
+        [property: JsonPropertyName("credits")] int Credits
+);
+public sealed record VoidTrader(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("activation")] DateTime Activation,
+        [property: JsonPropertyName("expiry")] DateTime Expiry,
+        [property: JsonPropertyName("startString")] string StartString,
+        [property: JsonPropertyName("active")] bool Active,
+        [property: JsonPropertyName("character")] string Character,
+        [property: JsonPropertyName("location")] string Location,
+        [property: JsonPropertyName("inventory")] IReadOnlyList<Inventory> Inventory,
+        [property: JsonPropertyName("psId")] string PsId,
+        [property: JsonPropertyName("endString")] string EndString
+);
 
 public sealed record WarframeItem(
     [property: JsonPropertyName("uniqueName")] string UniqueName,
