@@ -20,7 +20,7 @@ public static class Core
     #region Main
     public static async Task<int> Main()
     {
-        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Debug;
+        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
