@@ -21,5 +21,6 @@ internal sealed class WarframeHandler : ChatCommandHandler
         AddCommand(new Drops());
         AddCommand(new Mods());
         AddCommand(new Profile());
+        AddCommand(new ArchonHunt());
     }
 }
