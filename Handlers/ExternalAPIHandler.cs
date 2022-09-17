@@ -135,7 +135,7 @@ internal static class ExternalAPIHandler
             Stream response = await requests.GetStreamAsync(url);
             requests.Dispose();
             T value = (await JsonSerializer.DeserializeAsync<T>(response))!;
-            Log.Debug($"called {url} [{typeof(T)}]");
+            Log.Verbose($"called {url} [{value}]");
             return new Result<T>(value, true, default!);
         }
         catch (TaskCanceledException tex)

@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using Tack.Nonclass;
+using Tack.Utils;
 
 namespace Tack.Models;
 public sealed class Cooldown
@@ -37,25 +38,19 @@ public sealed class Cooldown
         RegisterNewCooldown(cd);
         Log.Verbose($"+ [{cd.User};{cd.Channel};{cd.CooldownOptions.Name}]");
 
-        // I sure hope playing with lists across multiple threads wont cause any trouble !!
-        Timer? uTimer = null;
-        Timer? cTimer = null;
-
         // Remove USER cooldown
-        uTimer = new Timer(state =>
+        Time.Schedule(() =>
         {
             _ = UserCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.User};{cd.CooldownOptions.Name}]");
-            uTimer?.Dispose();
-        }, null, uCD * 1000, Timeout.Infinite);
+        }, TimeSpan.FromSeconds(uCD));
 
         // Remove CHANNEL cooldown
-        cTimer = new Timer(state =>
+        Time.Schedule(() =>
         {
             _ = ChannelCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.Channel};{cd.CooldownOptions.Name}]");
-            cTimer?.Dispose();
-        }, null, cCD * 1000, Timeout.Infinite);
+        }, TimeSpan.FromSeconds(cCD));
 
         // Command can't be executed
         return true;

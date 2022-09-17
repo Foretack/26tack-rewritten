@@ -3,7 +3,6 @@ using Tack.Handlers;
 using Tack.Json;
 using Tack.Nonclass;
 using Tack.Utils;
-using TTimer = System.Timers.Timer;
 
 namespace Tack.Modules;
 internal sealed class BaroChecker : IModule
@@ -11,13 +10,9 @@ internal sealed class BaroChecker : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; } = true;
 
-    private readonly TTimer _checker = new();
-
     public BaroChecker()
     {
-        _checker.Interval = TimeSpan.FromMinutes(15).TotalMilliseconds;
-        _checker.Enabled = true;
-        _checker.Elapsed += async (_, _) => await Check(); // Always running; returns if disabled
+        Time.DoEvery(TimeSpan.FromMinutes(15), async () => await Check()); // Always running; returns if disabled
     }
 
     private bool Active { get; set; } = false;
@@ -34,32 +29,22 @@ internal sealed class BaroChecker : IModule
         Active = baro.Active;
         if (!Active && !baro.Active)
         {
-            TimeSpan arrivalTime = Time.Until(baro.Activation);
-            Timer? timer = null;
-
-            timer = new Timer(_ =>
+            Time.Schedule(() =>
             {
                 ArrivedEv(ref baro);
                 Scheduled = false;
-                timer?.Dispose();
-            },
-            null, arrivalTime, Timeout.InfiniteTimeSpan);
+            }, baro.Activation);
             Scheduled = true;
             Log.Debug($"Scheduled baro arrival: {Time.UntilString(baro.Activation)}");
         }
 
         if (Active && baro.Active)
         {
-            TimeSpan departureTime = Time.Until(baro.Expiry);
-            Timer? timer = null;
-
-            timer = new Timer(_ =>
+            Time.Schedule(() =>
             {
                 DepartedEv(ref baro);
                 Scheduled = false;
-                timer?.Dispose();
-            },
-            null, departureTime, Timeout.InfiniteTimeSpan);
+            }, baro.Expiry);
             Scheduled = true;
             Log.Debug($"Scheduled baro departure: {Time.UntilString(baro.Expiry)}");
         }

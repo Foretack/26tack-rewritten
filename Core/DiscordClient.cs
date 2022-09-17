@@ -3,6 +3,7 @@ using Discord;
 using Discord.WebSocket;
 using Serilog;
 using Tack.Handlers;
+using Tack.Utils;
 
 namespace Tack.Core;
 internal static class DiscordClient
@@ -106,12 +107,7 @@ internal static class DiscordClient
         });
 
         OnCooldown = true;
-        Timer? t = null;
-        t = new Timer(c =>
-        {
-            OnCooldown = false;
-            t?.Dispose();
-        }, null, 120 * 1000, Timeout.Infinite);
+        Time.Schedule(() => { OnCooldown = false; }, TimeSpan.FromSeconds(120));
     }
     #endregion
 }
