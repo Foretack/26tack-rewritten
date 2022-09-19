@@ -62,48 +62,51 @@ internal static class DiscordClient
         await Task.Run(() =>
         {
             var user = (SocketGuildUser)_user;
-            var activity = arg2.Activities.FirstOrDefault(x => x.Type != ActivityType.CustomStatus);
-            if (activity is null) return;
-            var type = (byte)activity.Type;
-            if (!_rpcData.ContainsKey(type)) _rpcData.Add(type, string.Empty);
-
-            var sb = new StringBuilder(user.DisplayName);
-            switch (activity.Type)
+            var activities = arg2.Activities.Where(x => x.Type != ActivityType.CustomStatus);
+            if (activities is null) return;
+            foreach (var activity in activities)
             {
-                case ActivityType.Listening:
-                    if (activity is SpotifyGame sSong)
-                    {
-                        if (_rpcData[type] == $"{user.DisplayName}:{sSong.TrackTitle}") return;
+                var type = (byte)activity.Type;
+                if (!_rpcData.ContainsKey(type)) _rpcData.Add(type, string.Empty);
 
-                        sb.Append($" is listening to: \"{sSong.TrackTitle}\" by {string.Join(", ", sSong.Artists)}");
-                        _rpcData[type] = $"{user.DisplayName}:{sSong.TrackTitle}";
-                        break;
-                    }
-                    return;
-                case ActivityType.Streaming:
-                    if (activity is StreamingGame sGame)
-                    {
-                        if (_rpcData[type] == $"{user.DisplayName}:{sGame.Name}") return;
+                var sb = new StringBuilder(user.DisplayName);
+                switch (activity.Type)
+                {
+                    case ActivityType.Listening:
+                        if (activity is SpotifyGame sSong)
+                        {
+                            if (_rpcData[type] == $"{user.DisplayName}:{sSong.TrackTitle}") return;
 
-                        sb.Append($" is streaming: {sGame.Name} ({sGame.Url})");
-                        _rpcData[type] = $"{user.DisplayName}:{sGame.Name}";
-                        break;
-                    }
-                    return;
-                default:
-                    if (activity is RichGame game)
-                    {
-                        if (_rpcData[type] == $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}") return;
+                            sb.Append($" is listening to: \"{sSong.TrackTitle}\" by {string.Join(", ", sSong.Artists)}");
+                            _rpcData[type] = $"{user.DisplayName}:{sSong.TrackTitle}";
+                            break;
+                        }
+                        return;
+                    case ActivityType.Streaming:
+                        if (activity is StreamingGame sGame)
+                        {
+                            if (_rpcData[type] == $"{user.DisplayName}:{sGame.Name}") return;
 
-                        sb.Append($" is playing: {game.Name} | {game.Details} | {game.State}");
-                        _rpcData[type] = $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}";
+                            sb.Append($" is streaming: {sGame.Name} ({sGame.Url})");
+                            _rpcData[type] = $"{user.DisplayName}:{sGame.Name}";
+                            break;
+                        }
+                        return;
+                    default:
+                        if (activity is RichGame game)
+                        {
+                            if (_rpcData[type] == $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}") return;
+
+                            sb.Append($" is playing: {game.Name} | {game.Details} | {game.State}");
+                            _rpcData[type] = $"{user.DisplayName}:{game.Name}:{game.Details}:{game.State}";
+                            break;
+                        }
                         break;
-                    }
-                    break;
+                }
+                if (sb.ToString() == user.DisplayName) return;
+
+                MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
             }
-            if (sb.ToString() == user.DisplayName) return;
-
-            MessageHandler.SendMessage(Config.RelayChannel, sb.ToString());
         });
 
         OnCooldown = true;
