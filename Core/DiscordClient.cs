@@ -15,7 +15,7 @@ internal static class DiscordClient
     private static bool OnCooldown { get; set; } = false;
     private static readonly DiscordSocketConfig _config = new()
     {
-        GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildPresences
+        GatewayIntents = GatewayIntents.MessageContent | GatewayIntents.GuildPresences | GatewayIntents.AllUnprivileged
     };
     private static readonly Dictionary<byte, string> _rpcData = new();
     #endregion
@@ -62,7 +62,7 @@ internal static class DiscordClient
         await Task.Run(() =>
         {
             var user = (SocketGuildUser)_user;
-            var activity = arg2.Activities.FirstOrDefault();
+            var activity = arg2.Activities.FirstOrDefault(x => x.Type != ActivityType.CustomStatus);
             if (activity is null) return;
             var type = (byte)activity.Type;
             if (!_rpcData.ContainsKey(type)) _rpcData.Add(type, string.Empty);
