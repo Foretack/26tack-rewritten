@@ -30,7 +30,6 @@ internal sealed class RandomLink : Command
         using (var db = new DbQueries())
         {
             var queryString = new StringBuilder();
-            queryString.Append("SELECT * FROM collected_links ");
 
             var options = new[]
             {
@@ -58,9 +57,7 @@ internal sealed class RandomLink : Command
                 .Append("LIMIT 1");
 
             var query = await db.QueryFactory.Query()
-                .SelectRaw($"* FROM collected_links {queryConditions} OFFSET floor(" +
-                $"random() * (SELECT COUNT(*) FROM collected_links {queryConditions})" +
-                ") LIMIT 1").GetAsync();
+                .SelectRaw($"* FROM collected_links {queryString}").GetAsync();
 
             var row = query.FirstOrDefault();
             if (row is null)
@@ -77,10 +74,5 @@ internal sealed class RandomLink : Command
             $"({FormatTimePosted(randomlink.TimePosted)})");
     }
 
-    private string FormatTimePosted(DateTime time)
-    {
-        TimeSpan span = DateTime.Now - time.ToLocalTime();
-
-        return span.FormatTimeLeft() + " ago";
-    }
+    private string FormatTimePosted(DateTime time) => Time.SinceString(time) + " ago";
 }
