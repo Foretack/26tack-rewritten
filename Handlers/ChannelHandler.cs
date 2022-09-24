@@ -1,4 +1,5 @@
-﻿using Dasync.Collections;
+﻿using System.Text.Json;
+using Dasync.Collections;
 using Serilog;
 using Tack.Core;
 using Tack.Database;
@@ -14,13 +15,13 @@ namespace Tack.Handlers;
 internal static class ChannelHandler
 {
     #region Properties
-    public static List<Channel> MainJoinedChannels { get; } = new List<Channel>();
+    public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
-    public static List<Channel> AnonJoinedChannels { get; } = new List<Channel>();
+    public static List<ExtendedChannel> AnonJoinedChannels { get; } = new List<ExtendedChannel>();
     public static string[] JLChannels { get; private set; } = Array.Empty<string>();
-    public static List<Channel> FetchedChannels { get; private set; } = new List<Channel>(DbQueries.NewInstance().GetChannels().Result);
+    public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
 
-    private static readonly List<Channel> JoinFailureChannels = new();
+    private static readonly List<ExtendedChannel> JoinFailureChannels = new();
     private static bool IsInProgress { get; set; } = false;
     #endregion
 
@@ -42,7 +43,10 @@ internal static class ChannelHandler
         RegisterEvents(isReconnect);
         JLChannels = (await ExternalAPIHandler.GetIvrChannels()).Channels.Select(x => x.Name).ToArray();
 
-        IAsyncEnumerable<Channel> c = new AsyncEnumerable<Channel>(async y =>
+        string channelsJson = JsonSerializer.Serialize(FetchedChannels);
+        await "twitch:channels".RedisSet(channelsJson);
+
+        IAsyncEnumerable<ExtendedChannel> c = new AsyncEnumerable<ExtendedChannel>(async y =>
         {
             for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
@@ -53,12 +57,12 @@ internal static class ChannelHandler
             // Assume the channel is joined until being told otherwise
             if (x.Priority >= 50)
             {
-                MainClient.Client.JoinChannel(x.Name);
-                Log.Debug($"[Main] Attempting to join: {x.Name} (JustLog:{JLChannels.Contains(x.Name)})");
+                MainClient.Client.JoinChannel(x.Username);
+                Log.Debug($"[Main] Attempting to join: {x.Username} (JustLog:{JLChannels.Contains(x.Username)})");
                 await Task.Delay(300);
             }
-            AnonymousClient.Client.JoinChannel(x.Name);
-            Log.Debug($"[Anon] Attempting to join: {x.Name}");
+            AnonymousClient.Client.JoinChannel(x.Username);
+            Log.Debug($"[Anon] Attempting to join: {x.Username}");
             await Task.Delay(300);
         });
         c = default!;
@@ -71,12 +75,12 @@ internal static class ChannelHandler
     /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
-        if (FetchedChannels.Any(x => x.Name == channel)) return false;
+        if (FetchedChannels.Any(x => x.Username == channel)) return false;
         var uf = new UserFactory();
         var c = new Channel(channel, priority, logged);
         ExtendedChannel? ec = await uf.CreateChannelProfile(c);
         if (ec is null) return false;
-        FetchedChannels.Add(c);
+        FetchedChannels.Add(ec);
 
         if (priority >= 50) MainClient.Client.JoinChannel(channel);
         AnonymousClient.Client.JoinChannel(channel);
@@ -89,11 +93,11 @@ internal static class ChannelHandler
     /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> PartChannel(string channel)
     {
-        bool fetched = FetchedChannels.Any(x => x.Name == channel);
+        bool fetched = FetchedChannels.Any(x => x.Username == channel);
 
         try
         {
-            Channel target = AnonJoinedChannels.First(x => x.Name == channel);
+            ExtendedChannel target = AnonJoinedChannels.First(x => x.Username == channel);
             _ = AnonJoinedChannels.Remove(target);
             AnonymousClient.Client.LeaveChannel(channel);
 
@@ -107,7 +111,7 @@ internal static class ChannelHandler
 
         try
         {
-            Channel target = MainJoinedChannels.First(x => x.Name == channel);
+            ExtendedChannel target = MainJoinedChannels.First(x => x.Username == channel);
             _ = MainJoinedChannels.Remove(target);
             _ = MainJoinedChannelNames.Remove(channel);
             MainClient.Client.LeaveChannel(channel);
@@ -123,7 +127,7 @@ internal static class ChannelHandler
     public static async Task ReloadFetchedChannels()
     {
         int pCount = FetchedChannels.Count;
-        FetchedChannels = new List<Channel>(await DbQueries.NewInstance().GetChannels());
+        FetchedChannels = (await DbQueries.NewInstance().GetChannels()).ToList();
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
@@ -155,33 +159,33 @@ internal static class ChannelHandler
     private static void AnonOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
         Log.Information($"[Anon] Left channel {e.Channel}");
-        _ = AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
+        _ = AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Username == e.Channel));
     }
 
     private static void AnonOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
         Log.Information($"[Anon] Joined channel {e.Channel}");
-        AnonJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
+        AnonJoinedChannels.Add(FetchedChannels.First(x => x.Username == e.Channel));
     }
 
     private static void MainOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {
         Log.Warning($"[Main] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
-        JoinFailureChannels.Add(FetchedChannels.First(x => x.Name == e.Exception.Channel));
+        JoinFailureChannels.Add(FetchedChannels.First(x => x.Username == e.Exception.Channel));
         _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
     }
 
     private static void MainOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
         Log.Information($"[Main] Left channel {e.Channel}");
-        _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Name == e.Channel));
+        _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Username == e.Channel));
         _ = MainJoinedChannelNames.Remove(e.Channel);
     }
 
     private static void MainOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
         Log.Information($"[Main] Joined channel {e.Channel}");
-        MainJoinedChannels.Add(FetchedChannels.First(x => x.Name == e.Channel));
+        MainJoinedChannels.Add(FetchedChannels.First(x => x.Username == e.Channel));
         MainJoinedChannelNames.Add(e.Channel);
     }
     #endregion
@@ -200,11 +204,11 @@ internal static class StreamMonitor
     #region Controls
     public static void Start()
     {
-        List<ChannelHandler.Channel> Channels = ChannelHandler.FetchedChannels;
+        List<ExtendedChannel> Channels = ChannelHandler.FetchedChannels;
         StreamData = Channels.ToDictionary(
-            x => x.Name,
-            y => new Stream(y.Name, false, string.Empty, string.Empty, DateTime.Now));
-        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Name).ToList());
+            x => x.Username,
+            y => new Stream(y.Username, false, string.Empty, string.Empty, DateTime.Now));
+        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
 
         MonitoringService.OnServiceStarted += ServiceStarted;
         MonitoringService.OnStreamOnline += StreamOnline;
@@ -217,8 +221,8 @@ internal static class StreamMonitor
     public static void Reset()
     {
         StreamData.Clear();
-        List<ChannelHandler.Channel> Channels = ChannelHandler.FetchedChannels;
-        MonitoringService.SetChannelsByName(Channels.Select(x => x.Name).ToList());
+        List<ExtendedChannel> Channels = ChannelHandler.FetchedChannels;
+        MonitoringService.SetChannelsByName(Channels.Select(x => x.Username).ToList());
     }
 
     public static void Stop()

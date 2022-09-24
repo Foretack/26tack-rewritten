@@ -40,16 +40,23 @@ internal sealed class DbQueries : DbConnection
         return inserted > 0;
     }
 
-    public async Task<ChannelHandler.Channel[]> GetChannels()
+    public async Task<ExtendedChannel[]> GetChannels()
     {
         var query = await base["channels"]
             .Where("priority", ">", -10)
-            .Select("username", "priority", "is_logged")
             .OrderByDesc("priority")
             .GetAsync();
 
         var channels = query.Select(
-            x => new ChannelHandler.Channel(x.username, x.priority, x.is_logged)
+            x => new ExtendedChannel(
+                x.display_name,
+                x.username,
+                ((int)x.id).ToString(),
+                x.avatar_url,
+                x.date_joined,
+                x.priority,
+                x.is_logged
+                )
             ).ToArray();
         if (channels is null || channels.Length == 0)
         {
@@ -100,10 +107,10 @@ internal sealed class DbQueries : DbConnection
         return data;
     }
 
-    public async Task<bool> RemoveChannel(ChannelHandler.Channel channel)
+    public async Task<bool> RemoveChannel(ExtendedChannel channel)
     {
         int deleted = await base["channels"]
-            .Where("username", channel.Name)
+            .Where("username", channel.Username)
             .DeleteAsync();
 
         return deleted > 0;

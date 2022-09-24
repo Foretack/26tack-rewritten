@@ -24,7 +24,7 @@ internal sealed class LinkCollection : ChatModule
         if (ircMessage.Message.Length < 10) return;
         if (ircMessage.Username == Config.Auth.Username) return;
         if (ircMessage.Username.Contains("bot") || ircMessage.Username == "streamelements") return;
-        if (ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Name == ircMessage.Channel)) return;
+        if (ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel)) return;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null) return;

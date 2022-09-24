@@ -25,7 +25,7 @@ internal sealed class JoinChannel : Command
         }
 
         string targetChannel = args[0].ToLower();
-        if (ChannelHandler.FetchedChannels.Any(x => x.Name == targetChannel))
+        if (ChannelHandler.FetchedChannels.Any(x => x.Username == targetChannel))
         {
             MessageHandler.SendMessage(channel, $"I'm already in that channel! (Aborted)");
             return;

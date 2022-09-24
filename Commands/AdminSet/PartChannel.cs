@@ -24,7 +24,7 @@ internal sealed class PartChannel : Command
         }
 
         string targetChannel = args[0].ToLower();
-        if (!ChannelHandler.FetchedChannels.Any(x => x.Name == targetChannel))
+        if (!ChannelHandler.FetchedChannels.Any(x => x.Username == targetChannel))
         {
             MessageHandler.SendMessage(channel, $"I'm not in that channel! (Aborted)");
             return;
