@@ -1,6 +1,5 @@
 ﻿using Tack.Database;
 using Tack.Nonclass;
-using TwitchLib.Client.Models;
 
 namespace Tack.Models;
 public sealed class Permission
@@ -16,7 +15,7 @@ public sealed class Permission
     private static readonly List<string> BlacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
     private static readonly List<string> WhitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
 
-    public Permission(ChatMessage ircMessage)
+    public Permission(TwitchMessage ircMessage)
     {
         Username = ircMessage.Username;
         IsBroadcaster = ircMessage.IsBroadcaster;

@@ -41,8 +41,7 @@ public static class Core
         await DiscordClient.Connect();
 
         int seconds = 0;
-        while (!(AnonymousClient.Connected
-        && DiscordClient.Connected
+        while (!(DiscordClient.Connected
         && MainClient.Connected))
         {
             await Task.Delay(1000);

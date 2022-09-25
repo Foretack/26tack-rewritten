@@ -58,11 +58,10 @@ internal static class ChannelHandler
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Username);
-                Log.Debug($"[Main] Attempting to join: {x.Username} (JustLog:{JLChannels.Contains(x.Username)})");
+                Log.Debug($"[Main] Queued join: {x.Username} (JustLog:{JLChannels.Contains(x.Username)})");
                 await Task.Delay(300);
             }
-            AnonymousClient.Client.JoinChannel(x.Username);
-            Log.Debug($"[Anon] Attempting to join: {x.Username}");
+            Log.Debug($"[Anon] Queued join: {x.Username}");
             await Task.Delay(300);
         });
         c = default!;
@@ -83,7 +82,6 @@ internal static class ChannelHandler
         FetchedChannels.Add(ec);
 
         if (priority >= 50) MainClient.Client.JoinChannel(channel);
-        AnonymousClient.Client.JoinChannel(channel);
 
         var db = new DbQueries();
         bool s = await db.AddChannel(ec);
@@ -99,7 +97,6 @@ internal static class ChannelHandler
         {
             ExtendedChannel target = AnonJoinedChannels.First(x => x.Username == channel);
             _ = AnonJoinedChannels.Remove(target);
-            AnonymousClient.Client.LeaveChannel(channel);
 
             var db = new DbQueries();
             _ = await db.RemoveChannel(target);
@@ -143,10 +140,6 @@ internal static class ChannelHandler
         MainClient.Client.OnJoinedChannel += MainOnJoinedChannel;
         MainClient.Client.OnLeftChannel += MainOnLeftChannel;
         MainClient.Client.OnFailureToReceiveJoinConfirmation += MainOnFailedJoin;
-
-        AnonymousClient.Client.OnJoinedChannel += AnonOnJoinedChannel;
-        AnonymousClient.Client.OnLeftChannel += AnonOnLeftChannel;
-        AnonymousClient.Client.OnFailureToReceiveJoinConfirmation += AnonOnFailedJoin;
     }
     #endregion
 

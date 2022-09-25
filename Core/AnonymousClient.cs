@@ -1,72 +1,47 @@
-﻿using Serilog;
-using TwitchLib.Client;
-using TwitchLib.Client.Events;
-using TwitchLib.Client.Models;
-using TwitchLib.Communication.Clients;
-using TwitchLib.Communication.Events;
-using TwitchLib.Communication.Models;
-using C = Tack.Core.Core;
+﻿using System.Text.Json;
+using Tack.Database;
+using Tack.Models;
 
 namespace Tack.Core;
 internal static class AnonymousClient
 {
-    #region Properties
-    public static bool Connected { get; set; } = false;
-
-    internal static TwitchClient Client { get; private set; } = new TwitchClient();
-    #endregion
-
-    #region Initialization
+    private static readonly AnonymousChat _anonChat = new();
     public static void Initialize()
     {
-        var options = new ClientOptions();
-        options.MessagesAllowedInPeriod = 1;
-        options.ThrottlingPeriod = TimeSpan.FromSeconds(1);
-
-        var policy = new ReconnectionPolicy(10);
-        policy.SetMaxAttempts(10);
-        options.ReconnectionPolicy = policy;
-
-        var webSocketClient = new WebSocketClient(options);
-        Client = new TwitchClient(webSocketClient);
-        Client.AutoReListenOnException = true;
-
-        var credentials = new ConnectionCredentials("justinfan123", "justinfan");
-        Client.Initialize(credentials, Config.Auth.Username);
-
-        Connect();
+        Redis.Subscribe("twitch:messages").OnMessage(x =>
+        {
+            if (!x.Message.HasValue) return;
+            TwitchMessage? message = JsonSerializer.Deserialize<TwitchMessage>(x.Message!);
+            if (message is null) return;
+            _anonChat.Raise(message);
+        });
     }
+}
 
-    public static void Connect()
+public sealed class AnonymousChat
+{
+    public delegate void OnMessageHandler(object? sender, OnMessageArgs args);
+    public static event EventHandler<OnMessageArgs> OnMessage;
+    public void Raise(TwitchMessage message)
     {
-        _ = Client.Connect();
-        Client.OnConnected += ClientConnectedEvent;
-        Client.OnDisconnected += ClientDisconnectedEvent;
-        Client.OnError += ClientOnErrorEvent;
-        Client.OnConnectionError += ClientConnectionErrorEvent;
+        RaiseEvent(new OnMessageArgs(message));
     }
-    #endregion
-
-    #region Client events
-    private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
+    internal void RaiseEvent(OnMessageArgs args)
     {
-        Log.Information("[Anon] Connected");
-        Connected = true;
+        EventHandler<OnMessageArgs> raiseEvent = OnMessage;
+        if (raiseEvent is not null)
+        {
+            raiseEvent(this, args);
+        }
     }
+}
 
-    private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
-    {
-        C.RestartProcess(nameof(ClientConnectionErrorEvent));
-    }
+public sealed class OnMessageArgs : EventArgs
+{
+    public TwitchMessage ChatMessage { get; set; }
 
-    private static void ClientOnErrorEvent(object? sender, OnErrorEventArgs e)
+    public OnMessageArgs(TwitchMessage twitchMessage)
     {
-        C.RestartProcess(nameof(ClientOnErrorEvent));
+        ChatMessage = twitchMessage;
     }
-
-    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
-    {
-        C.RestartProcess(nameof(ClientDisconnectedEvent));
-    }
-    #endregion
 }

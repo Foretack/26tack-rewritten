@@ -3,7 +3,6 @@ using Serilog;
 using Tack.Commands;
 using Tack.Models;
 using Tack.Nonclass;
-using TwitchLib.Client.Models;
 
 namespace Tack.Handlers;
 internal static class CommandHandler
@@ -74,4 +73,4 @@ internal static class CommandHandler
     #endregion
 }
 
-public sealed record CommandContext(ChatMessage IrcMessage, string[] Args, string CommandName, Permission Permission);
+public sealed record CommandContext(TwitchMessage IrcMessage, string[] Args, string CommandName, Permission Permission);

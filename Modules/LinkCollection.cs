@@ -1,24 +1,24 @@
 ﻿using System.Text.RegularExpressions;
 using SqlKata.Execution;
+using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Nonclass;
-using TwitchLib.Client.Events;
 
 namespace Tack.Modules;
 internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {
-        base[true].OnMessageReceived += OnMessage;
+        AnonymousChat.OnMessage += OnMessage;
 
-        OnEnabled = _ => base[true].OnMessageReceived += OnMessage;
-        OnDisabled = _ => base[true].OnMessageReceived -= OnMessage;
+        OnEnabled = _ => AnonymousChat.OnMessage += OnMessage;
+        OnDisabled = _ => AnonymousChat.OnMessage -= OnMessage;
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
-    private async void OnMessage(object? sender, OnMessageReceivedArgs e)
+    private async void OnMessage(object? sender, OnMessageArgs e)
     {
         var ircMessage = e.ChatMessage;
         if (ircMessage.Message.Length < 10) return;

@@ -4,7 +4,6 @@ using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
-using TwitchLib.Client.Models;
 
 namespace Tack.Commands.BaseSet;
 internal sealed class LongPing : Command
@@ -42,7 +41,7 @@ internal sealed class LongPing : Command
         Commencing = true;
         string[] messages = await GenerateMessages();
         int count = messages.Length;
-        AnonymousClient.Client.OnMessageReceived += Read;
+        AnonymousChat.OnMessage += Read;
 
         for (int i = 0; i < count; i++)
         {
@@ -52,7 +51,7 @@ internal sealed class LongPing : Command
         }
         await Task.Delay(2500);
 
-        AnonymousClient.Client.OnMessageReceived -= Read;
+        AnonymousChat.OnMessage -= Read;
         if (!NotifyList.Contains(channel)) NotifyList.Add(channel);
 
         string results = $"{CaughtCount} of {count} messages caught | ~{LatencySum / CaughtCount}ms";
@@ -95,9 +94,9 @@ internal sealed class LongPing : Command
 
     private static short CaughtCount { get; set; } = 0;
     private static float LatencySum { get; set; } = 0;
-    private void Read(object? sender, TwitchLib.Client.Events.OnMessageReceivedArgs e)
+    private void Read(object? sender, OnMessageArgs e)
     {
-        ChatMessage ircMessage = e.ChatMessage;
+        var ircMessage = e.ChatMessage;
         long unixTimeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         if (ircMessage.Channel == Config.Auth.Username
         && ircMessage.Username == Config.Auth.Username)

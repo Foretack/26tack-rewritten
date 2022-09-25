@@ -7,7 +7,6 @@ using Tack.Database;
 using Tack.Models;
 using Tack.Utils;
 using TwitchLib.Client.Events;
-using TwitchLib.Client.Models;
 using TwitchLib.Communication.Events;
 
 namespace Tack.Handlers;
@@ -22,7 +21,7 @@ internal static class MessageHandler
     #region Initialization
     public static void Initialize()
     {
-        AnonymousClient.Client.OnMessageReceived += OnMessageReceived;
+        AnonymousChat.OnMessage += OnMessage;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }
@@ -79,7 +78,7 @@ internal static class MessageHandler
         HandleDiscordMessage(arg).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
         return Task.CompletedTask;
     }
-    private static async void OnMessageReceived(object? sender, OnMessageReceivedArgs e)
+    private static async void OnMessage(object? sender, OnMessageArgs e)
     {
         Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
         await HandleIrcMessage(e.ChatMessage);
@@ -87,7 +86,7 @@ internal static class MessageHandler
     #endregion
 
     #region Handling
-    private static async ValueTask HandleIrcMessage(ChatMessage ircMessage)
+    private static async ValueTask HandleIrcMessage(TwitchMessage ircMessage)
     {
         try
         {
