@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Discord;
 using Discord.WebSocket;
-using Serilog;
 using Tack.Handlers;
 using Tack.Utils;
 

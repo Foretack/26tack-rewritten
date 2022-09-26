@@ -1,5 +1,4 @@
 ﻿using Npgsql;
-using Serilog;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 

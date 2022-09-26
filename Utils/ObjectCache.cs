@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Tack.Utils;
+﻿namespace Tack.Utils;
 public static class ObjectCache
 {
     private static readonly Dictionary<string, object> CachedObjects = new();

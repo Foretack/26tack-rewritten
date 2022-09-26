@@ -1,5 +1,4 @@
-﻿using Serilog;
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 
 namespace Tack.Database;
 internal sealed class RedisConnection

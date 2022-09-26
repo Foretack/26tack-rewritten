@@ -1,5 +1,4 @@
 ﻿using Dasync.Collections;
-using Serilog;
 using SqlKata.Execution;
 using Tack.Handlers;
 using Tack.Models;

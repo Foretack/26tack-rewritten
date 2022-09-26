@@ -1,5 +1,4 @@
 ﻿using AsyncAwaitBestPractices;
-using Serilog;
 using Tack.Commands;
 using Tack.Models;
 using Tack.Nonclass;

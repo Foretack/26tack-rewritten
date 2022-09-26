@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Dasync.Collections;
-using Serilog;
 using Tack.Core;
 using Tack.Database;
 using Tack.Misc;

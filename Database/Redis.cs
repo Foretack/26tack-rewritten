@@ -1,5 +1,4 @@
-﻿using Serilog;
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 using Tack.Utils;
 
 namespace Tack.Database;

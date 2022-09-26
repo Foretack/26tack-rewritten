@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Tack.Utils;
+﻿namespace Tack.Utils;
 internal static class Time
 {
     public static TimeSpan Until(DateTime time) => time.ToLocalTime() - DateTime.Now;

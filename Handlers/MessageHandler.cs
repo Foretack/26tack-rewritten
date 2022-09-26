@@ -1,7 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
 using Discord;
 using Discord.WebSocket;
-using Serilog;
 using Tack.Core;
 using Tack.Database;
 using Tack.Models;

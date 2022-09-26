@@ -1,5 +1,4 @@
-﻿using Serilog;
-using TwitchLib.Client;
+﻿using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;

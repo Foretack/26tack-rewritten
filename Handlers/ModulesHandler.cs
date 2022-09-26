@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Tack.Modules;
+﻿using Tack.Modules;
 using Tack.Nonclass;
 
 namespace Tack.Handlers;

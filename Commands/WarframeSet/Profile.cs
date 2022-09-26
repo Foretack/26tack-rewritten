@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
-using Serilog;
 using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;

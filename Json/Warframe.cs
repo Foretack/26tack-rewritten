@@ -1,8 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Tack.Nonclass;
 
-#pragma warning disable CS8618
-
 namespace Tack.Json;
 public sealed record Alert(
         [property: JsonPropertyName("id")] string Id,

@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Tack.Nonclass;
+﻿namespace Tack.Nonclass;
 
 public interface IModule
 {

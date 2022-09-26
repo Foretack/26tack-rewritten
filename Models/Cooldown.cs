@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Tack.Nonclass;
+﻿using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Models;

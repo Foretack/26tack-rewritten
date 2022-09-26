@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Tack.Handlers;
+﻿using Tack.Handlers;
 using Tack.Utils;
 using Tl = TwitchLib.Api.Helix.Models.Users.GetUsers;
 

@@ -1,5 +1,4 @@
-﻿using Serilog;
-using TwitchLib.Api;
+﻿using TwitchLib.Api;
 using TwitchLib.Api.Core;
 using TwitchLib.Api.Core.Exceptions;
 using TwitchLib.Api.Helix;

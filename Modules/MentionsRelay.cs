@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using Serilog;
 using Tack.Core;
 using Tack.Handlers;
 using Tack.Models;
