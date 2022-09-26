@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+﻿global using Serilog;
+using System.Diagnostics;
 using System.Reflection;
 using CliWrap;
 using CliWrap.Buffered;
-using Serilog;
 using Serilog.Core;
 using Tack.Database;
 using Tack.Handlers;
