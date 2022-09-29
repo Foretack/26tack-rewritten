@@ -54,9 +54,8 @@ internal static class MessageHandler
     }
     public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
     {
-        SocketTextChannel channel = ObjectCache.Get<SocketTextChannel>(channelID + "_DISCORD_CHANNEL")
-            ?? DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID);
-        ObjectCache.Put(channelID + "_DISCORD_CHANNEL", channel, 36400);
+        SocketTextChannel channel = await $"discord:channels:{channelID}"
+            .GetOrCreate<SocketTextChannel>(() => DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID));
 
         _ = await channel.SendMessageAsync(message);
     }

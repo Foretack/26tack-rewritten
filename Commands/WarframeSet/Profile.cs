@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using System.Text.Json;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
@@ -24,20 +25,18 @@ internal sealed class Profile : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        string? token = ObjectCache.Get<string>("v5_ext_token")
-            ?? (await ExternalAPIHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel)).Value;
-        if (token is null)
+        string token = await "warframe:v5_ext_token".GetOrCreate(async () =>
         {
-            Result<string> t = await ExternalAPIHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel);
+            var t = await ExternalAPIHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel);
             if (!t.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation. Please report this issue :( ");
-                Log.Error(t.Exception, $"Error generating Warframe extension token");
-                return;
+                Log.Warning(t.Exception, $"Error generating Warframe extension token");
+                return default!;
             }
-            token = t.Value;
-        }
-        ObjectCache.Put("v5_ext_token", token, 60);
+            return t.Value;
+        }, true, TimeSpan.FromMinutes(1));
+        if (string.IsNullOrEmpty(token)) return;
 
         string target = ctx.Args.Length == 0 ? ctx.IrcMessage.Username : ctx.Args[0];
         Result<(Stream? Stream, HttpStatusCode Code)> data = await ExternalAPIHandler.GetWarframeProfileData(target, token);

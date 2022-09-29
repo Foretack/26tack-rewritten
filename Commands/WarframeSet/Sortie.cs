@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -20,30 +21,31 @@ internal sealed class Sortie : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie? sortie = ObjectCache.Get<CurrentSortie>("current_sortie_wf");
-        if (sortie is null)
+        CurrentSortie sortie = await "warframe:sortiedata".GetOrCreate<CurrentSortie>(async () =>
         {
-            Result<CurrentSortie> r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
+            var r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
-                return;
+                return default!;
             }
-            sortie = r.Value;
-        }
-
-        TimeSpan timeLeft = sortie.Expiry.ToLocalTime() - DateTime.Now.ToLocalTime();
-        if (timeLeft.TotalSeconds < 0)
+            return r.Value;
+        }, true);
+        if (sortie is null) return;
+        TimeSpan timeLeft = Time.Until(sortie.Expiry);
+        if (timeLeft.TotalMilliseconds < 0)
         {
+            await "warframe:sortiedata".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
+        await "warframe:sortiedata".SetKeyExpiry(timeLeft);
+
         string sortieString = $"{sortie.Faction} " +
             $"➜ ● {sortie.Variants[0].MissionType} [{sortie.Variants[0].Modifier}] " +
             $"➜ ■ {sortie.Variants[1].MissionType} [{sortie.Variants[1].Modifier}] " +
             $"➜ ◆ {(sortie.Variants[2].MissionType == "Assassination" ? $"{sortie.Boss} Assassination" : sortie.Variants[2].MissionType)} [{sortie.Variants[2].Modifier}]";
 
         MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("current_sortie_wf", sortie, (int)timeLeft.TotalSeconds);
     }
 }

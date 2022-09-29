@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -20,28 +21,29 @@ internal sealed class SteelPath : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        SteelPathRewards? rewards = ObjectCache.Get<SteelPathRewards>("steelpath_wf");
-        if (rewards is null)
+        SteelPathRewards rewards = await "warframe:steelpath:rewards".GetOrCreate<SteelPathRewards>(async () =>
         {
-            Result<SteelPathRewards> r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
+            var r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
-                return;
+                return default!;
             }
-            rewards = r.Value;
-        }
+            return r.Value;
+        }, true);
+        if (rewards is null) return;
 
-        TimeSpan timeLeft = rewards.Expiry - DateTime.Now;
-        if (timeLeft.TotalSeconds <= 0)
+        TimeSpan timeLeft = Time.Until(rewards.Expiry);
+        if (timeLeft.TotalMilliseconds <= 0)
         {
+            await "warframe:steelpath:rewards".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Data is outdated. Try again later?");
             return;
         }
+        await "warframe:steelpath:rewards".SetKeyExpiry(timeLeft);
 
         string rewardsString = $"Current item in rotation: {rewards.CurrentReward.Name} ({rewards.CurrentReward.Cost} Steel Essence) 🏹 ●";
         string nextInRotationString = $" Next in rotation: {rewards.Rotation[0].Name}";
         MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➜ in: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put("steelpath_wf", rewards, (int)timeLeft.TotalSeconds);
     }
 }

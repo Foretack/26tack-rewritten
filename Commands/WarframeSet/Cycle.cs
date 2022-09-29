@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -32,25 +33,28 @@ internal sealed class Cycle : Command
         string channel = ctx.IrcMessage.Channel;
         string queryString = new T().QueryString;
 
-        T? cycle = ObjectCache.Get<T>(queryString + "_wf");
-        if (cycle is null)
+        T cycle = await $"warframe:cycles:{queryString}".GetOrCreate<T>(async () =>
         {
-            Result<T> r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
+            var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
-                return;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request error! {r.Exception.Message}");
+                return default!;
             }
-            cycle = r.Value;
-        }
-        TimeSpan timeLeft = cycle.Expiry.ToLocalTime() - DateTime.Now;
-        if (timeLeft.TotalSeconds < 0)
+            return r.Value;
+        }, true);
+        if (cycle is null) return;
+
+        TimeSpan timeLeft = Time.Until(cycle.Expiry);
+        if (timeLeft.TotalMilliseconds < 0)
         {
+            await $"warframe:cycles:{queryString}".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {timeLeft.FormatTimeLeft()}");
-        ObjectCache.Put(queryString + "_wf", cycle, (int)timeLeft.TotalSeconds);
+        await $"warframe:cycles:{queryString}".SetKeyExpiry(timeLeft);
+
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {(timeLeft).FormatTimeLeft()}");
     }
 
     private async ValueTask Other(CommandContext ctx)

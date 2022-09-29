@@ -1,5 +1,5 @@
-﻿using Tack.Handlers;
-using Tack.Utils;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tl = TwitchLib.Api.Helix.Models.Users.GetUsers;
 
 namespace Tack.Models;
@@ -7,38 +7,46 @@ internal sealed class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        User? c = ObjectCache.Get<User>(username + "_users");
-        if (c is not null) return c;
-        Tl::User? call = await TwitchAPIHandler.GetUsers(username);
-        if (call is null)
+        User user = await $"twitch:users:{username}".GetOrCreate<User>(async () =>
         {
-            User? call2 = await ExternalAPIHandler.GetIvrUser(username);
-            if (call2 is null) return null;
-            ObjectCache.Put(username + "_users", call2, 86400);
-            return call2;
-        }
-        var u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
-        ObjectCache.Put(username + "_users", u, 86400);
-        return u;
+            var r = await TwitchAPIHandler.GetUsers(username);
+            if (r is null)
+            {
+                User? call2 = await ExternalAPIHandler.GetIvrUser(username);
+                if (call2 is null) return default!;
+                return call2;
+            }
+            return new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
+        }, true, TimeSpan.FromDays(1));
+        return user;
     }
     public async Task<User[]?> CreateUserAsync(params string[] usernames)
     {
-        Tl::User[]? call = await TwitchAPIHandler.GetUsers(usernames);
-        if (call is null || call.Length == 0) return null;
-        var users = new List<User>();
-        foreach (Tl::User u in call)
+        List<string> nonCachedUsernames = new();
+        List<User> users = new();
+        foreach (var username in usernames)
         {
-            try
+            var cachedUser = await $"twitch:users:{username}".Get<User>();
+            if (cachedUser is null)
             {
-                var user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
-                users.Add(user);
-                ObjectCache.Put(user.Username + "_user", user, 86400);
+                nonCachedUsernames.Add(username);
+                continue;
             }
-            catch (Exception ex)
+            users.Add(cachedUser);
+        }
+        if (nonCachedUsernames.Count > 0)
+        {
+            var r = await TwitchAPIHandler.GetUsers(nonCachedUsernames.ToArray());
+            if (r is null) return default!;
+            foreach (var user in r
+            .Where(x => x is not null)
+            .Select(x => new User(x.DisplayName, x.Login, x.Id, x.ProfileImageUrl, x.CreatedAt)))
             {
-                Log.Error(ex, "Failed to enumerate over a user in an array of users");
+                await $"twitch:users:{user.Username}".SetExpiringKey(user, TimeSpan.FromDays(1));
+                users.Add(user);
             }
         }
+
         return users.ToArray();
     }
     public async Task<User?> CreateUserByIDAsync(string id)

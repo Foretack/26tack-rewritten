@@ -1,8 +1,8 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
-using Tack.Utils;
 
 namespace Tack.Commands.WarframeSet;
 internal sealed class Invasions : Command
@@ -19,21 +19,20 @@ internal sealed class Invasions : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[]? invasionNodes = ObjectCache.Get<InvasionNode[]>("invasions_wf");
-        if (invasionNodes is null)
+        InvasionNode[] invasionNodes = await "warframe:invasions".GetOrCreate<InvasionNode[]>(async () =>
         {
-            Result<InvasionNode[]> r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
+            var r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :( ({r.Exception.Message})");
-                return;
+                return default!;
             }
-            invasionNodes = r.Value;
-        }
+            return r.Value;
+        }, true, TimeSpan.FromMinutes(5));
+        if (invasionNodes is null) return;
 
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
-        ObjectCache.Put("invasions_wf", invasionNodes, 300);
     }
 
     private async Task<string> SumItems(InvasionNode[] invasions)

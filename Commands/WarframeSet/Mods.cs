@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -28,18 +29,18 @@ internal sealed class Mods : Command
         }
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
-        ModInfo? mod = ObjectCache.Get<ModInfo>(modName + "_modobj");
-        if (mod is null)
+
+        ModInfo mod = await $"warframe:mod:{modName}".GetOrCreate<ModInfo>(async () =>
         {
-            Result<ModInfo> r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
+            var r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
-                return;
+                return default!;
             }
-            mod = r.Value;
-            ObjectCache.Put(modName + "_modobj", mod, 150);
-        }
+            return r.Value;
+        }, true, TimeSpan.FromMinutes(30));
+        if (mod is null) return;
 
         int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.FusionLimit;
         if (level > mod.FusionLimit) level = mod.FusionLimit;

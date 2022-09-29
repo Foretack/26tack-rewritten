@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
@@ -39,8 +40,8 @@ internal sealed class Massping : Command
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        TMI? chatterList = ObjectCache.Get<TMI>(targetChannel + "_CHATTERS")
-            ?? await ExternalAPIHandler.GetChannelChatters(targetChannel);
+        TMI chatterList =
+            await $"twitch:users:{targetChannel}:chatters".GetOrCreate<TMI>(async () => (await ExternalAPIHandler.GetChannelChatters(targetChannel))!, true, TimeSpan.FromMinutes(15));
         if (chatterList is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, Could not fetch chatters of that channel :(");

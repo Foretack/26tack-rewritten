@@ -164,8 +164,7 @@ public sealed record Relic(
     [property: JsonPropertyName("tier")] string Tier,
     [property: JsonPropertyName("relicName")] string RelicName,
     [property: JsonPropertyName("state")] string State,
-    [property: JsonPropertyName("rewards")] IReadOnlyList<RelicReward> Rewards,
-    [property: JsonPropertyName("_id")] string Id
+    [property: JsonPropertyName("rewards")] IReadOnlyList<RelicReward> Rewards
 );
 public sealed record RelicReward(
     [property: JsonPropertyName("_id")] string Id,

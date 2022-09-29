@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -19,24 +20,25 @@ internal sealed class ArchonHunt : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        ArchonData? archonData = ObjectCache.Get<ArchonData>(CacheKey);
-        if (archonData is null)
+        ArchonData archonData = await "warframe:archonhunt".GetOrCreate<ArchonData>(async () =>
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<ArchonData>("archonHunt", timeout: 10);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ err! {r.Exception.Message}");
-                return;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request error! {r.Exception.Message}");
+                return default!;
             }
-            archonData = r.Value;
-        }
-
-        TimeSpan timeLeft = Time.Until(archonData.Expiry);
-        if (timeLeft.TotalMilliseconds < 0 || !archonData.Active)
+            return r.Value;
+        }, true);
+        if (archonData is null || archonData == default(ArchonData)) return;
+        var timeLeft = Time.Until(archonData.Expiry);
+        if (timeLeft.TotalMilliseconds < 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, The data retreived is outdated. Try again later?");
+            await "warframe:archonhunt".RemoveKey();
+            MessageHandler.SendMessage(channel, $"@{user}, Archon hunt information seems to be outdates, try again in later.");
             return;
         }
+        await "warframe:archonhunt".SetKeyExpiry(timeLeft);
 
         string bossString = archonData.Boss switch
         {
@@ -49,9 +51,8 @@ internal sealed class ArchonHunt : Command
             + '['
             + string.Join(" ➜ ", archonData.Missions.Select(x => x.TypeKey))
             + ']'
-            + $" Expires in: {timeLeft.FormatTimeLeft()}";
+            + $" Expires in: {((TimeSpan)timeLeft!).FormatTimeLeft()}";
 
         MessageHandler.SendMessage(channel, $"@{user}, {archonMessage}");
-        ObjectCache.Put(CacheKey, archonData, (int)timeLeft.TotalSeconds);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Database;
+using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
@@ -39,16 +40,21 @@ internal sealed class Relics : Command
 
         string item = string.Join(' ', args).ToLower();
         string message;
-        RelicData? relicData = ObjectCache.Get<RelicData>("relics_wf")
-            ?? await ExternalAPIHandler.GetRelicData();
-        if (relicData is null)
+
+        RelicData relicData = await $"warframe:relicdata".GetOrCreate<RelicData>(async () =>
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error while trying to get relic information :(");
-            return;
-        }
+            var r = await ExternalAPIHandler.GetRelicData();
+            if (r is null)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, There was an error while trying to get relic information :(");
+                return default!;
+            }
+            return r;
+        }, true, TimeSpan.FromDays(1));
+        if (relicData is null) return;
+
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
         MessageHandler.SendMessage(channel, $"@{user}, {message}");
-        ObjectCache.Put("relics_wf", relicData, 3600);
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Tack.Core;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
@@ -31,7 +32,7 @@ internal sealed class LongPing : Command
             return;
         }
 
-        string? prev = ObjectCache.Get<string>("longping_results");
+        string? prev = await "bot:longping".Get();
         if (prev is not null)
         {
             MessageHandler.SendMessage(channel, $"[Cached] {prev}");
@@ -55,7 +56,7 @@ internal sealed class LongPing : Command
         if (!NotifyList.Contains(channel)) NotifyList.Add(channel);
 
         string results = $"{CaughtCount} of {count} messages caught | ~{LatencySum / CaughtCount}ms";
-        ObjectCache.Put("longping_results", results, 250);
+        await "bot:longping".SetExpiringKey(results, TimeSpan.FromMinutes(2.5));
 
         CaughtCount = 0;
         LatencySum = 0;

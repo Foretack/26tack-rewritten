@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Json;
 using Tack.Models;
@@ -21,17 +22,17 @@ internal sealed class Alerts : Command
         string channel = ctx.IrcMessage.Channel;
         var ab = new StringBuilder();
 
-        Alert[]? alerts = ObjectCache.Get<Alert[]>("alerts_wf");
-        if (alerts is null)
+        Alert[] alerts = await "warframe:alerts".GetOrCreate<Alert[]>(async () =>
         {
-            Result<Alert[]> r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
+            var r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
-                return;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request error! {r.Exception.Message}");
+                return Array.Empty<Alert>();
             }
-            alerts = r.Value;
-        }
+            return r.Value;
+        }, true, TimeSpan.FromMinutes(2.5));
+        if (alerts.Length == 0) return;
 
         string[] rewards = alerts
             .Where(x => x.Active)
@@ -42,6 +43,5 @@ internal sealed class Alerts : Command
             .Append(string.Join(" ● ", rewards));
 
         MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
-        ObjectCache.Put("alerts_wf", alerts, 150);
     }
 }

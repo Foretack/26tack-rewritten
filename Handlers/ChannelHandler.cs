@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Dasync.Collections;
+﻿using Dasync.Collections;
 using Tack.Core;
 using Tack.Database;
 using Tack.Misc;
@@ -42,8 +41,7 @@ internal static class ChannelHandler
         RegisterEvents(isReconnect);
         JLChannels = (await ExternalAPIHandler.GetIvrChannels()).Channels.Select(x => x.Name).ToArray();
 
-        string channelsJson = JsonSerializer.Serialize(FetchedChannels);
-        await "twitch:channels".RedisSet(channelsJson);
+        await "twitch:channels".SetKey(FetchedChannels);
 
         IAsyncEnumerable<ExtendedChannel> c = new AsyncEnumerable<ExtendedChannel>(async y =>
         {

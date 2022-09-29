@@ -29,19 +29,27 @@ internal static class Redis
         if (!val.HasValue || val.IsNull) return default(T);
         return JsonSerializer.Deserialize<T>(val!);
     }
-    public static async Task<bool> RedisSet(this string key, RedisValue value) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize(value));
-    public static async Task<bool> RedisSetExpiring(this string key, RedisValue value, TimeSpan expiry) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize(value), expiry);
-    public static async Task<bool> RedisSetExpiring(this string key, RedisValue value, DateTime expiry) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize(value), Time.Until(expiry));
+    public static async Task<bool> SetKey<T>(this string key, T value) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize<T>(value));
+    public static async Task<bool> SetExpiringKey<T>(this string key, T value, TimeSpan expiry) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize<T>(value), expiry);
+    public static async Task<bool> SetExpiringKey<T>(this string key, T value, DateTime expiry) => await _connection.Db.StringSetAsync(key, JsonSerializer.Serialize<T>(value), Time.Until(expiry));
+    public static async Task<bool> RemoveKey(this string key) => await _connection.Db.KeyDeleteAsync(key);
+    public static async Task<object> SetKeyExpiry(this string key, TimeSpan expiry) => await _connection.Db.KeyExpireAsync(key, expiry);
+    public static async Task<object> SetKeyExpiry(this string key, DateTime expiry) => await _connection.Db.KeyExpireAsync(key, expiry);
 
 
     public static async Task<T> GetOrCreate<T>(this string key, Func<Task<T>> createFunc, bool setWhenCreate = false, TimeSpan? expiry = null)
     {
+        // try getting the value first
         var val = await key.Get<T>();
         if (val is null)
         {
+            // if the value doesn't exist, try creating one from createFunc()
             val = await createFunc();
-            if (setWhenCreate && expiry is not null) await key.RedisSetExpiring(JsonSerializer.Serialize(val), (TimeSpan)expiry);
-            else if (setWhenCreate) await key.RedisSet(JsonSerializer.Serialize(val));
+            // exit early if createFunc() returns null to avoid caching it
+            if (val is null) return default!;
+            // set expiring key if parameter expiry isn't null
+            if (setWhenCreate && expiry is not null) await key.SetExpiringKey(val, (TimeSpan)expiry);
+            else if (setWhenCreate) await key.SetKey(val);
         }
         return val;
     }
@@ -51,8 +59,9 @@ internal static class Redis
         if (val is null)
         {
             val = createFunc();
-            if (setWhenCreate && expiry is not null) await key.RedisSetExpiring(JsonSerializer.Serialize(val), (TimeSpan)expiry);
-            else if (setWhenCreate) await key.RedisSet(JsonSerializer.Serialize(val));
+            if (val is null) return default!;
+            if (setWhenCreate && expiry is not null) await key.SetExpiringKey(val, (TimeSpan)expiry);
+            else if (setWhenCreate) await key.SetKey(val);
         }
         return val;
     }
