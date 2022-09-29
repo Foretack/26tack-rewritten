@@ -1,4 +1,5 @@
-﻿using Tack.Database;
+﻿using Tack.Core;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Misc;
 using Tack.Models;
@@ -21,16 +22,13 @@ internal sealed class Ping : Command
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
         string uptime = Time.SinceString(C.StartupTime);
-        string? shardStatus = null;
-
-        Redis.Subscribe("shard:manage").OnMessage(x =>
-        {
-            if (x.Message.ToString().Contains("active,")) shardStatus = x.Message;
-        });
         await Redis.PublishAsync("shard:manage", "PING");
+        await Task.Delay(10);
+        string shardStatus = AnonymousClient.ShardStatus;
+
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
             $"● {latency}ms " +
-            $"● Uptime: {uptime} ● Shard status: {shardStatus ?? "unknown"}");
+            $"● Uptime: {uptime} ● Shard status: {shardStatus}");
 
     }
 }

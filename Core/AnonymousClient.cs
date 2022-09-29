@@ -6,6 +6,8 @@ using Tack.Models;
 namespace Tack.Core;
 internal static class AnonymousClient
 {
+    public static string ShardStatus { get; private set; }
+
     private static readonly AnonymousChat _anonChat = new();
     private static readonly ShardUpdates _shardUpdates = new();
     public static void Initialize()
@@ -21,6 +23,10 @@ internal static class AnonymousClient
         {
             if (!x.Message.HasValue) return;
             _shardUpdates.Raise(x.Message!);
+        });
+        Redis.Subscribe("shard:manage").OnMessage(x =>
+        {
+            if (x.Message.ToString().Contains("active,")) ShardStatus = x.Message.ToString() ?? "unknown";
         });
         ShardUpdates.OnShardUpdate += (s, e) => MessageHandler.SendMessage(Config.RelayChannel, e.UpdateMessage);
     }
