@@ -64,6 +64,11 @@ internal static class ChannelHandler
         c = default!;
         IsInProgress = false;
         StreamMonitor.Start();
+        Time.DoEvery(TimeSpan.FromHours(1), async () =>
+        {
+            await ReloadFetchedChannels();
+            await "twitch:channels".SetKey(FetchedChannels);
+        });
     }
     #endregion
 
@@ -121,7 +126,10 @@ internal static class ChannelHandler
     public static async Task ReloadFetchedChannels()
     {
         int pCount = FetchedChannels.Count;
-        FetchedChannels = (await DbQueries.NewInstance().GetChannels()).ToList();
+        using (var db = new DbQueries())
+        {
+            FetchedChannels = (await db.GetChannels()).ToList();
+        }
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
