@@ -212,8 +212,9 @@ internal static class StreamMonitor
         MonitoringService.OnStreamOnline += StreamOnline;
         MonitoringService.OnStreamUpdate += StreamUpdate;
         MonitoringService.OnStreamOffline += StreamOffline;
-
         MonitoringService.Start();
+
+        Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
     }
 
     public static void Reset()

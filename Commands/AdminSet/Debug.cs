@@ -38,13 +38,6 @@ internal sealed class Debug : Command
                 string output = await C.GitPull() ?? "Command execution failed, check console :(";
                 MessageHandler.SendMessage(channel, output);
                 break;
-            case "monitor":
-            case "reloadmonitor":
-                StreamMonitor.Stop();
-                await ChannelHandler.ReloadFetchedChannels();
-                StreamMonitor.Reset();
-                StreamMonitor.Start();
-                break;
             case "triggers":
             case "reloadtriggers":
                 MessageHandler.ReloadDiscordTriggers();
