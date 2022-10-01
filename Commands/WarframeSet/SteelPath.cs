@@ -33,17 +33,16 @@ internal sealed class SteelPath : Command
         }, true);
         if (rewards is null) return;
 
-        TimeSpan timeLeft = Time.Until(rewards.Expiry);
-        if (timeLeft.TotalMilliseconds <= 0)
+        if (Time.HasPassed(rewards.Expiry))
         {
             await "warframe:steelpath:rewards".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Data is outdated. Try again later?");
             return;
         }
-        await "warframe:steelpath:rewards".SetKeyExpiry(timeLeft);
+        await "warframe:steelpath:rewards".SetKeyExpiry(Time.Until(rewards.Expiry));
 
         string rewardsString = $"Current item in rotation: {rewards.CurrentReward.Name} ({rewards.CurrentReward.Cost} Steel Essence) 🏹 ●";
         string nextInRotationString = $" Next in rotation: {rewards.Rotation[0].Name}";
-        MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➜ in: {timeLeft.FormatTimeLeft()}");
+        MessageHandler.SendMessage(channel, $"@{user}, {rewardsString} {nextInRotationString} ➜ in: {Time.UntilString(rewards.Expiry)}");
     }
 }

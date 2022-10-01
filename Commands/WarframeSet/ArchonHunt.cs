@@ -31,14 +31,13 @@ internal sealed class ArchonHunt : Command
             return r.Value;
         }, true);
         if (archonData is null || archonData == default(ArchonData)) return;
-        var timeLeft = Time.Until(archonData.Expiry);
-        if (timeLeft.TotalMilliseconds < 0)
+        if (Time.HasPassed(archonData.Expiry))
         {
             await "warframe:archonhunt".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Archon hunt information seems to be outdates, try again in later.");
             return;
         }
-        await "warframe:archonhunt".SetKeyExpiry(timeLeft);
+        await "warframe:archonhunt".SetKeyExpiry(Time.Until(archonData.Expiry));
 
         string bossString = archonData.Boss switch
         {
@@ -51,7 +50,7 @@ internal sealed class ArchonHunt : Command
             + '['
             + string.Join(" ➜ ", archonData.Missions.Select(x => x.TypeKey))
             + ']'
-            + $" Expires in: {((TimeSpan)timeLeft!).FormatTimeLeft()}";
+            + $" Expires in: {Time.UntilString(archonData.Expiry)}";
 
         MessageHandler.SendMessage(channel, $"@{user}, {archonMessage}");
     }

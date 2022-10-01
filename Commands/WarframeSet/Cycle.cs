@@ -45,16 +45,15 @@ internal sealed class Cycle : Command
         }, true);
         if (cycle is null) return;
 
-        TimeSpan timeLeft = Time.Until(cycle.Expiry);
-        if (timeLeft.TotalMilliseconds < 0)
+        if (Time.HasPassed(cycle.Expiry))
         {
             await $"warframe:cycles:{queryString}".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        await $"warframe:cycles:{queryString}".SetKeyExpiry(timeLeft);
+        await $"warframe:cycles:{queryString}".SetKeyExpiry(Time.Until(cycle.Expiry));
 
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {(timeLeft).FormatTimeLeft()}");
+        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {Time.UntilString(cycle.Expiry)}");
     }
 
     private async ValueTask Other(CommandContext ctx)

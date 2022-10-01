@@ -32,20 +32,19 @@ internal sealed class Sortie : Command
             return r.Value;
         }, true);
         if (sortie is null) return;
-        TimeSpan timeLeft = Time.Until(sortie.Expiry);
-        if (timeLeft.TotalMilliseconds < 0)
+        if (Time.HasPassed(sortie.Expiry))
         {
             await "warframe:sortiedata".RemoveKey();
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
-        await "warframe:sortiedata".SetKeyExpiry(timeLeft);
+        await "warframe:sortiedata".SetKeyExpiry(Time.Until(sortie.Expiry));
 
         string sortieString = $"{sortie.Faction} " +
             $"➜ ● {sortie.Variants[0].MissionType} [{sortie.Variants[0].Modifier}] " +
             $"➜ ■ {sortie.Variants[1].MissionType} [{sortie.Variants[1].Modifier}] " +
             $"➜ ◆ {(sortie.Variants[2].MissionType == "Assassination" ? $"{sortie.Boss} Assassination" : sortie.Variants[2].MissionType)} [{sortie.Variants[2].Modifier}]";
 
-        MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {timeLeft.FormatTimeLeft()}");
+        MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {Time.UntilString(sortie.Expiry)}");
     }
 }
