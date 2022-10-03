@@ -11,6 +11,7 @@ internal static class ModulesHandler
         AddModule(new LinkCollection());
         AddModule(new MentionsRelay());
         AddModule(new BaroChecker());
+        AddModule(new DiscordActivityNotifier());
     }
 
     private static void AddModule(IModule module)

@@ -6,6 +6,7 @@ namespace Tack.Core;
 internal static class DiscordClient
 {
     private static readonly DiscordChat _discordChat = new();
+    private static readonly DiscordPresences _discordPresences = new();
     public static void Initialize()
     {
         Redis.Subscribe("discord:messages").OnMessage(x =>
@@ -14,6 +15,13 @@ internal static class DiscordClient
             var message = JsonSerializer.Deserialize<DiscordMessage>(x.Message!);
             if (message is null) return;
             _discordChat.Raise(message);
+        });
+        Redis.Subscribe("discord:presences").OnMessage(x =>
+        {
+            if (!x.Message.HasValue) return;
+            var presence = JsonSerializer.Deserialize<DiscordPresence>(x.Message!);
+            if (presence is null) return;
+            _discordPresences.Raise(presence);
         });
     }
 }
@@ -47,5 +55,30 @@ public sealed class OnDiscordMsgArgs : EventArgs
     public OnDiscordMsgArgs(DiscordMessage discordMessage)
     {
         DiscordMessage = discordMessage;
+    }
+}
+
+internal sealed class DiscordPresences
+{
+    public delegate void OnDiscordPresenceHandler(object? sender, OnDiscordPresenceArgs args);
+    public static event EventHandler<OnDiscordPresenceArgs> OnUpdate;
+    public void Raise(DiscordPresence presence)
+    {
+        RaiseEvent(new OnDiscordPresenceArgs(presence));
+    }
+    private void RaiseEvent(OnDiscordPresenceArgs args)
+    {
+        EventHandler<OnDiscordPresenceArgs> handler = OnUpdate;
+        if (handler is not null) handler(this, args);
+    }
+}
+
+public sealed class OnDiscordPresenceArgs : EventArgs
+{
+    public DiscordPresence DiscordPresence { get; private set; }
+
+    public OnDiscordPresenceArgs(DiscordPresence discordPresence)
+    {
+        DiscordPresence = discordPresence;
     }
 }
