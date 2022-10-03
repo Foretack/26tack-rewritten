@@ -20,7 +20,7 @@ internal class DiscordActivityNotifier : IModule
     private void OnUpdate(object? sender, OnDiscordPresenceArgs e)
     {
         var presence = e.DiscordPresence;
-        if (presence.Author.IsBot || presence.Activities.Count == 0 || !presence.Activities.Any(x => x is not null)) return;
+        if (presence.Author.IsBot || presence.Activities.Count == 0) return;
         foreach (var activity in presence.Activities)
         {
             if (activity is null) continue;
