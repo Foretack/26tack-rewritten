@@ -32,7 +32,7 @@ internal static class AnonymousClient
     }
 }
 
-public sealed class AnonymousChat
+internal sealed class AnonymousChat
 {
     public delegate void OnMessageHandler(object? sender, OnMessageArgs args);
     public static event EventHandler<OnMessageArgs> OnMessage;
@@ -40,7 +40,7 @@ public sealed class AnonymousChat
     {
         RaiseEvent(new OnMessageArgs(message));
     }
-    internal void RaiseEvent(OnMessageArgs args)
+    private void RaiseEvent(OnMessageArgs args)
     {
         EventHandler<OnMessageArgs> raiseEvent = OnMessage;
         if (raiseEvent is not null)
@@ -60,7 +60,7 @@ public sealed class OnMessageArgs : EventArgs
     }
 }
 
-public sealed class ShardUpdates
+internal sealed class ShardUpdates
 {
     public delegate void OnShardUpdateHandler(object? sender, OnShardUpdateArgs args);
     public static event EventHandler<OnShardUpdateArgs> OnShardUpdate;
