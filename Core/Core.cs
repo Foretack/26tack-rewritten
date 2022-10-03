@@ -38,11 +38,10 @@ public static class Core
         MessageHandler.Initialize();
         CommandHandler.Initialize();
         ModulesHandler.Initialize();
-        await DiscordClient.Connect();
+        DiscordClient.Initialize();
 
         int seconds = 0;
-        while (!(DiscordClient.Connected
-        && MainClient.Connected))
+        while (!MainClient.Connected)
         {
             await Task.Delay(1000);
             seconds++;

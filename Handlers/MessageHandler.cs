@@ -1,6 +1,4 @@
 ﻿using AsyncAwaitBestPractices;
-using Discord;
-using Discord.WebSocket;
 using Tack.Core;
 using Tack.Database;
 using Tack.Models;
@@ -52,13 +50,6 @@ internal static class MessageHandler
         }
         SendMessage(channel, "/me " + message);
     }
-    public static async Task SendDiscordMessage(ulong guildID, ulong channelID, string message)
-    {
-        SocketTextChannel channel = await $"discord:channels:{channelID}"
-            .GetOrCreate<SocketTextChannel>(() => DiscordClient.Client.GetGuild(guildID).GetTextChannel(channelID));
-
-        _ = await channel.SendMessageAsync(message);
-    }
     private static void OnMessageSent(object? sender, OnMessageSentArgs e)
     {
         Log.Debug($"Sent message: {e.SentMessage.Message}");
@@ -70,10 +61,10 @@ internal static class MessageHandler
     #endregion
 
     #region Receiving
-    internal static Task OnDiscordMessageReceived(SocketMessage arg)
+    internal static Task OnDiscordMessageReceived(DiscordMessage message)
     {
-        Log.Verbose($"Discord message received => {arg.Author.Username} {arg.Channel.Name}: {arg.Content}");
-        HandleDiscordMessage(arg).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
+        Log.Verbose($"Discord message received => {message.Author.Username} {message.ChannelName}: {message.Content}");
+        HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
         return Task.CompletedTask;
     }
     private static async void OnMessage(object? sender, OnMessageArgs e)
@@ -108,11 +99,11 @@ internal static class MessageHandler
         }
     }
 
-    private static async ValueTask HandleDiscordMessage(SocketMessage socketMessage)
+    private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
         DiscordEvent[] evs = DiscordEvents.Where(
-            x => x.ChannelID == socketMessage.Channel.Id
-            && (socketMessage.Author.Username.StripDescriminator().Contains(x.NameContains)
+            x => x.ChannelID == msg.ChannelId
+            && (msg.Author.Username.StripDescriminator().Contains(x.NameContains)
             || x.NameContains == "_ANY_")
             ).ToArray();
         if (evs.Length == 0) return;
@@ -123,9 +114,9 @@ internal static class MessageHandler
                 // Remove "_SHOW_ALL_" to properly .Remove()
                 string newRemove = ev.Remove.Replace(" _SHOW_ALL_", "");
                 // Get links of all attachments in message
-                IEnumerable<string> attachmentLinks = socketMessage.Attachments.Select(x => x.Url + ' ');
+                IEnumerable<string> attachmentLinks = msg.Attachments.Select(x => x.Url + ' ');
                 // Message clean content + attachment links joined with 🔗
-                string m = $"{socketMessage.CleanContent} \n\n" + string.Join(" 🔗 ", attachmentLinks);
+                string m = $"{msg.Content} \n\n" + string.Join(" 🔗 ", attachmentLinks);
                 // Remove operation
                 if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
                 // Prepend operation
@@ -159,8 +150,8 @@ internal static class MessageHandler
                 }
                 return;
             }
-            string content = socketMessage.CleanContent.Replace("\n", " ⤶ ").StripSymbols();
-            IReadOnlyCollection<Embed> embeds = socketMessage.Embeds;
+            string content = msg.Content.Replace("\n", " ⤶ ").StripSymbols();
+            IReadOnlyCollection<Embed> embeds = msg.Embeds;
 
             if (content.Length < 50
             && embeds.Count > 0)

@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using Tack.Core;
-using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 
@@ -30,7 +29,7 @@ internal sealed class MentionsRelay : ChatModule
         if (!Permission.IsBlacklisted(ircMessage.Username) && Mention.IsMatch(ircMessage.Message))
         {
             string msg = $"`[{DateTime.Now:F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
-            await MessageHandler.SendDiscordMessage(Config.Discord.GuildID, Config.Discord.PingsChannelID, msg);
+            await DiscordChat.SendMessage(Config.Discord.PingsChannelID, msg);
         }
     }
 }
