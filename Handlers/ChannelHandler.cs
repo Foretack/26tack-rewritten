@@ -221,7 +221,7 @@ internal static class StreamMonitor
     {
         StreamData.Clear();
         List<ExtendedChannel> Channels = ChannelHandler.FetchedChannels;
-        MonitoringService.SetChannelsByName(Channels.Select(x => x.Username).ToList());
+        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
     }
 
     public static void Stop()
