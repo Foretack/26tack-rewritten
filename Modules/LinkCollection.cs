@@ -4,6 +4,7 @@ using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Nonclass;
+using Tack.Utils;
 
 namespace Tack.Modules;
 internal sealed class LinkCollection : ChatModule
@@ -14,11 +15,19 @@ internal sealed class LinkCollection : ChatModule
 
         OnEnabled = _ => AnonymousChat.OnMessage += OnMessage;
         OnDisabled = _ => AnonymousChat.OnMessage -= OnMessage;
+        Time.DoEvery(10, async () => await Commit());
     }
 
-    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+    // no point in setting a timeout; timeouts throw exceptions, and exceptions can't be caught in async void
+    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled);
+    private static readonly List<(string Username, string Channel, string Link)>[] _commitLists = new[]
+    {
+        new List<(string, string, string)>(),
+        new List<(string, string, string)>()
+    };
+    private bool _toggle = false;
 
-    private async void OnMessage(object? sender, OnMessageArgs e)
+    private void OnMessage(object? sender, OnMessageArgs e)
     {
         var ircMessage = e.ChatMessage;
         if (ircMessage.Message.Length < 10) return;
@@ -31,14 +40,26 @@ internal sealed class LinkCollection : ChatModule
         if (link.Length < 10) return;
         if (link.Length > 400) return;
 
+        _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
+    }
+
+    private async Task Commit()
+    {
+        _toggle = !_toggle;
         using (DbQueries db = new DbQueries())
         {
-            _ = await db["collected_links"].InsertAsync(new
+            var list = _commitLists[_toggle ? 1 : 0];
+            if (!list.Any() || list.Count == 0) return;
+            _ = await db["collected_links"].InsertAsync(list.Select(x =>
             {
-                username = ircMessage.Username,
-                channel = ircMessage.Channel,
-                link_text = link
-            });
+                return new
+                {
+                    username = x.Username,
+                    channel = x.Channel,
+                    link_text = x.Link
+                };
+            }));
+            list.Clear();
         }
     }
 }

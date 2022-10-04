@@ -8,6 +8,7 @@ internal static class Time
     public static void Schedule(Action action, DateTime dueTime) => Schedule(action, Until(dueTime));
     public static void Schedule(Func<Task> task, DateTime dueTime) => Schedule(task, Until(dueTime));
     public static void DoEvery(int seconds, Action action) => DoEvery(TimeSpan.FromSeconds(seconds), action);
+    public static void DoEvery(int seconds, Func<Task> task) => DoEvery(TimeSpan.FromSeconds(seconds), task);
     public static bool HasPassed(DateTime datetime) => Time.Until(datetime) <= TimeSpan.Zero;
     public static bool HasPassed(TimeSpan timespan) => timespan <= TimeSpan.Zero;
 
