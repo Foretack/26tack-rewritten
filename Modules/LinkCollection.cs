@@ -52,7 +52,7 @@ internal sealed class LinkCollection : ChatModule
             var list = _commitLists[_toggle ? 1 : 0];
             if (!list.Any() || list.Count == 0) return;
             var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
-            _ = await Task.Run(() => db["collected_links"].AsInsert(_columns, data));
+            _ = await db["collected_links"].InsertAsync(_columns, data);
             list.Clear();
         }
     }
