@@ -25,6 +25,7 @@ internal sealed class LinkCollection : ChatModule
         new List<(string, string, string)>(),
         new List<(string, string, string)>()
     };
+    private static readonly IEnumerable<string> _columns = new[] { "username", "channel", "link_text" };
     private bool _toggle = false;
 
     private void OnMessage(object? sender, OnMessageArgs e)
@@ -50,15 +51,8 @@ internal sealed class LinkCollection : ChatModule
         {
             var list = _commitLists[_toggle ? 1 : 0];
             if (!list.Any() || list.Count == 0) return;
-            _ = await db["collected_links"].InsertAsync(list.Select(x =>
-            {
-                return new
-                {
-                    username = x.Username,
-                    channel = x.Channel,
-                    link_text = x.Link
-                };
-            }));
+            var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
+            _ = await Task.Run(() => db["collected_links"].AsInsert(_columns, data));
             list.Clear();
         }
     }
