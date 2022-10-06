@@ -28,14 +28,29 @@ internal class DiscordActivityNotifier : IModule
 
             if (spotify)
             {
-                string endString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
-                MessageHandler.SendMessage(Config.RelayChannel, $"{presence.Author.Username} is listening to: " +
-                    $"\"{activity.Details}\" by {activity.State} [{endString}] 🎶 ");
                 CurrentSong = activity;
+                string lenString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
+
+                if (!ActOnCooldown())
+                {
+                    MessageHandler.SendMessage(Config.RelayChannel,
+                        $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
+                }
                 continue;
             }
-
         }
+    }
+
+    private bool _onCooldown;
+    private bool ActOnCooldown()
+    {
+        if (!_onCooldown)
+        {
+            _onCooldown = true;
+            Time.Schedule(() => _onCooldown = false, TimeSpan.FromMinutes(2.5));
+            return false;
+        }
+        return _onCooldown;
     }
 
     public void Enable()
