@@ -9,19 +9,25 @@ internal static class DiscordClient
     private static readonly DiscordPresences _discordPresences = new();
     public static void Initialize()
     {
-        Redis.Subscribe("discord:messages").OnMessage(x =>
+        Redis.Subscribe("discord:messages").OnMessage(async x =>
         {
-            if (!x.Message.HasValue) return;
-            var message = JsonSerializer.Deserialize<DiscordMessage>(x.Message!);
-            if (message is null) return;
-            _discordChat.Raise(message);
+            await Task.Run(() =>
+            {
+                if (!x.Message.HasValue) return;
+                var message = JsonSerializer.Deserialize<DiscordMessage>(x.Message!);
+                if (message is null) return;
+                _discordChat.Raise(message);
+            }).ConfigureAwait(false);
         });
-        Redis.Subscribe("discord:presences").OnMessage(x =>
+        Redis.Subscribe("discord:presences").OnMessage(async x =>
         {
-            if (!x.Message.HasValue) return;
-            var presence = JsonSerializer.Deserialize<DiscordPresence>(x.Message!);
-            if (presence is null) return;
-            _discordPresences.Raise(presence);
+            await Task.Run(() =>
+            {
+                if (!x.Message.HasValue) return;
+                var presence = JsonSerializer.Deserialize<DiscordPresence>(x.Message!);
+                if (presence is null) return;
+                _discordPresences.Raise(presence);
+            }).ConfigureAwait(false);
         });
     }
 }
