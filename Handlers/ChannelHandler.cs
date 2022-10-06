@@ -248,12 +248,11 @@ internal static class StreamMonitor
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
-        var current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
             TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started.ToLocalTime();
-            StreamData[e.Channel] = current;
+            StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
                 $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
@@ -263,8 +262,7 @@ internal static class StreamMonitor
 
     private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
-        var current = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
-        StreamData[e.Channel] = current;
+        StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
             $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live: {e.Stream.Title} - {e.Stream.GameName}",
