@@ -13,8 +13,6 @@ public record Activity(
         [property: JsonPropertyName("LargeImageText")] string LargeImageText,
         [property: JsonPropertyName("SmallImage")] SmallImage SmallImage,
         [property: JsonPropertyName("SmallImageText")] string SmallImageText,
-        [property: JsonPropertyName("CurrentPartySize")] int CurrentPartySize,
-        [property: JsonPropertyName("MaximumPartySize")] int MaximumPartySize,
         [property: JsonPropertyName("StartTimestamp")] DateTime StartTimestamp,
         [property: JsonPropertyName("EndTimestamp")] DateTime? EndTimestamp
 );

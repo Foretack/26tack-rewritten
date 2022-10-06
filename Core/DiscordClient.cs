@@ -26,6 +26,7 @@ internal static class DiscordClient
                 if (!x.Message.HasValue) return;
                 var presence = JsonSerializer.Deserialize<DiscordPresence>(x.Message!);
                 if (presence is null) return;
+                if (!presence.Activities.Any(x => x is not null)) return;
                 _discordPresences.Raise(presence);
             }).ConfigureAwait(false);
         });

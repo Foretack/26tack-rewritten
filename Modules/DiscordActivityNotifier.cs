@@ -30,7 +30,7 @@ internal class DiscordActivityNotifier : IModule
             {
                 string endString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
                 MessageHandler.SendMessage(Config.RelayChannel, $"{presence.Author.Username} is listening to: " +
-                    $"\"{activity.Details}\" by {activity.State} [{((DateTime)activity.EndTimestamp!).ToLocalTime()}] 🎶 ");
+                    $"\"{activity.Details}\" by {activity.State} [{endString}] 🎶 ");
                 CurrentSong = activity;
                 continue;
             }
