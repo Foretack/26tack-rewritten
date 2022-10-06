@@ -215,7 +215,7 @@ internal static class StreamMonitor
         MonitoringService.Start();
 
         Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
-        Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData.Select(x => new { Key = x.Key, Data = x.Value })));
+        Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData.Select(x => x.Value)));
     }
 
     public static void Reset()
@@ -238,7 +238,7 @@ internal static class StreamMonitor
     #region Monitor events
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
-        TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started.ToLocalTime();
+        TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
             Config.RelayChannel,
@@ -251,8 +251,8 @@ internal static class StreamMonitor
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
-            TimeSpan uptime = DateTime.Now - StreamData[e.Channel].Started.ToLocalTime();
-            StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
+            TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
+            StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
             MessageHandler.SendColoredMessage(
                 Config.RelayChannel,
                 $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
