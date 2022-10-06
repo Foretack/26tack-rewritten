@@ -215,7 +215,7 @@ internal static class StreamMonitor
         MonitoringService.Start();
 
         Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
-        Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData));
+        Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData.Select(x => new { Key = x.Key, Data = x.Value })));
     }
 
     public static void Reset()
