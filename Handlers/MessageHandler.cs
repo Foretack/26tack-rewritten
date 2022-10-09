@@ -18,6 +18,7 @@ internal static class MessageHandler
     #region Initialization
     public static void Initialize()
     {
+        DiscordChat.OnMessage += OnDiscordMessageReceived;
         AnonymousChat.OnMessage += OnMessage;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
@@ -61,11 +62,11 @@ internal static class MessageHandler
     #endregion
 
     #region Receiving
-    internal static Task OnDiscordMessageReceived(DiscordMessage message)
+    internal static void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
+        var message = args.DiscordMessage;
         Log.Verbose($"Discord message received => {message.Author.Username} {message.ChannelName}: {message.Content}");
         HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
-        return Task.CompletedTask;
     }
     private static async void OnMessage(object? sender, OnMessageArgs e)
     {
