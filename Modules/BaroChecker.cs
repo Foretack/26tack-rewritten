@@ -28,6 +28,7 @@ internal sealed class BaroChecker : IModule
         Active = baro.Active;
         if (!Active && !baro.Active)
         {
+            if (Time.HasPassed(baro.Activation)) return;
             Time.Schedule(() =>
             {
                 ArrivedEv(ref baro);
@@ -39,6 +40,7 @@ internal sealed class BaroChecker : IModule
 
         if (Active && baro.Active)
         {
+            if (Time.HasPassed(baro.Expiry)) return;
             Time.Schedule(() =>
             {
                 DepartedEv(ref baro);
