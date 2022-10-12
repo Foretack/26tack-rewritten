@@ -19,15 +19,15 @@ internal static class ChannelHandler
     public static string[] JLChannels { get; private set; } = Array.Empty<string>();
     public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
 
-    private static readonly List<ExtendedChannel> JoinFailureChannels = new();
-    private static bool IsInProgress { get; set; } = false;
+    private static readonly List<ExtendedChannel> _joinFailureChannels = new();
+    private static bool _isInProgress = false;
     #endregion
 
     #region Initialization
     internal static async Task Connect(bool isReconnect)
     {
-        if (IsInProgress) return;
-        IsInProgress = true;
+        if (_isInProgress) return;
+        _isInProgress = true;
 
         if (isReconnect)
         {
@@ -62,7 +62,7 @@ internal static class ChannelHandler
             await Task.Delay(300);
         });
         c = default!;
-        IsInProgress = false;
+        _isInProgress = false;
         StreamMonitor.Start();
         Time.DoEvery(TimeSpan.FromHours(1), async () =>
         {
@@ -169,7 +169,7 @@ internal static class ChannelHandler
     private static void MainOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {
         Log.Warning($"[Main] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
-        JoinFailureChannels.Add(FetchedChannels.First(x => x.Username == e.Exception.Channel));
+        _joinFailureChannels.Add(FetchedChannels.First(x => x.Username == e.Exception.Channel));
         _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
     }
 
@@ -196,7 +196,7 @@ internal static class StreamMonitor
     #region Properties
     public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
-    private static readonly LiveStreamMonitorService MonitoringService = new(TwitchAPIHandler.API, 30);
+    private static readonly LiveStreamMonitorService _monitoringService = new(TwitchAPIHandler.API, 30);
     #endregion
 
     #region Controls
@@ -206,13 +206,13 @@ internal static class StreamMonitor
         StreamData = Channels.ToDictionary(
             x => x.Username,
             y => new Stream(y.Username, false, string.Empty, string.Empty, DateTime.Now));
-        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
+        _monitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
 
-        MonitoringService.OnServiceStarted += ServiceStarted;
-        MonitoringService.OnStreamOnline += StreamOnline;
-        MonitoringService.OnStreamUpdate += StreamUpdate;
-        MonitoringService.OnStreamOffline += StreamOffline;
-        MonitoringService.Start();
+        _monitoringService.OnServiceStarted += ServiceStarted;
+        _monitoringService.OnStreamOnline += StreamOnline;
+        _monitoringService.OnStreamUpdate += StreamUpdate;
+        _monitoringService.OnStreamOffline += StreamOffline;
+        _monitoringService.Start();
 
         Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
         Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData.Select(x => x.Value)));
@@ -222,16 +222,16 @@ internal static class StreamMonitor
     {
         StreamData.Clear();
         List<ExtendedChannel> Channels = ChannelHandler.FetchedChannels;
-        MonitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
+        _monitoringService.SetChannelsByName(Channels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
     }
 
     public static void Stop()
     {
-        MonitoringService.OnServiceStarted -= ServiceStarted;
-        MonitoringService.OnStreamOnline -= StreamOnline;
-        MonitoringService.OnStreamUpdate -= StreamUpdate;
-        MonitoringService.OnStreamOffline -= StreamOffline;
-        MonitoringService.Stop();
+        _monitoringService.OnServiceStarted -= ServiceStarted;
+        _monitoringService.OnStreamOnline -= StreamOnline;
+        _monitoringService.OnStreamUpdate -= StreamUpdate;
+        _monitoringService.OnStreamOffline -= StreamOffline;
+        _monitoringService.Stop();
     }
     #endregion
 

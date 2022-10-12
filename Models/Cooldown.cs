@@ -4,8 +4,8 @@ using Tack.Utils;
 namespace Tack.Models;
 public sealed class Cooldown
 {
-    private static readonly List<Cooldown> UserCooldownPool = new();
-    private static readonly List<Cooldown> ChannelCooldownPool = new();
+    private static readonly List<Cooldown> _userCooldownPool = new();
+    private static readonly List<Cooldown> _channelCooldownPool = new();
 
     public string User { get; set; }
     public string Channel { get; set; }
@@ -26,8 +26,8 @@ public sealed class Cooldown
 
         if (uCD == 0 && cCD == 0) return true;
 
-        if (UserCooldownPool.Any(x => x.User == cd.User && x.CooldownOptions.Name == cd.CooldownOptions.Name) // same user + same command
-        || ChannelCooldownPool.Any(x => x.Channel == cd.Channel && x.CooldownOptions.Name == cd.CooldownOptions.Name)) // same channel + same command
+        if (_userCooldownPool.Any(x => x.User == cd.User && x.CooldownOptions.Name == cd.CooldownOptions.Name) // same user + same command
+        || _channelCooldownPool.Any(x => x.Channel == cd.Channel && x.CooldownOptions.Name == cd.CooldownOptions.Name)) // same channel + same command
         {
             Log.Verbose($"[{cd.User};{cd.Channel};{cd.CooldownOptions.Name}] is on cooldown");
             return false;
@@ -40,14 +40,14 @@ public sealed class Cooldown
         // Remove USER cooldown
         Time.Schedule(() =>
         {
-            _ = UserCooldownPool.Remove(cd);
+            _ = _userCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.User};{cd.CooldownOptions.Name}]");
         }, TimeSpan.FromSeconds(uCD));
 
         // Remove CHANNEL cooldown
         Time.Schedule(() =>
         {
-            _ = ChannelCooldownPool.Remove(cd);
+            _ = _channelCooldownPool.Remove(cd);
             Log.Verbose($"- [{cd.Channel};{cd.CooldownOptions.Name}]");
         }, TimeSpan.FromSeconds(cCD));
 
@@ -57,8 +57,8 @@ public sealed class Cooldown
 
     private static void RegisterNewCooldown(Cooldown newCooldown, bool user = true, bool channel = true)
     {
-        if (user) UserCooldownPool.Add(newCooldown);
-        if (channel) ChannelCooldownPool.Add(newCooldown);
+        if (user) _userCooldownPool.Add(newCooldown);
+        if (channel) _channelCooldownPool.Add(newCooldown);
     }
 }
 

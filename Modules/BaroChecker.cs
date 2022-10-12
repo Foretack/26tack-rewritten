@@ -14,46 +14,46 @@ internal sealed class BaroChecker : IModule
         Time.DoEvery(TimeSpan.FromMinutes(15), async () => await Check()); // Always running; returns if disabled
     }
 
-    private bool Active { get; set; } = false;
-    private bool Scheduled { get; set; } = false;
+    private bool _active = false;
+    private bool _scheduled = false;
 
     private async ValueTask Check()
     {
         if (!Enabled) return;
-        if (Scheduled) return;
+        if (_scheduled) return;
 
         VoidTrader? baro = (await ExternalAPIHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
         if (baro is null) return;
 
-        Active = baro.Active;
-        if (!Active && !baro.Active)
+        _active = baro.Active;
+        if (!_active && !baro.Active)
         {
             if (Time.HasPassed(baro.Activation)) return;
             Time.Schedule(() =>
             {
                 ArrivedEv(ref baro);
-                Scheduled = false;
+                _scheduled = false;
             }, baro.Activation);
-            Scheduled = true;
+            _scheduled = true;
             Log.Debug($"Scheduled baro arrival: {Time.UntilString(baro.Activation)}");
         }
 
-        if (Active && baro.Active)
+        if (_active && baro.Active)
         {
             if (Time.HasPassed(baro.Expiry)) return;
             Time.Schedule(() =>
             {
                 DepartedEv(ref baro);
-                Scheduled = false;
+                _scheduled = false;
             }, baro.Expiry);
-            Scheduled = true;
+            _scheduled = true;
             Log.Debug($"Scheduled baro departure: {Time.UntilString(baro.Expiry)}");
         }
     }
 
     private void ArrivedEv(ref VoidTrader baro)
     {
-        Active = true;
+        _active = true;
         if (!Enabled) return;
         MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
         MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
@@ -61,7 +61,7 @@ internal sealed class BaroChecker : IModule
 
     private void DepartedEv(ref VoidTrader baro)
     {
-        Active = false;
+        _active = false;
         if (!Enabled) return;
         MessageHandler.SendMessage("pajlada", "Void trader Baro Ki’Teer has departed! 💠");
         MessageHandler.SendMessage(Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");

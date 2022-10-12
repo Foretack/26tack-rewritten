@@ -10,12 +10,12 @@ internal abstract class DbConnection : IDisposable
     public QueryFactory QueryFactory { get; protected set; }
     public HttpClient Requests { get; private set; } = new();
 
-    private NpgsqlConnection Connection { get; set; } = new(ConnectionString);
-    private PostgresCompiler Compiler { get; set; } = new();
+    private NpgsqlConnection _connection = new(ConnectionString);
+    private PostgresCompiler _compiler = new();
 
     protected DbConnection(int logLevel = 1)
     {
-        QueryFactory = new QueryFactory(Connection, Compiler);
+        QueryFactory = new QueryFactory(_connection, _compiler);
         QueryFactory.Logger = compiled =>
         {
             switch (logLevel)
@@ -58,16 +58,16 @@ internal abstract class DbConnection : IDisposable
         {
             if (disposing)
             {
-                Connection.Close();
-                Connection.Dispose();
+                _connection.Close();
+                _connection.Dispose();
                 Requests.Dispose();
                 QueryFactory.Dispose();
             }
 
             QueryFactory = default!;
-            Compiler = default!;
+            _compiler = default!;
             Requests = default!;
-            Connection = default!;
+            _connection = default!;
             disposedValue = true;
         }
     }

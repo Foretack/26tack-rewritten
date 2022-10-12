@@ -14,7 +14,7 @@ public static class Core
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 
-    private static string AssemblyName { get; } = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(AssemblyName)} can not be null.");
+    private static string _assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(_assemblyName)} can not be null.");
     #endregion
 
     #region Main
@@ -62,7 +62,7 @@ public static class Core
         Log.Fatal($"The program is restarting...");
         var db = new DbQueries();
         _ = db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
-        _ = Process.Start($"./{AssemblyName}", Environment.GetCommandLineArgs());
+        _ = Process.Start($"./{_assemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
     #endregion

@@ -7,21 +7,21 @@ public sealed class Permission
     public int Level { get; set; } // forsenLevel
     public string Username { get; set; }
 
-    private bool IsBroadcaster { get; set; }
-    private bool IsModerator { get; set; }
-    private bool IsVIP { get; set; }
-    private bool IsSubscriber { get; set; }
+    private bool _isBroadcaster;
+    private bool _isModerator;
+    private bool _isVIP;
+    private bool _isSubscriber;
 
-    private static readonly List<string> BlacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
-    private static readonly List<string> WhitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
+    private static readonly List<string> _blacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
+    private static readonly List<string> _whitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
 
     public Permission(TwitchMessage ircMessage)
     {
         Username = ircMessage.Username;
-        IsBroadcaster = ircMessage.IsBroadcaster;
-        IsModerator = ircMessage.IsModerator;
-        IsVIP = ircMessage.IsVip;
-        IsSubscriber = ircMessage.IsSubscriber;
+        _isBroadcaster = ircMessage.IsBroadcaster;
+        _isModerator = ircMessage.IsModerator;
+        _isVIP = ircMessage.IsVip;
+        _isSubscriber = ircMessage.IsSubscriber;
         Level = EvaluateLevel();
     }
 
@@ -29,12 +29,12 @@ public sealed class Permission
     {
         int level = 0;
 
-        if (WhitelistedUsers.Contains(Username)) { level = (int)PermissionLevels.Whitelisted; return level; }
-        if (BlacklistedUsers.Contains(Username)) { level = (int)PermissionLevels.EveryonePlusBlacklisted; return level; }
-        if (IsBroadcaster) { level = (int)PermissionLevels.Broadcaster; return level; }
-        if (IsModerator) { level = (int)PermissionLevels.Moderator; return level; }
-        if (IsVIP) { level = (int)PermissionLevels.VIP; return level; }
-        if (IsSubscriber) { level = (int)PermissionLevels.Subscriber; return level; }
+        if (_whitelistedUsers.Contains(Username)) { level = (int)PermissionLevels.Whitelisted; return level; }
+        if (_blacklistedUsers.Contains(Username)) { level = (int)PermissionLevels.EveryonePlusBlacklisted; return level; }
+        if (_isBroadcaster) { level = (int)PermissionLevels.Broadcaster; return level; }
+        if (_isModerator) { level = (int)PermissionLevels.Moderator; return level; }
+        if (_isVIP) { level = (int)PermissionLevels.VIP; return level; }
+        if (_isSubscriber) { level = (int)PermissionLevels.Subscriber; return level; }
 
         return level;
     }
@@ -46,13 +46,13 @@ public sealed class Permission
 
     public static bool IsBlacklisted(string username)
     {
-        return BlacklistedUsers.Contains(username);
+        return _blacklistedUsers.Contains(username);
     }
 
-    public static void BlacklistUser(string username) { BlacklistedUsers.Add(username); }
-    public static void UnBlacklistUser(string username) { _ = BlacklistedUsers.Remove(username); }
-    public static void WhitelistUser(string username) { WhitelistedUsers.Add(username); }
-    public static void UnWhitelistUser(string username) { _ = WhitelistedUsers.Remove(username); }
+    public static void BlacklistUser(string username) { _blacklistedUsers.Add(username); }
+    public static void UnBlacklistUser(string username) { _ = _blacklistedUsers.Remove(username); }
+    public static void WhitelistUser(string username) { _whitelistedUsers.Add(username); }
+    public static void UnWhitelistUser(string username) { _ = _whitelistedUsers.Remove(username); }
 }
 
 public enum PermissionLevels : sbyte

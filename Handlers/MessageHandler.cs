@@ -10,9 +10,9 @@ namespace Tack.Handlers;
 internal static class MessageHandler
 {
     #region Properties
-    private static ChatColor CurrentColor { get; set; } = ChatColor.FANCY_NOT_SET_STATE_NAME;
-    private static DiscordEvent[] DiscordEvents { get; set; } = DbQueries.NewInstance().GetDiscordEvents();
-    private static readonly Dictionary<string, string> LastSentMessage = new();
+    private static ChatColor _currentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    private static DiscordEvent[] _discordEvents = DbQueries.NewInstance().GetDiscordEvents();
+    private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
     #region Initialization
@@ -24,30 +24,30 @@ internal static class MessageHandler
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }
 
-    public static void ReloadDiscordTriggers() { DiscordEvents = DbQueries.NewInstance().GetDiscordEvents(); }
+    public static void ReloadDiscordTriggers() { _discordEvents = DbQueries.NewInstance().GetDiscordEvents(); }
     #endregion
 
     #region Sending
     public static void SendMessage(string channel, string message)
     {
         message = message.Length >= 500 ? message[..495] + "..." : message;
-        if (!LastSentMessage.ContainsKey(channel))
+        if (!_lastSentMessage.ContainsKey(channel))
         {
-            LastSentMessage.Add(channel, message);
+            _lastSentMessage.Add(channel, message);
         }
-        else if (LastSentMessage[channel] == message)
+        else if (_lastSentMessage[channel] == message)
         {
             message += " 󠀀";
         }
         MainClient.Client.SendMessage(channel, message);
-        LastSentMessage[channel] = message;
+        _lastSentMessage[channel] = message;
     }
     public static void SendColoredMessage(string channel, string message, ChatColor color)
     {
-        if (CurrentColor != color)
+        if (_currentColor != color)
         {
             SendMessage(Config.Auth.Username, $"/color {color}");
-            CurrentColor = color;
+            _currentColor = color;
         }
         SendMessage(channel, "/me " + message);
     }
@@ -102,7 +102,7 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
-        DiscordEvent[] evs = DiscordEvents.Where(
+        DiscordEvent[] evs = _discordEvents.Where(
             x => x.ChannelID == msg.ChannelId
             && (msg.Author.Username.StripDescriminator().Contains(x.NameContains)
             || x.NameContains == "_ANY_")

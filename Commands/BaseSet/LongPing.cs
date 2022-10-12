@@ -11,24 +11,24 @@ internal sealed class LongPing : Command
 {
     public override CommandInfo Info { get; } = new(
     name: "longping",
-    description: "Test if TMI is in fact eating messages",
+    description: "Test TMI",
     userCooldown: 300,
     channelCooldown: 300,
     permission: PermissionLevels.Moderator
     );
 
-    private static bool Commencing { get; set; } = false;
-    private static readonly List<string> NotifyList = new();
+    private static bool _commencing = false;
+    private static readonly List<string> _notifyList = new();
 
     public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        if (Commencing)
+        if (_commencing)
         {
             MessageHandler.SendMessage(channel, $"@{user}, A test is already commencing WTRuck You will be notified about its results");
-            if (!NotifyList.Contains(channel)) NotifyList.Add(channel);
+            if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
             return;
         }
 
@@ -39,7 +39,7 @@ internal sealed class LongPing : Command
             return;
         }
 
-        Commencing = true;
+        _commencing = true;
         string[] messages = await GenerateMessages();
         int count = messages.Length;
         AnonymousChat.OnMessage += Read;
@@ -53,23 +53,23 @@ internal sealed class LongPing : Command
         await Task.Delay(2500);
 
         AnonymousChat.OnMessage -= Read;
-        if (!NotifyList.Contains(channel)) NotifyList.Add(channel);
+        if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
 
-        string results = $"{CaughtCount} of {count} messages caught | ~{LatencySum / CaughtCount}ms";
+        string results = $"{_caughtCount} of {count} messages caught | ~{_latencySum / _caughtCount}ms";
         await "bot:longping".SetExpiringKey(results, TimeSpan.FromMinutes(2.5));
 
-        CaughtCount = 0;
-        LatencySum = 0;
+        _caughtCount = 0;
+        _latencySum = 0;
 
-        foreach (string c in NotifyList)
+        foreach (string c in _notifyList)
         {
             MessageHandler.SendMessage(c, results);
-            _ = NotifyList.Remove(c);
+            _ = _notifyList.Remove(c);
         }
-        Commencing = false;
+        _commencing = false;
     }
 
-    private static readonly char[] chars =
+    private static readonly char[] _chars =
     {
         '⣿', '⣷', '⡜', '⢀', '⠂', '⣶', '⣒',
         'a', 'b', 'c', 'd', 'e', 'f', '1', '2',
@@ -85,7 +85,7 @@ internal sealed class LongPing : Command
                 var message = new StringBuilder();
                 for (int j = 0; j < 450; j++)
                 {
-                    _ = message.Append(chars.Choice());
+                    _ = message.Append(_chars.Choice());
                 }
                 messages.Add(message.ToString());
             }
@@ -93,8 +93,8 @@ internal sealed class LongPing : Command
         return messages.ToArray();
     }
 
-    private static short CaughtCount { get; set; } = 0;
-    private static float LatencySum { get; set; } = 0;
+    private static short _caughtCount = 0;
+    private static float _latencySum = 0;
     private void Read(object? sender, OnMessageArgs e)
     {
         var ircMessage = e.ChatMessage;
@@ -103,8 +103,8 @@ internal sealed class LongPing : Command
         && ircMessage.Username == Config.Auth.Username)
         {
             float Latency = (float)(unixTimeMs - double.Parse(ircMessage.TmiSentTs));
-            LatencySum += Latency;
-            CaughtCount++;
+            _latencySum += Latency;
+            _caughtCount++;
         }
     }
 }
