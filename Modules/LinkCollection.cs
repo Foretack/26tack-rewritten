@@ -40,6 +40,7 @@ internal sealed class LinkCollection : ChatModule
         if (link is null) return;
         if (link.Length < 10) return;
         if (link.Length > 400) return;
+        if (!link.StartsWith('h')) return;
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
     }
