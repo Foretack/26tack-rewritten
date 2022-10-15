@@ -25,7 +25,7 @@ public sealed record TwitchMessage(
     [property: JsonPropertyName("RoomId")] string RoomId,
     [property: JsonPropertyName("SubscribedMonthCount")] int SubscribedMonthCount,
     [property: JsonPropertyName("TmiSentTs")] string TmiSentTs,
-    [property: JsonPropertyName("ChatReply")] object ChatReply,
+    [property: JsonPropertyName("ChatReply")] ChatReply ChatReply,
     [property: JsonPropertyName("Badges")] IReadOnlyList<Badge> Badges,
     [property: JsonPropertyName("BotUsername")] string BotUsername,
     [property: JsonPropertyName("Color")] Color Color,
@@ -67,6 +67,14 @@ public sealed record Emote(
     [property: JsonPropertyName("StartIndex")] int StartIndex,
     [property: JsonPropertyName("EndIndex")] int EndIndex,
     [property: JsonPropertyName("ImageUrl")] string ImageUrl
+);
+
+public sealed record ChatReply(
+        [property: JsonPropertyName("ParentDisplayName")] string ParentDisplayName,
+        [property: JsonPropertyName("ParentMsgBody")] string ParentMsgBody,
+        [property: JsonPropertyName("ParentMsgId")] string ParentMsgId,
+        [property: JsonPropertyName("ParentUserId")] string ParentUserId,
+        [property: JsonPropertyName("ParentUserLogin")] string ParentUserLogin
 );
 
 public sealed record EmoteSet(
