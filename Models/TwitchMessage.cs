@@ -6,9 +6,9 @@ public sealed record TwitchMessage(
     [property: JsonPropertyName("Bits")] int Bits,
     [property: JsonPropertyName("BitsInDollars")] int BitsInDollars,
     [property: JsonPropertyName("Channel")] string Channel,
-    [property: JsonPropertyName("CheerBadge")] object CheerBadge,
-    [property: JsonPropertyName("CustomRewardId")] object CustomRewardId,
-    [property: JsonPropertyName("EmoteReplacedMessage")] object EmoteReplacedMessage,
+    [property: JsonPropertyName("CheerBadge")] CheerBadge CheerBadge,
+    [property: JsonPropertyName("CustomRewardId")] string CustomRewardId,
+    [property: JsonPropertyName("EmoteReplacedMessage")] string EmoteReplacedMessage,
     [property: JsonPropertyName("Id")] string Id,
     [property: JsonPropertyName("IsBroadcaster")] bool IsBroadcaster,
     [property: JsonPropertyName("IsFirstMessage")] bool IsFirstMessage,
@@ -37,6 +37,11 @@ public sealed record TwitchMessage(
     [property: JsonPropertyName("Username")] string Username,
     [property: JsonPropertyName("UserType")] int UserType,
     [property: JsonPropertyName("RawIrcMessage")] string RawIrcMessage
+);
+
+public sealed record CheerBadge(
+    [property: JsonPropertyName("CheerAmount")] int CheerAmount,
+    [property: JsonPropertyName("Color")] object Color
 );
 
 public sealed record Badge(
