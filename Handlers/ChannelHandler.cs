@@ -16,7 +16,6 @@ internal static class ChannelHandler
     public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<ExtendedChannel> AnonJoinedChannels { get; } = new List<ExtendedChannel>();
-    public static string[] JLChannels { get; private set; } = Array.Empty<string>();
     public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
 
     private static readonly List<ExtendedChannel> _joinFailureChannels = new();
@@ -39,7 +38,6 @@ internal static class ChannelHandler
 
         Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
-        JLChannels = (await ExternalAPIHandler.GetIvrChannels()).Channels.Select(x => x.Name).ToArray();
 
         await "twitch:channels".SetKey(FetchedChannels);
 
@@ -55,7 +53,7 @@ internal static class ChannelHandler
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Username);
-                Log.Debug($"[Main] Queued join: {x.Username} (JustLog:{JLChannels.Contains(x.Username)})");
+                Log.Debug($"[Main] Queued join: {x.Username}");
                 await Task.Delay(300);
             }
             Log.Debug($"[Anon] Queued join: {x.Username}");

@@ -7,6 +7,26 @@ using M = Tack.Models;
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
 {
+    public static async Task<Result<T>> GetInto<T>(string url, int timeout = 5)
+    {
+        var requests = new HttpClient()
+        {
+            Timeout = TimeSpan.FromSeconds(timeout)
+        };
+
+        try
+        {
+            Stream response = await requests.GetStreamAsync(url);
+            T? result = await JsonSerializer.DeserializeAsync<T>(response);
+            return new Result<T>(result!, true, default!);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, $"Exception throw :: GET {url} => {ex.Message}");
+            return new Result<T>(default!, false, ex);
+        }
+    }
+
     public static async Task<M::User?> GetIvrUser(string username)
     {
         var requests = new HttpClient();
@@ -26,80 +46,8 @@ internal static class ExternalAPIHandler
         }
     }
 
-    public static async Task<TMI?> GetChannelChatters(string channel)
-    {
-        var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(2);
-
-        try
-        {
-            Stream tmiResponse = await requests.GetStreamAsync($"https://tmi.twitch.tv/group/user/{channel}/chatters");
-            TMI clist = (await JsonSerializer.DeserializeAsync<TMI>(tmiResponse))!;
-            return clist;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch [{channel}] chatters");
-            return null;
-        }
-    }
-
-    public static async Task<JokeAPI?> GetRandomJoke()
-    {
-        var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromMilliseconds(500);
-
-        try
-        {
-            Stream response = await requests.GetStreamAsync("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
-            JokeAPI rj = (await JsonSerializer.DeserializeAsync<JokeAPI>(response))!;
-            return rj;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to get a random joke xd");
-            return null;
-        }
-    }
-
-    public static async Task<JustLog> GetIvrChannels()
-    {
-        var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromMilliseconds(1500);
-
-        try
-        {
-            Stream jlcl = await requests.GetStreamAsync(Config.Links.IvrChannels);
-            JustLog deserialized = (await JsonSerializer.DeserializeAsync<JustLog>(jlcl))!;
-            return deserialized;
-        }
-        catch (Exception ex)
-        {
-            Log.Fatal(ex, "Failed to load just logged channels");
-            throw;
-        }
-    }
-
     #region Warframe
     private const string WarframeBaseUrl = "https://api.warframestat.us/";
-
-    public static async Task<MarketItems?> GetMarketItemListings(string itemName)
-    {
-        var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(1);
-
-        try
-        {
-            Stream iResponse = await requests.GetStreamAsync($"https://api.warframe.market/v1/items/{itemName}/orders?platform=pc");
-            MarketItems item = (await JsonSerializer.DeserializeAsync<MarketItems>(iResponse))!;
-            return item;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"Failed to fetch \"{itemName}\" from the market");
-            return null;
-        }
-    }
 
     public static async Task<RelicData?> GetRelicData()
     {
