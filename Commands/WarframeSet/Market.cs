@@ -31,13 +31,14 @@ internal sealed class Market : Command
         string option1 = "activeOnly";
         bool activeOnly = Options.ParseBool(option1, ctx.IrcMessage.Message) ?? true;
         string desiredItem = string.Join('_', args.Where(x => !x.StartsWith(option1))).ToLower();
-        MarketItems? listings = await ExternalAPIHandler.GetMarketItemListings(desiredItem);
-        if (listings is null)
+        var res = await ExternalAPIHandler.GetInto<MarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
+        if (!res.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :(");
+            MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :( -> {res.Exception.Message}");
             return false;
         }
 
+        var listings = res.Value;
         await Task.Run(() =>
         {
             Order[] orders = listings.Payload.Orders

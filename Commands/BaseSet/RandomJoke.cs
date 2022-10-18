@@ -13,18 +13,21 @@ internal sealed class RandomJoke : Command
         aliases: new string[] { "4head", "rj" }
     );
 
+    private readonly string[] _appendedEndings = new string[] { "LuL", "4Head", "xd", string.Empty };
+
     public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        JokeAPI? rj = await ExternalAPIHandler.GetRandomJoke();
+        var result = await ExternalAPIHandler.GetInto<JokeAPI>("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
 
-        if (rj is null)
+        if (!result.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, there was an error retrieving a random joke :(");
+            MessageHandler.SendMessage(channel, $"@{user}, there was an error retrieving a random joke :( -> {result.Exception.Message}");
             return;
         }
-        MessageHandler.SendMessage(channel, $"@{user}, [{rj.Category}] {rj.Joke.Replace('\n', ' ')} {new string[] { "LuL", "4Head", "xd", string.Empty }.Choice()}");
+        var joke = result.Value;
+        MessageHandler.SendMessage(channel, $"@{user}, [{joke.Category}] {joke.Joke.Replace('\n', ' ')} {_appendedEndings.Choice()}");
     }
 }

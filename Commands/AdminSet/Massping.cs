@@ -40,13 +40,17 @@ internal sealed class Massping : Command
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        TMI chatterList =
-            await $"twitch:users:{targetChannel}:chatters".GetOrCreate<TMI>(async () => (await ExternalAPIHandler.GetChannelChatters(targetChannel))!, true, TimeSpan.FromMinutes(15));
-        if (chatterList is null)
+        TMI chatterList = await $"twitch:users:{targetChannel}:chatters".GetOrCreate<TMI>(async () =>
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Could not fetch chatters of that channel :(");
-            return;
-        }
+            var res = await ExternalAPIHandler.GetInto<TMI>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
+            if (!res.Success)
+            {
+                MessageHandler.SendMessage(channel, $"@{user}, Could not fetch chatters of that channel :( -> {res.Exception.Message}");
+                return default!;
+            }
+            return res.Value;
+        }, true, TimeSpan.FromMinutes(15));
+        if (chatterList is null) return;
 
         if (mods)
         {

@@ -1,16 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace Tack.Json;
-
-public sealed record JustLog(
-    [property: JsonPropertyName("channels")] IReadOnlyList<Channel> Channels
-);
-public sealed record Channel(
-        [property: JsonPropertyName("userID")] string UserID,
-        [property: JsonPropertyName("name")] string Name
-    );
-
-
 public sealed record IvrUserData(
     [property: JsonPropertyName("banned")] bool Banned,
     [property: JsonPropertyName("displayName")] string DisplayName,
