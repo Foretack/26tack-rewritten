@@ -1,5 +1,5 @@
 ﻿using Tack.Handlers;
-using Tack.Json;
+using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -31,7 +31,7 @@ internal sealed class BaroChecker : IModule
             if (Time.HasPassed(baro.Activation)) return;
             Time.Schedule(() =>
             {
-                ArrivedEv(ref baro);
+                ArrivedEv(baro);
                 _scheduled = false;
             }, baro.Activation);
             _scheduled = true;
@@ -43,7 +43,7 @@ internal sealed class BaroChecker : IModule
             if (Time.HasPassed(baro.Expiry)) return;
             Time.Schedule(() =>
             {
-                DepartedEv(ref baro);
+                DepartedEv(baro);
                 _scheduled = false;
             }, baro.Expiry);
             _scheduled = true;
@@ -51,7 +51,7 @@ internal sealed class BaroChecker : IModule
         }
     }
 
-    private void ArrivedEv(ref VoidTrader baro)
+    private void ArrivedEv(VoidTrader baro)
     {
         _active = true;
         if (!Enabled) return;
@@ -59,7 +59,7 @@ internal sealed class BaroChecker : IModule
         MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
     }
 
-    private void DepartedEv(ref VoidTrader baro)
+    private void DepartedEv(VoidTrader baro)
     {
         _active = false;
         if (!Enabled) return;

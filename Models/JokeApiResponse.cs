@@ -1,8 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Tack.Json;
-
-public sealed record JokeAPI(
+namespace Tack.Models;
+public sealed record JokeApiResponse(
     [property: JsonPropertyName("category")] string Category,
     [property: JsonPropertyName("joke")] string Joke
 );

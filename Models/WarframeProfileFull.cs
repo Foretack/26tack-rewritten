@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Tack.Json;
+namespace Tack.Models;
 
 #region Token stuff
 public sealed class V5Root
