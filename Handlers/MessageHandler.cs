@@ -130,10 +130,10 @@ internal static class MessageHandler
                 var messages = new Queue<string>();
                 foreach (string message in sMessage)
                 {
-                    // Split message into chunks if length is >= 488
-                    if (message.Length >= 488)
+                    // Split message into chunks if length is >= 475
+                    if (message.Length >= 475)
                     {
-                        IEnumerable<char[]> chunks = message.Chunk(488);
+                        IEnumerable<char[]> chunks = message.Chunk(475);
                         foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
                         continue;
                     }
@@ -149,7 +149,7 @@ internal static class MessageHandler
                     SendColoredMessage(ev.OutputChannel, messages.Dequeue(), _color);
                     await Task.Delay(2500);
                 }
-                return;
+                continue;
             }
             string content = msg.Content.Replace("\n", " ⤶ ").StripSymbols();
             IReadOnlyCollection<Embed> embeds = msg.Embeds;
