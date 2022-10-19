@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Tack.Json;
-public sealed record IvrUserData(
+namespace Tack.Models;
+public sealed record IvrUser(
     [property: JsonPropertyName("banned")] bool Banned,
     [property: JsonPropertyName("displayName")] string DisplayName,
     [property: JsonPropertyName("login")] string Login,
@@ -15,12 +15,12 @@ public sealed record IvrUserData(
     [property: JsonPropertyName("createdAt")] DateTime CreatedAt,
     [property: JsonPropertyName("updatedAt")] DateTime UpdatedAt,
     [property: JsonPropertyName("chatSettings")] ChatSettings ChatSettings,
-    [property: JsonPropertyName("badge")] IReadOnlyList<Badge> Badge,
+    [property: JsonPropertyName("badge")] IReadOnlyList<UserBadge> Badge,
     [property: JsonPropertyName("roles")] Roles Roles,
     [property: JsonPropertyName("settings")] Settings Settings,
     [property: JsonPropertyName("panels")] IReadOnlyList<Panel> Panels
 );
-public sealed record Badge(
+public sealed record UserBadge(
         [property: JsonPropertyName("setID")] string SetID,
         [property: JsonPropertyName("title")] string Title,
         [property: JsonPropertyName("description")] string Description,

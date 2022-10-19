@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Tack.Handlers;
-using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
@@ -31,7 +30,7 @@ internal sealed class Market : Command
         string option1 = "activeOnly";
         bool activeOnly = Options.ParseBool(option1, ctx.IrcMessage.Message) ?? true;
         string desiredItem = string.Join('_', args.Where(x => !x.StartsWith(option1))).ToLower();
-        var res = await ExternalAPIHandler.GetInto<MarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
+        var res = await ExternalAPIHandler.GetInto<WarframeMarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
         if (!res.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :( -> {res.Exception.Message}");

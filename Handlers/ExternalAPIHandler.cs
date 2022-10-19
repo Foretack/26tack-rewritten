@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using Tack.Database;
-using Tack.Json;
+using Tack.Models;
 using M = Tack.Models;
 
 namespace Tack.Handlers;
@@ -35,7 +35,7 @@ internal static class ExternalAPIHandler
         try
         {
             Stream resp = await requests.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
-            IvrUserData ivrUser = (await JsonSerializer.DeserializeAsync<IvrUserData>(resp))!;
+            IvrUser ivrUser = (await JsonSerializer.DeserializeAsync<IvrUser>(resp))!;
             var user = new M::User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
             return user;
         }

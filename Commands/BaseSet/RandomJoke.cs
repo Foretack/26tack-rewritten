@@ -1,5 +1,4 @@
 ﻿using Tack.Handlers;
-using Tack.Json;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
@@ -20,7 +19,7 @@ internal sealed class RandomJoke : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        var result = await ExternalAPIHandler.GetInto<JokeAPI>("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
+        var result = await ExternalAPIHandler.GetInto<JokeApiResponse>("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
 
         if (!result.Success)
         {
