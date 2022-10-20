@@ -65,16 +65,18 @@ public sealed class OnDiscordMsgArgs : EventArgs
 
 internal sealed class DiscordPresences
 {
+    public static event EventHandler<OnDiscordPresenceArgs> OnUpdate
+    {
+        add => _presenceEventManager.AddEventHandler(value, nameof(OnUpdate));
+        remove => _presenceEventManager.RemoveEventHandler(value, nameof(OnUpdate));
+    }
+
+    private static readonly WeakEventManager<OnDiscordPresenceArgs> _presenceEventManager = new();
+
     public delegate void OnDiscordPresenceHandler(object? sender, OnDiscordPresenceArgs args);
-    public static event EventHandler<OnDiscordPresenceArgs> OnUpdate;
     public void Raise(DiscordPresence presence)
     {
-        RaiseEvent(new OnDiscordPresenceArgs(presence));
-    }
-    private void RaiseEvent(OnDiscordPresenceArgs args)
-    {
-        EventHandler<OnDiscordPresenceArgs> handler = OnUpdate;
-        if (handler is not null) handler(this, args);
+        _presenceEventManager.RaiseEvent(new OnDiscordPresenceArgs(presence), nameof(OnUpdate));
     }
 }
 
