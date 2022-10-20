@@ -12,6 +12,7 @@ internal static class ModulesHandler
         AddModule(new MentionsRelay());
         AddModule(new BaroChecker());
         AddModule(new DiscordActivityNotifier());
+        AddModule(new Tf2NewsPrinter());
     }
 
     private static void AddModule(IModule module)
