@@ -18,19 +18,21 @@ internal static class MessageHandler
     #region Events
     public static event EventHandler<OnDiscordMsgArgs> OnDiscordMsg
     {
-        add => DiscordChat.DiscordMessageManager.AddEventHandler(value);
-        remove => DiscordChat.DiscordMessageManager.RemoveEventHandler(value);
+        add => DiscordChat.DiscordMessageManager.AddEventHandler(value, nameof(OnDiscordMsg));
+        remove => DiscordChat.DiscordMessageManager.RemoveEventHandler(value, nameof(OnDiscordMsg));
     }
     public static event EventHandler<OnMessageArgs> OnTwitchMsg
     {
-        add => AnonymousChat.TwitchMessageManager.AddEventHandler(value);
-        remove => AnonymousChat.TwitchMessageManager.RemoveEventHandler(value);
+        add => AnonymousChat.TwitchMessageManager.AddEventHandler(value, nameof(OnTwitchMsg));
+        remove => AnonymousChat.TwitchMessageManager.RemoveEventHandler(value, nameof(OnTwitchMsg));
     }
     #endregion
 
     #region Initialization
     public static void Initialize()
     {
+        OnTwitchMsg += OnMessage;
+        OnDiscordMsg += OnDiscordMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }

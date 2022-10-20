@@ -40,7 +40,7 @@ internal sealed class AnonymousChat
 
     public void Raise(TwitchMessage message)
     {
-        TwitchMessageManager.RaiseEvent(new OnMessageArgs(message), nameof(MessageHandler.OnTwitchMsg));
+        TwitchMessageManager.RaiseEvent(this, new OnMessageArgs(message), nameof(MessageHandler.OnTwitchMsg));
     }
 }
 
