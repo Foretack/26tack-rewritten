@@ -27,9 +27,9 @@ internal sealed class Tf2NewsPrinter : IModule
         foreach (var line in lines)
         {
             if (line[..4] == "    " && line[4..TfArrow.Length] == TfArrow)
-                MessageHandler.SendMessage(Config.RelayChannel, line[(TfArrow.Length + 4)..]);
+                MessageHandler.SendMessage(Config.RelayChannel, "|-> " + line[(TfArrow.Length + 4)..]);
             else if (line.StartsWith(TfArrow))
-                MessageHandler.SendMessage(Config.RelayChannel, line[TfArrow.Length..]);
+                MessageHandler.SendMessage(Config.RelayChannel, "● " + line[TfArrow.Length..]);
             else continue;
             await Task.Delay(500);
         }
