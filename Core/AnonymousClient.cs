@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using AsyncAwaitBestPractices;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -34,19 +35,12 @@ internal static class AnonymousClient
 
 internal sealed class AnonymousChat
 {
+    public static WeakEventManager<OnMessageArgs> TwitchMessageManager { get; } = new();
     public delegate void OnMessageHandler(object? sender, OnMessageArgs args);
-    public static event EventHandler<OnMessageArgs> OnMessage;
+
     public void Raise(TwitchMessage message)
     {
-        RaiseEvent(new OnMessageArgs(message));
-    }
-    private void RaiseEvent(OnMessageArgs args)
-    {
-        EventHandler<OnMessageArgs> raiseEvent = OnMessage;
-        if (raiseEvent is not null)
-        {
-            raiseEvent(this, args);
-        }
+        TwitchMessageManager.RaiseEvent(this, new OnMessageArgs(message), nameof(MessageHandler.OnTwitchMsg));
     }
 }
 

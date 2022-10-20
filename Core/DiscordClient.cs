@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using AsyncAwaitBestPractices;
 using Tack.Database;
+using Tack.Handlers;
 using Tack.Models;
 
 namespace Tack.Core;
@@ -35,16 +37,12 @@ internal static class DiscordClient
 
 internal sealed class DiscordChat
 {
+    public static WeakEventManager<OnDiscordMsgArgs> DiscordMessageManager { get; } = new();
     public delegate void OnDiscordMsgHandler(object? sender, OnDiscordMsgArgs args);
-    public static event EventHandler<OnDiscordMsgArgs> OnMessage;
+
     public void Raise(DiscordMessage message)
     {
-        RaiseEvent(new OnDiscordMsgArgs(message));
-    }
-    private void RaiseEvent(OnDiscordMsgArgs args)
-    {
-        EventHandler<OnDiscordMsgArgs> handler = OnMessage;
-        if (handler is not null) handler(this, args);
+        DiscordMessageManager.RaiseEvent(new OnDiscordMsgArgs(message), nameof(MessageHandler.OnDiscordMsg));
     }
 
     public static async Task SendMessage(ulong channelId, string content)
@@ -67,16 +65,18 @@ public sealed class OnDiscordMsgArgs : EventArgs
 
 internal sealed class DiscordPresences
 {
+    public static event EventHandler<OnDiscordPresenceArgs> OnUpdate
+    {
+        add => _presenceEventManager.AddEventHandler(value, nameof(OnUpdate));
+        remove => _presenceEventManager.RemoveEventHandler(value, nameof(OnUpdate));
+    }
+
+    private static readonly WeakEventManager<OnDiscordPresenceArgs> _presenceEventManager = new();
+
     public delegate void OnDiscordPresenceHandler(object? sender, OnDiscordPresenceArgs args);
-    public static event EventHandler<OnDiscordPresenceArgs> OnUpdate;
     public void Raise(DiscordPresence presence)
     {
-        RaiseEvent(new OnDiscordPresenceArgs(presence));
-    }
-    private void RaiseEvent(OnDiscordPresenceArgs args)
-    {
-        EventHandler<OnDiscordPresenceArgs> handler = OnUpdate;
-        if (handler is not null) handler(this, args);
+        _presenceEventManager.RaiseEvent(new OnDiscordPresenceArgs(presence), nameof(OnUpdate));
     }
 }
 

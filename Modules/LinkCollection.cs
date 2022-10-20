@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using SqlKata.Execution;
-using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
+using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -11,10 +11,6 @@ internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {
-        AnonymousChat.OnMessage += OnMessage;
-
-        OnEnabled = _ => AnonymousChat.OnMessage += OnMessage;
-        OnDisabled = _ => AnonymousChat.OnMessage -= OnMessage;
         Time.DoEvery(10, async () => await Commit());
     }
 
@@ -28,21 +24,24 @@ internal sealed class LinkCollection : ChatModule
     private static readonly IEnumerable<string> _columns = new[] { "username", "channel", "link_text" };
     private bool _toggle = false;
 
-    private void OnMessage(object? sender, OnMessageArgs e)
+    protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
-        var ircMessage = e.ChatMessage;
-        if (ircMessage.Message.Length < 10) return;
-        if (ircMessage.Username == Config.Auth.Username) return;
-        if (ircMessage.Username.Contains("bot") || ircMessage.Username == "streamelements") return;
-        if (ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel)) return;
+        if (ircMessage.Message.Length < 10
+        || ircMessage.Username == Config.Auth.Username
+        || ircMessage.Username.Contains("bot")
+        || ircMessage.Username == "streamelements"
+        || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
+            return ValueTask.CompletedTask;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
-        if (link is null) return;
-        if (link.Length < 10) return;
-        if (link.Length > 400) return;
-        if (!link.StartsWith('h')) return;
+        if (link is null
+        || link.Length < 10
+        || link.Length > 400
+        || !link.StartsWith('h'))
+            return ValueTask.CompletedTask;
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
+        return ValueTask.CompletedTask;
     }
 
     private async Task Commit()

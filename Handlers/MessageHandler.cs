@@ -15,11 +15,24 @@ internal static class MessageHandler
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
+    #region Events
+    public static event EventHandler<OnDiscordMsgArgs> OnDiscordMsg
+    {
+        add => DiscordChat.DiscordMessageManager.AddEventHandler(value, nameof(OnDiscordMsg));
+        remove => DiscordChat.DiscordMessageManager.RemoveEventHandler(value, nameof(OnDiscordMsg));
+    }
+    public static event EventHandler<OnMessageArgs> OnTwitchMsg
+    {
+        add => AnonymousChat.TwitchMessageManager.AddEventHandler(value, nameof(OnTwitchMsg));
+        remove => AnonymousChat.TwitchMessageManager.RemoveEventHandler(value, nameof(OnTwitchMsg));
+    }
+    #endregion
+
     #region Initialization
     public static void Initialize()
     {
-        DiscordChat.OnMessage += OnDiscordMessageReceived;
-        AnonymousChat.OnMessage += OnMessage;
+        OnTwitchMsg += OnMessage;
+        OnDiscordMsg += OnDiscordMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
     }

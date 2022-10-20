@@ -42,7 +42,7 @@ internal sealed class LongPing : Command
         _commencing = true;
         string[] messages = await GenerateMessages();
         int count = messages.Length;
-        AnonymousChat.OnMessage += Read;
+        MessageHandler.OnTwitchMsg += Read;
 
         for (int i = 0; i < count; i++)
         {
@@ -52,7 +52,7 @@ internal sealed class LongPing : Command
         }
         await Task.Delay(2500);
 
-        AnonymousChat.OnMessage -= Read;
+        MessageHandler.OnTwitchMsg -= Read;
         if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
 
         string results = $"{_caughtCount} of {count} messages caught | ~{_latencySum / _caughtCount}ms";
