@@ -24,13 +24,19 @@ internal static class ModulesHandler
     {
         if (!_modules.ContainsKey(name)) return false;
 
-        _modules[name].Enable();
+        var module = _modules[name];
+        if (module.Enabled) return true;
+
+        module.Enable();
         return true;
     }
 
     public static bool DisableModule(string name)
     {
         if (!_modules.ContainsKey(name)) return false;
+
+        var module = _modules[name];
+        if (!module.Enabled) return true;
 
         _modules[name].Disable();
         return true;
