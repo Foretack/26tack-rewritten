@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using AsyncAwaitBestPractices;
 using Tack.Database;
+using Tack.Handlers;
 using Tack.Models;
 
 namespace Tack.Core;
@@ -35,16 +37,12 @@ internal static class DiscordClient
 
 internal sealed class DiscordChat
 {
+    public static WeakEventManager<OnDiscordMsgArgs> DiscordMessageManager { get; } = new();
     public delegate void OnDiscordMsgHandler(object? sender, OnDiscordMsgArgs args);
-    public static event EventHandler<OnDiscordMsgArgs> OnMessage;
+
     public void Raise(DiscordMessage message)
     {
-        RaiseEvent(new OnDiscordMsgArgs(message));
-    }
-    private void RaiseEvent(OnDiscordMsgArgs args)
-    {
-        EventHandler<OnDiscordMsgArgs> handler = OnMessage;
-        if (handler is not null) handler(this, args);
+        DiscordMessageManager.RaiseEvent(new OnDiscordMsgArgs(message), nameof(MessageHandler.OnDiscordMsg));
     }
 
     public static async Task SendMessage(ulong channelId, string content)

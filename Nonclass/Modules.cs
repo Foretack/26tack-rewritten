@@ -1,4 +1,8 @@
-﻿namespace Tack.Nonclass;
+﻿using AsyncAwaitBestPractices;
+using Tack.Handlers;
+using Tack.Models;
+
+namespace Tack.Nonclass;
 
 public interface IModule
 {
@@ -19,17 +23,31 @@ public abstract class ChatModule : IModule
     protected Action<ChatModule> OnEnabled { get; set; } = _ => { };
     protected Action<ChatModule> OnDisabled { get; set; } = _ => { };
 
+    protected ChatModule()
+    {
+        Enable();
+    }
+
+    private void OnTwitchMessage(object? sender, Core.OnMessageArgs e)
+    {
+        OnMessage(e.ChatMessage).SafeFireAndForget(x => Log.Error(x, $"{Name} encountered an issue"));
+    }
+
+    protected abstract ValueTask OnMessage(TwitchMessage ircMessage);
+
     public void Enable()
     {
         Enabled = true;
-        Log.Debug($"Enabled module: {Name}");
+        MessageHandler.OnTwitchMsg += OnTwitchMessage;
         OnEnabled.Invoke(this);
+        Log.Debug($"Enabled module: {Name}");
     }
 
     public void Disable()
     {
         Enabled = false;
-        Log.Debug($"Disabled module: {Name}");
+        MessageHandler.OnTwitchMsg -= OnTwitchMessage;
         OnDisabled.Invoke(this);
+        Log.Debug($"Disabled module: {Name}");
     }
 }
