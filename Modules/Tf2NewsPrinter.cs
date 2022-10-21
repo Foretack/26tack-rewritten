@@ -30,6 +30,8 @@ internal sealed class Tf2NewsPrinter : IModule
                 MessageHandler.SendMessage(Config.RelayChannel, "|-> " + line[(TfArrow.Length + 4)..]);
             else if (line.StartsWith(TfArrow))
                 MessageHandler.SendMessage(Config.RelayChannel, "● " + line[TfArrow.Length..]);
+            else if (line.StartsWith("https://www.teamfortress.com"))
+                MessageHandler.SendMessage(Config.RelayChannel, line);
             else continue;
             await Task.Delay(500);
         }
