@@ -42,7 +42,7 @@ internal sealed class DiscordChat
 
     public void Raise(DiscordMessage message)
     {
-        DiscordMessageManager.RaiseEvent(new OnDiscordMsgArgs(message), nameof(MessageHandler.OnDiscordMsg));
+        DiscordMessageManager.RaiseEvent(this, new OnDiscordMsgArgs(message), nameof(MessageHandler.OnDiscordMsg));
     }
 
     public static async Task SendMessage(ulong channelId, string content)
@@ -76,7 +76,7 @@ internal sealed class DiscordPresences
     public delegate void OnDiscordPresenceHandler(object? sender, OnDiscordPresenceArgs args);
     public void Raise(DiscordPresence presence)
     {
-        _presenceEventManager.RaiseEvent(new OnDiscordPresenceArgs(presence), nameof(OnUpdate));
+        _presenceEventManager.RaiseEvent(this, new OnDiscordPresenceArgs(presence), nameof(OnUpdate));
     }
 }
 
