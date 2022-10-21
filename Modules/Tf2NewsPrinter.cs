@@ -16,11 +16,11 @@ internal sealed class Tf2NewsPrinter : IModule
         var message = e.DiscordMessage;
         if (message is null
         || message.ChannelId == 0
-        || message.Author.Name is null
+        || message.Author.Username is null
         || message.ChannelId != 864407160422662184
         || message.Author.Username != "TF2 Community #updates"
-        || !message.Content.StartsWith("**Team Fortress 2 Update Released**")
-        || !message.Content.StartsWith(TfArrow))
+        || (!message.Content.StartsWith("**Team Fortress 2 Update Released**")
+        && !message.Content.StartsWith(TfArrow)))
             return;
 
         var lines = message.Content.Split('\n');
