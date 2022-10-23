@@ -29,6 +29,6 @@ internal sealed class MentionsRelay : ChatModule
             string msg = $"`[{DateTime.Now:F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
             await DiscordChat.SendMessage(Config.Discord.PingsChannelID, msg);
         }
-        if (Time.Since(start).TotalMilliseconds >= 10) Log.Warning($"{nameof(MentionsRelay)} took too long to process a message (>=10ms)");
+        if (Time.Since(start).TotalMilliseconds >= 10) Log.Warning($"{nameof(MentionsRelay)} module took too long to process a message (>=10ms)");
     }
 }

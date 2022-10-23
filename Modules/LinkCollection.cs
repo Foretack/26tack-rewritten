@@ -42,7 +42,7 @@ internal sealed class LinkCollection : ChatModule
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
 
-        if (Time.Since(start).TotalMilliseconds >= 25) Log.Warning($"{nameof(LinkCollection)} took too long to process a message (>=25ms)");
+        if (Time.Since(start).TotalMilliseconds >= 25) Log.Warning($"{nameof(LinkCollection)} module took too long to process a message (>=25ms)");
         return default;
     }
 
