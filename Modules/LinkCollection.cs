@@ -14,8 +14,7 @@ internal sealed class LinkCollection : ChatModule
         Time.DoEvery(10, async () => await Commit());
     }
 
-    // no point in setting a timeout; timeouts throw exceptions, and exceptions can't be caught in async void
-    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled);
+    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     private static readonly List<(string Username, string Channel, string Link)>[] _commitLists = new[]
     {
         new List<(string, string, string)>(),
