@@ -14,8 +14,7 @@ internal sealed class LinkCollection : ChatModule
         Time.DoEvery(10, async () => await Commit());
     }
 
-    // no point in setting a timeout; timeouts throw exceptions, and exceptions can't be caught in async void
-    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled);
+    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\=]*)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     private static readonly List<(string Username, string Channel, string Link)>[] _commitLists = new[]
     {
         new List<(string, string, string)>(),
@@ -26,22 +25,25 @@ internal sealed class LinkCollection : ChatModule
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
+        var start = DateTime.Now;
         if (ircMessage.Message.Length < 10
         || ircMessage.Username == Config.Auth.Username
         || ircMessage.Username.Contains("bot")
         || ircMessage.Username == "streamelements"
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
-            return ValueTask.CompletedTask;
+            return default;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null
         || link.Length < 10
         || link.Length > 400
         || !link.StartsWith('h'))
-            return ValueTask.CompletedTask;
+            return default;
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
-        return ValueTask.CompletedTask;
+
+        if (Time.Since(start).TotalMilliseconds >= 25) Log.Warning($"{nameof(LinkCollection)} module took too long to process a message (>=25ms)");
+        return default;
     }
 
     private async Task Commit()
