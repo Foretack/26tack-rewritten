@@ -26,22 +26,25 @@ internal sealed class LinkCollection : ChatModule
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
+        var start = DateTime.Now;
         if (ircMessage.Message.Length < 10
         || ircMessage.Username == Config.Auth.Username
         || ircMessage.Username.Contains("bot")
         || ircMessage.Username == "streamelements"
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
-            return ValueTask.CompletedTask;
+            return default;
 
         string? link = ircMessage.Message.Split(' ').FirstOrDefault(x => _regex.IsMatch(x));
         if (link is null
         || link.Length < 10
         || link.Length > 400
         || !link.StartsWith('h'))
-            return ValueTask.CompletedTask;
+            return default;
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
-        return ValueTask.CompletedTask;
+
+        if (Time.Since(start).TotalMilliseconds >= 25) Log.Warning($"{nameof(LinkCollection)} took too long to process a message (>=25ms)");
+        return default;
     }
 
     private async Task Commit()
