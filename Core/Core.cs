@@ -6,6 +6,7 @@ using CliWrap.Buffered;
 using Serilog.Core;
 using Tack.Database;
 using Tack.Handlers;
+using Tack.Utils;
 
 namespace Tack.Core;
 public static class Core
@@ -24,6 +25,7 @@ public static class Core
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
+            .WriteTo.Discord("https://discord.com/api/webhooks/1034159567355002911/8KNvbmpv4RK7qoKGi7j5YRK2UMlug5Sn6PCSalJnmiXQEzEC54An5Ns6PA1DgiZvEr-s")
             .CreateLogger();
 
         var db = new DbQueries(0);
