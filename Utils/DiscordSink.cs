@@ -61,7 +61,7 @@ internal sealed class DiscordSink : ILogEventSink
                 }
             };
             StringContent content = new(JsonSerializer.Serialize(discordMessage), Encoding.UTF8, "application/json");
-            await _httpClient.PostAsync(_webhookUrl, content);
+            _ = await _httpClient.PostAsync(_webhookUrl, content);
             return;
         }
 
@@ -78,7 +78,7 @@ internal sealed class DiscordSink : ILogEventSink
             }
         };
         StringContent content_ = new(JsonSerializer.Serialize(discordMessage_), Encoding.UTF8, "application/json");
-        var a = await _httpClient.PostAsync(_webhookUrl, content_);
+        _ = await _httpClient.PostAsync(_webhookUrl, content_);
     }
 
     private void SpecifyEmbedLevel(LogEventLevel level)
