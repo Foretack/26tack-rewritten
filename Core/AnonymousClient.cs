@@ -29,7 +29,7 @@ internal static class AnonymousClient
         {
             if (x.Message.ToString().Contains("active,")) ShardStatus = x.Message.ToString() ?? "unknown";
         });
-        ShardUpdates.OnShardUpdate += (s, e) => MessageHandler.SendMessage(Config.RelayChannel, e.UpdateMessage);
+        ShardUpdates.OnShardUpdate += (s, e) => MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, e.UpdateMessage);
     }
 }
 

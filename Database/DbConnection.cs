@@ -5,7 +5,11 @@ using SqlKata.Execution;
 namespace Tack.Database;
 internal abstract class DbConnection : IDisposable
 {
-    private const string ConnectionString = $"Host={Config.Host};Username={Config.DbUsername};Password={Config.Password};Database={Config.DatabaseName}";
+    private static readonly string ConnectionString =
+        $"Host={AppConfigLoader.Config.DbHost};" +
+        $"Username={AppConfigLoader.Config.DbUser};" +
+        $"Password={AppConfigLoader.Config.DbPass};" +
+        $"Database={AppConfigLoader.Config.DbName}";
 
     public QueryFactory QueryFactory { get; protected set; }
     public HttpClient Requests { get; private set; } = new();

@@ -29,7 +29,7 @@ public static class MainClient
         Client = new TwitchClient(webSocketClient);
         Client.AutoReListenOnException = true;
 
-        var credentials = new ConnectionCredentials(Config.Auth.Username, Config.Auth.AccessToken);
+        var credentials = new ConnectionCredentials(AppConfigLoader.Config.BotUsername, AppConfigLoader.Config.BotAccessToken);
         Client.Initialize(credentials);
 
         Connect();

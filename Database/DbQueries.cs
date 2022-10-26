@@ -84,28 +84,6 @@ internal sealed class DbQueries : DbConnection
         return query.Select(x => (string)x.username).ToArray();
     }
 
-    public async Task<Authorization> GetAuthorizationData()
-    {
-        var query = await base["auth"]
-            .GetAsync();
-
-        var row = query.First();
-        var auth = new Authorization(row.username, row.access_token, row.client_id, row.supibot_token, row.discord_token);
-
-        return auth;
-    }
-
-    public async Task<Discord> GetDiscordData()
-    {
-        var query = await base["discord"]
-            .GetAsync();
-
-        var row = query.First();
-        var data = new Discord((ulong)row.guild_id, (ulong)row.pings_channelid, (ulong)row.news_channelid, row.ping_string);
-
-        return data;
-    }
-
     public async Task<bool> RemoveChannel(ExtendedChannel channel)
     {
         int deleted = await base["channels"]

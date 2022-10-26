@@ -1,0 +1,16 @@
+﻿DbHost:
+DbUser:
+DbPass:
+DbName:
+
+RedisHost:
+RedisPass:
+
+RelayChannel:
+BotUsername:
+BotAccessToken:
+BotClientId:
+SupibotApiToken:
+MainPrefix: 
+
+LoggingWebhookUrl:
