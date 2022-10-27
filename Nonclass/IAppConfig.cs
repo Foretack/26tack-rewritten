@@ -18,5 +18,5 @@ public interface IAppConfig
 
     string LoggingWebhookUrl { get; }
 
-    Dictionary<string, ulong> DiscordChannelIds { get; }
+    List<(string, ulong)> DiscordChannelIds { get; }
 }

@@ -15,5 +15,5 @@ MainPrefix:
 
 LoggingWebhookUrl:
 
-# Dictionary<string, ulong>
+# string: ulong
 DiscordChannelIds:
