@@ -14,3 +14,6 @@ SupibotApiToken:
 MainPrefix: 
 
 LoggingWebhookUrl:
+
+# Dictionary<string, ulong>
+DiscordChannelIds:
