@@ -18,5 +18,7 @@ public interface IAppConfig
 
     string LoggingWebhookUrl { get; }
 
-    List<(string, ulong)> DiscordChannelIds { get; }
+    List<DiscordChannel> DiscordChannels { get; }
 }
+
+public sealed record DiscordChannel(String Name, ulong Id);

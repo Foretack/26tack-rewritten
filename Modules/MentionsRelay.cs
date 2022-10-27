@@ -27,7 +27,7 @@ internal sealed class MentionsRelay : ChatModule
         if (!Permission.IsBlacklisted(ircMessage.Username) && Mention.IsMatch(ircMessage.Message))
         {
             string msg = $"`[{DateTime.Now:F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
-            await DiscordChat.SendMessage(AppConfigLoader.Config.DiscordChannelIds.Where(x => x.Item1 == "Mentions").Select(x => x.Item2).First(), msg);
+            await DiscordChat.SendMessage(AppConfigLoader.Config.DiscordChannels[0].Id, msg);
         }
         if (Time.Since(start).TotalMilliseconds >= 10) Log.Warning($"{nameof(MentionsRelay)} module took too long to process a message (>=10ms)");
     }
