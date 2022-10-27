@@ -33,7 +33,7 @@ internal class DiscordActivityNotifier : IModule
 
                 if (!ActOnCooldown())
                 {
-                    MessageHandler.SendMessage(Config.RelayChannel,
+                    MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
                         $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
                 }
                 continue;

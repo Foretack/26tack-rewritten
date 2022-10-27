@@ -59,7 +59,7 @@ internal static class MessageHandler
     {
         if (_currentColor != color)
         {
-            SendMessage(Config.Auth.Username, $"/color {color}");
+            SendMessage(AppConfigLoader.Config.BotUsername, $"/color {color}");
             _currentColor = color;
         }
         SendMessage(channel, "/me " + message);

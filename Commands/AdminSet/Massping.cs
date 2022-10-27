@@ -31,7 +31,7 @@ internal sealed class Massping : Command
         string targetChannel = args[0].ToLower();
         bool mods = false;
 
-        if (channel != Config.RelayChannel || targetChannel == Config.RelayChannel)
+        if (channel != AppConfigLoader.Config.RelayChannel || targetChannel == AppConfigLoader.Config.RelayChannel)
         {
             MessageHandler.SendMessage(channel, "Can't do that in this channel!");
             return;

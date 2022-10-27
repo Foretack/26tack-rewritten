@@ -56,7 +56,7 @@ internal sealed class BaroChecker : IModule
         _active = true;
         if (!Enabled) return;
         MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
-        MessageHandler.SendMessage(Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+        MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
     }
 
     private void DepartedEv(VoidTrader baro)
@@ -64,7 +64,7 @@ internal sealed class BaroChecker : IModule
         _active = false;
         if (!Enabled) return;
         MessageHandler.SendMessage("pajlada", "Void trader Baro Ki’Teer has departed! 💠");
-        MessageHandler.SendMessage(Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
+        MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
     }
 
     public void Enable()

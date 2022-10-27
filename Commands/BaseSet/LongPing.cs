@@ -19,6 +19,7 @@ internal sealed class LongPing : Command
 
     private static bool _commencing = false;
     private static readonly List<string> _notifyList = new();
+    private static readonly string BotUsername = AppConfigLoader.Config.BotUsername;
 
     public override async Task Execute(CommandContext ctx)
     {
@@ -47,7 +48,7 @@ internal sealed class LongPing : Command
         for (int i = 0; i < count; i++)
         {
             string message = messages[i];
-            MessageHandler.SendMessage(Config.Auth.Username, $"test {i + 1} " + message);
+            MessageHandler.SendMessage(BotUsername, $"test {i + 1} " + message);
             await Task.Delay(125);
         }
         await Task.Delay(2500);
@@ -99,8 +100,8 @@ internal sealed class LongPing : Command
     {
         var ircMessage = e.ChatMessage;
         long unixTimeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        if (ircMessage.Channel == Config.Auth.Username
-        && ircMessage.Username == Config.Auth.Username)
+        if (ircMessage.Channel == BotUsername
+        && ircMessage.Username == BotUsername)
         {
             float Latency = (float)(unixTimeMs - double.Parse(ircMessage.TmiSentTs));
             _latencySum += Latency;

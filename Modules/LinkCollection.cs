@@ -27,7 +27,7 @@ internal sealed class LinkCollection : ChatModule
     {
         var start = DateTime.Now;
         if (ircMessage.Message.Length < 10
-        || ircMessage.Username == Config.Auth.Username
+        || ircMessage.Username == AppConfigLoader.Config.BotUsername
         || ircMessage.Username.Contains("bot")
         || ircMessage.Username == "streamelements"
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))

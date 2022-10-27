@@ -132,7 +132,7 @@ internal static class ChannelHandler
 
         if (pCount != cCount)
         {
-            MessageHandler.SendColoredMessage(Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
+            MessageHandler.SendColoredMessage(AppConfigLoader.Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
         }
     }
 
@@ -195,6 +195,7 @@ internal static class StreamMonitor
     public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
     private static readonly LiveStreamMonitorService _monitoringService = new(TwitchAPIHandler.API, 30);
+    private static readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
     #endregion
 
     #region Controls
@@ -239,7 +240,7 @@ internal static class StreamMonitor
         TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
-            Config.RelayChannel,
+            _relayChannel,
             $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! -- {uptime.FormatTimeLeft()}",
             ChatColor.GoldenRod);
     }
@@ -252,7 +253,7 @@ internal static class StreamMonitor
             TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
             StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
             MessageHandler.SendColoredMessage(
-                Config.RelayChannel,
+                _relayChannel,
                 $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
                 ChatColor.DodgerBlue);
         }
@@ -262,14 +263,14 @@ internal static class StreamMonitor
     {
         StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         MessageHandler.SendColoredMessage(
-            Config.RelayChannel,
+            _relayChannel,
             $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live: {e.Stream.Title} - {e.Stream.GameName}",
             ChatColor.SpringGreen);
     }
 
     private static void ServiceStarted(object? sender, OnServiceStartedArgs e)
     {
-        MessageHandler.SendMessage(Config.RelayChannel, $"OBSOLETE Hello");
+        MessageHandler.SendMessage(_relayChannel, $"OBSOLETE Hello");
     }
     #endregion
 

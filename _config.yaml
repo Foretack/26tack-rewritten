@@ -1,0 +1,21 @@
+﻿DbHost:
+DbUser:
+DbPass:
+DbName:
+
+RedisHost:
+RedisPass:
+
+RelayChannel:
+BotUsername:
+BotAccessToken:
+BotClientId:
+SupibotApiToken:
+MainPrefix: 
+
+LoggingWebhookUrl:
+
+# Discord channels
+Mentions: 
+Feed: 
+Errors: 

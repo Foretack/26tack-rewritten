@@ -5,7 +5,7 @@ using Tack.Utils;
 namespace Tack.Database;
 internal static class Redis
 {
-    private static readonly RedisConnection _connection = new("localhost");
+    private static readonly RedisConnection _connection = new($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
     private static readonly Dictionary<RedisChannel, ChannelMessageQueue> _pubsubChannels = new();
 
     public static async Task<RedisValue> GetSet(this string key, RedisValue newValue) => await _connection.Db.StringGetSetAsync(key, newValue);
