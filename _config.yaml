@@ -15,5 +15,7 @@ MainPrefix:
 
 LoggingWebhookUrl:
 
-# string: ulong
-DiscordChannelIds:
+# Discord channels
+Mentions: 
+Feed: 
+Errors: 
