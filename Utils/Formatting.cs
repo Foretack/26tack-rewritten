@@ -6,6 +6,9 @@ internal static class Formatting
         return exception.Message;
     }
 
+    public static string Join(this IEnumerable<object> src, char seperator) => string.Join(seperator, src);
+    public static string Join(this IEnumerable<object> src, string separator) => string.Join(separator, src);
+
     public static string AsString<T>(this T[] arr)
     {
         return $"[\"{string.Join("\", \"", arr)}\"]";

@@ -9,9 +9,9 @@ using TwitchLib.Communication.Events;
 namespace Tack.Handlers;
 internal static class MessageHandler
 {
-    #region Properties
+    #region Fields
     private static ChatColor _currentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
-    private static DiscordEvent[] _discordEvents = DbQueries.NewInstance().GetDiscordEvents();
+    private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
@@ -35,9 +35,15 @@ internal static class MessageHandler
         OnDiscordMsg += OnDiscordMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
+
+        Time.DoEvery(TimeSpan.FromHours(6), async () => await ReloadDiscordTriggers());
     }
 
-    public static void ReloadDiscordTriggers() { _discordEvents = DbQueries.NewInstance().GetDiscordEvents(); }
+    public static async Task ReloadDiscordTriggers()
+    {
+        using var db = new DbQueries();
+        _discordEvents = await db.GetDiscordTriggers();
+    }
     #endregion
 
     #region Sending
@@ -115,18 +121,18 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
-        DiscordEvent[] evs = _discordEvents.Where(
-            x => x.ChannelID == msg.ChannelId
-            && (msg.Author.Username.StripDescriminator().Contains(x.NameContains)
+        DiscordTrigger[] evs = _discordEvents.Where(
+            x => x.ChannelId == msg.ChannelId
+            && (msg.Author.Username.Contains(x.NameContains)
             || x.NameContains == "_ANY_")
             ).ToArray();
         if (evs.Length == 0) return;
-        foreach (DiscordEvent? ev in evs)
+        foreach (var ev in evs)
         {
-            if (ev.Remove?.Contains(" _SHOW_ALL_") ?? false)
+            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText.Contains(" _SHOW_ALL_"))
             {
                 // Remove "_SHOW_ALL_" to properly .Remove()
-                string newRemove = ev.Remove.Replace(" _SHOW_ALL_", "");
+                string newRemove = ev.RemoveText.Replace(" _SHOW_ALL_", "");
                 // Get links of all attachments in message
                 IEnumerable<string> attachmentLinks = msg.Attachments.Select(x => x.Url + ' ');
                 // Message clean content + attachment links joined with 🔗
@@ -134,7 +140,7 @@ internal static class MessageHandler
                 // Remove operation
                 if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
                 // Prepend operation
-                m = $"{ev.Prepend} " + m;
+                m = $"{ev.PrependText} " + m;
                 // Message is split by 2 new lines
                 string[] sMessage = m.Split("\n\n");
                 // Strip formatting symbols & show newlines
@@ -153,13 +159,10 @@ internal static class MessageHandler
                     messages.Enqueue(message);
                 }
 
-                // Get color
-                ChatColor _color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor _clr) ? _clr : ChatColor.BlueViolet;
-
                 // Send messages every 2.5 seconds
                 while (messages.Count > 0)
                 {
-                    SendColoredMessage(ev.OutputChannel, messages.Dequeue(), _color);
+                    SendMessage(ev.OutChannel, messages.Dequeue());
                     await Task.Delay(2500);
                 }
                 continue;
@@ -185,16 +188,14 @@ internal static class MessageHandler
                 content += $" [+{"Embed".PluralizeWith(embedCount)}]";
             }
 
-            if (ev.Remove is not null) content = ev.Remove == "_ALL_" ? string.Empty : content.Replace(ev.Remove, string.Empty);
-            if (ev.Prepend is not null) content = $"{ev.Prepend} {content}";
-            ChatColor color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor clr) ? clr : ChatColor.BlueViolet;
-            SendColoredMessage(ev.OutputChannel, content, color);
+            if (ev.RemoveText is not null) content = ev.RemoveText == "_ALL_" ? string.Empty : content.Replace(ev.RemoveText, string.Empty);
+            if (ev.PrependText is not null) content = $"{ev.PrependText} {content}";
+            SendMessage(ev.OutChannel, content);
         }
     }
     #endregion
 }
 
-internal sealed record DiscordEvent(ulong ChannelID, string NameContains, string? Remove, string OutputChannel, string? Prepend, string Color);
 internal enum ChatColor
 {
     FANCY_NOT_SET_STATE_NAME,

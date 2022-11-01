@@ -10,11 +10,11 @@ namespace Tack.Commands.BaseSet;
 internal sealed class LongPing : Command
 {
     public override CommandInfo Info { get; } = new(
-    name: "longping",
-    description: "Test TMI",
-    userCooldown: 300,
-    channelCooldown: 300,
-    permission: PermissionLevels.Moderator
+        name: "longping",
+        description: "Test TMI",
+        userCooldown: 300,
+        channelCooldown: 300,
+        permission: PermissionLevels.Moderator
     );
 
     private static bool _commencing = false;
@@ -70,12 +70,7 @@ internal sealed class LongPing : Command
         _commencing = false;
     }
 
-    private static readonly char[] _chars =
-    {
-        '⣿', '⣷', '⡜', '⢀', '⠂', '⣶', '⣒',
-        'a', 'b', 'c', 'd', 'e', 'f', '1', '2',
-        '3', '4', '5', '6', '7', '8', '9', '0'
-    };
+    private const string _s = "⣿⣷⡜⢀⠂⣶⣒abcdef1234567890";
     private async Task<string[]> GenerateMessages(int count = 50)
     {
         var messages = new List<string>();
@@ -86,7 +81,7 @@ internal sealed class LongPing : Command
                 var message = new StringBuilder();
                 for (int j = 0; j < 450; j++)
                 {
-                    _ = message.Append(_chars.Choice());
+                    _ = message.Append(_s.Choice());
                 }
                 messages.Add(message.ToString());
             }

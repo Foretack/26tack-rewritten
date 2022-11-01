@@ -42,13 +42,13 @@ internal sealed class Tf2NewsPrinter : IModule
     {
         MessageHandler.OnDiscordMsg += OnDiscordMessage;
         Enabled = true;
-        Log.Information($"{nameof(Tf2NewsPrinter)} Module enabled");
+        Log.Debug($"{nameof(Tf2NewsPrinter)} Module enabled");
     }
 
     public void Disable()
     {
         MessageHandler.OnDiscordMsg -= OnDiscordMessage;
         Enabled = false;
-        Log.Information($"{nameof(Tf2NewsPrinter)} Module disabled");
+        Log.Debug($"{nameof(Tf2NewsPrinter)} Module disabled");
     }
 }
