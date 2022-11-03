@@ -1,4 +1,6 @@
-﻿using AsyncAwaitBestPractices;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using AsyncAwaitBestPractices;
 using Tack.Core;
 using Tack.Database;
 using Tack.Models;
@@ -121,76 +123,78 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
-        DiscordTrigger[] evs = _discordEvents.Where(
-            x => x.ChannelId == msg.ChannelId
+        DiscordTrigger[] evs = _discordEvents.Where(x =>
+            x.ChannelId == msg.ChannelId
             && (msg.Author.Username.Contains(x.NameContains)
             || x.NameContains == "_ANY_")
-            ).ToArray();
+        ).ToArray();
         if (evs.Length == 0) return;
         foreach (var ev in evs)
         {
-            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText.Contains(" _SHOW_ALL_"))
-            {
-                // Remove "_SHOW_ALL_" to properly .Remove()
-                string newRemove = ev.RemoveText.Replace(" _SHOW_ALL_", "");
-                // Get links of all attachments in message
-                IEnumerable<string> attachmentLinks = msg.Attachments.Select(x => x.Url + ' ');
-                // Message clean content + attachment links joined with 🔗
-                string m = $"{msg.Content} \n\n" + string.Join(" 🔗 ", attachmentLinks);
-                // Remove operation
-                if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
-                // Prepend operation
-                m = $"{ev.PrependText} " + m;
-                // Message is split by 2 new lines
-                string[] sMessage = m.Split("\n\n");
-                // Strip formatting symbols & show newlines
-                sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶] ")).ToArray();
+            bool hasEmbed = msg.Embeds?.Any() ?? false;
+            Embed? embed = msg.Embeds?[0];
 
-                var messages = new Queue<string>();
-                foreach (string message in sMessage)
+            bool hasAttachments = msg.Attachments?.Any() ?? false;
+            IEnumerable<string>? attachmentLinks = msg.Attachments?.Select(x => x.Url);
+
+            StringBuilder sb = new();
+            sb.Append(msg.Content)
+                .Append(' ')
+                .AppendWhen(
+                    $"[{embed!.Title}] " +
+                    $"[{embed!.Description}] ", hasEmbed)
+                .AppendWhen($"[{embed!.Url}] ", hasEmbed && !string.IsNullOrEmpty(embed!.Url))
+                .AppendWhen($"[{embed!.Fields[0].Name}] [{embed!.Fields[0].Value}] ",
+                    hasEmbed && (embed!.Fields?.Any() ?? false))
+                .AppendWhen(attachmentLinks!.Join(" 🔗 "), hasAttachments);
+
+            string m = sb.ToString();
+
+            // Message is split by 2 new lines
+            string[] sMessage = m.Split("\n\n");
+
+            if (ev.UseRegex && ev.HasGroupReplacements)
+            {
+                foreach (Match match in ev.ReplacementRegex.Matches(m))
                 {
-                    // Split message into chunks if length is >= 475
-                    if (message.Length >= 475)
+                    for (int i = 0; i < match.Groups.Count; i++)
                     {
-                        IEnumerable<char[]> chunks = message.Chunk(475);
-                        foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
-                        continue;
+                        if (!ev.RegexGroupReplacements.ContainsKey(i)) continue;
+                        m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
                     }
-                    messages.Enqueue(message);
                 }
+            }
 
-                // Send messages every 2.5 seconds
-                while (messages.Count > 0)
+            // Remove operation
+            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText != "_ALL_") m = m.Replace(ev.RemoveText, "");
+            else if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText == "_ALL_") m = string.Empty;
+
+            // Prepend operation
+            m = $"{ev.PrependText} " + m;
+
+            // Strip formatting symbols & show newlines
+            sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", " {⤶} ")).ToArray();
+
+            var messages = new Queue<string>();
+            foreach (string message in sMessage)
+            {
+                // Split message into chunks if length is >= 475
+                if (message.Length >= 475)
                 {
-                    SendMessage(ev.OutChannel, messages.Dequeue());
-                    await Task.Delay(2500);
+                    IEnumerable<char[]> chunks = message.Chunk(475);
+                    foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
+                    continue;
                 }
-                continue;
-            }
-            string content = msg.Content.Replace("\n", " ⤶ ").StripSymbols();
-            IReadOnlyCollection<Embed> embeds = msg.Embeds;
-
-            if (content.Length < 50
-            && embeds.Count > 0)
-            {
-                int embedCount = embeds.Count;
-                Embed embed = embeds.First();
-                content =
-                    $"{embed.Title.StripSymbols()} " +
-                    $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
-                    $"{(embedCount > 1 ? $"[+{"embed".PluralizeWith(embedCount - 1)}]" : string.Empty)}";
-            }
-            else if (content.Length >= 50
-            && content.Length <= 450
-            && embeds.Count > 0)
-            {
-                int embedCount = embeds.Count;
-                content += $" [+{"Embed".PluralizeWith(embedCount)}]";
+                messages.Enqueue(message);
             }
 
-            if (ev.RemoveText is not null) content = ev.RemoveText == "_ALL_" ? string.Empty : content.Replace(ev.RemoveText, string.Empty);
-            if (ev.PrependText is not null) content = $"{ev.PrependText} {content}";
-            SendMessage(ev.OutChannel, content);
+            // Send messages every 2.5 seconds
+            while (messages.Count > 0)
+            {
+                SendMessage(ev.OutChannel, messages.Dequeue());
+                await Task.Delay(2500);
+            }
+            continue;
         }
     }
     #endregion
