@@ -124,9 +124,7 @@ internal static class MessageHandler
     private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
         DiscordTrigger[] evs = _discordEvents.Where(x =>
-            x.ChannelId == msg.ChannelId
-            && (msg.Author.Username.Contains(x.NameContains)
-            || x.NameContains == "_ANY_")
+            x.ChannelId == msg.ChannelId && (msg.Author.Username.Contains(x.NameContains) || x.NameContains == "_ANY_")
         ).ToArray();
         if (evs.Length == 0) return;
         foreach (var ev in evs)
@@ -140,12 +138,9 @@ internal static class MessageHandler
             StringBuilder sb = new();
             sb.Append(msg.Content)
                 .Append(' ')
-                .AppendWhen(
-                    $"[{embed!.Title}] " +
-                    $"[{embed!.Description}] ", hasEmbed)
+                .AppendWhen($"[{embed!.Title}] [{embed!.Description}] ", hasEmbed)
                 .AppendWhen($"[{embed!.Url}] ", hasEmbed && !string.IsNullOrEmpty(embed!.Url))
-                .AppendWhen($"[{embed!.Fields[0].Name}] [{embed!.Fields[0].Value}] ",
-                    hasEmbed && (embed!.Fields?.Any() ?? false))
+                .AppendWhen($"[{embed!.Fields[0].Name}] [{embed!.Fields[0].Value}] ", hasEmbed && (embed!.Fields?.Any() ?? false))
                 .AppendWhen(attachmentLinks!.Join(" 🔗 "), hasAttachments);
 
             string m = sb.ToString();
