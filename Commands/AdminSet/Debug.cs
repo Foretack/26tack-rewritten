@@ -1,9 +1,9 @@
-﻿using Tack.Database;
+﻿using Tack.Core;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
-using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
 internal sealed class Debug : Command
@@ -32,10 +32,10 @@ internal sealed class Debug : Command
                 MessageHandler.SendMessage(channel, s.ToString());
                 break;
             case "restart":
-                C.RestartProcess($"manual restart from user `{user}`");
+                Program.RestartProcess($"manual restart from user `{user}`");
                 break;
             case "pull":
-                string output = await C.GitPull() ?? "Command execution failed, check console :(";
+                string output = await Program.GitPull() ?? "Command execution failed, check console :(";
                 MessageHandler.SendMessage(channel, output);
                 break;
             case "triggers":

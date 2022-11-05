@@ -5,7 +5,6 @@ using Tack.Misc;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
-using C = Tack.Core.Core;
 
 namespace Tack.Commands.BaseSet;
 internal sealed class Ping : Command
@@ -26,7 +25,7 @@ internal sealed class Ping : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
-        string uptime = Time.SinceString(C.StartupTime);
+        string uptime = Time.SinceString(Program.StartupTime);
         string shardStatus = AnonymousClient.ShardStatus;
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
