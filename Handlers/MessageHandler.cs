@@ -136,11 +136,11 @@ internal static class MessageHandler
             IEnumerable<string>? attachmentLinks = msg.Attachments?.Select(x => x.Url);
 
             StringBuilder sb = new();
-            sb.Append(msg.Content)
+            sb
+                .Append(msg.Content)
                 .Append(' ')
-                .AppendWhen($"[{embed!.Title}] [{embed!.Description}] ", hasEmbed)
-                .AppendWhen($"[{embed!.Url}] ", hasEmbed && !string.IsNullOrEmpty(embed!.Url))
-                .AppendWhen($"[{embed!.Fields[0].Name}] [{embed!.Fields[0].Value}] ", hasEmbed && (embed!.Fields?.Any() ?? false))
+                .AppendWhen($"[{embed!.Title}] ", hasEmbed)
+                .AppendWhen($"( {embed!.Url} ) ", hasEmbed && !string.IsNullOrEmpty(embed!.Url))
                 .AppendWhen(attachmentLinks!.Join(" 🔗 "), hasAttachments);
 
             string m = sb.ToString();
@@ -170,7 +170,7 @@ internal static class MessageHandler
             // Strip formatting symbols & show newlines
             sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", " {⤶} ")).ToArray();
 
-            var messages = new Queue<string>();
+            Queue<string> messages = new();
             foreach (string message in sMessage)
             {
                 // Split message into chunks if length is >= 475
