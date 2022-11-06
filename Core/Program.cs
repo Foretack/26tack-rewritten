@@ -24,9 +24,9 @@ public static class Program
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.ControlledBy(LogSwitch)
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
+            .MinimumLevel.Verbose()
             .WriteTo.Discord(AppConfigLoader.Config.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}", levelSwitch: LogSwitch)
             .CreateLogger();
 
         var db = new DbQueries(0);
