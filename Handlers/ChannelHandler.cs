@@ -15,7 +15,6 @@ internal static class ChannelHandler
     #region Properties
     public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
-    public static List<ExtendedChannel> AnonJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
 
     private static readonly List<ExtendedChannel> _joinFailureChannels = new();
@@ -32,7 +31,6 @@ internal static class ChannelHandler
         {
             MainJoinedChannels.Clear();
             MainJoinedChannelNames.Clear();
-            AnonJoinedChannels.Clear();
             StreamMonitor.Stop();
         }
 
@@ -49,15 +47,12 @@ internal static class ChannelHandler
 
         await c.ForEachAsync(async x =>
         {
-            // Assume the channel is joined until being told otherwise
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Username);
                 Log.Debug($"[Main] Queued join: {x.Username}");
-                await Task.Delay(300);
+                await Task.Delay(1000);
             }
-            Log.Debug($"[Anon] Queued join: {x.Username}");
-            await Task.Delay(300);
         });
         c = default!;
         _isInProgress = false;
@@ -93,29 +88,20 @@ internal static class ChannelHandler
     {
         bool fetched = FetchedChannels.Any(x => x.Username == channel);
 
+        ExtendedChannel? target = FetchedChannels.FirstOrDefault(x => x.Username == channel);
+        if (target is null) return false;
+
         try
         {
-            ExtendedChannel target = AnonJoinedChannels.First(x => x.Username == channel);
-            _ = AnonJoinedChannels.Remove(target);
-
             var db = new DbQueries();
             _ = await db.RemoveChannel(target);
-        }
-        catch (Exception)
-        {
-            Log.Error($"AnonymousClient failed to part channel \"{channel}\"");
-        }
-
-        try
-        {
-            ExtendedChannel target = MainJoinedChannels.First(x => x.Username == channel);
             _ = MainJoinedChannels.Remove(target);
             _ = MainJoinedChannelNames.Remove(channel);
             MainClient.Client.LeaveChannel(channel);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Log.Error($"MainClient failed to part channel \"{channel}\"");
+            Log.Error(ex, $"Erros occured whilst trying to part {channel} :");
         }
 
         return fetched;
@@ -150,18 +136,6 @@ internal static class ChannelHandler
     private static void AnonOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {
         Log.Warning($"[Anon] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
-    }
-
-    private static void AnonOnLeftChannel(object? sender, OnLeftChannelArgs e)
-    {
-        Log.Information($"[Anon] Left channel {e.Channel}");
-        _ = AnonJoinedChannels.Remove(FetchedChannels.First(x => x.Username == e.Channel));
-    }
-
-    private static void AnonOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
-    {
-        Log.Information($"[Anon] Joined channel {e.Channel}");
-        AnonJoinedChannels.Add(FetchedChannels.First(x => x.Username == e.Channel));
     }
 
     private static void MainOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
