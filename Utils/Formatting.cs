@@ -3,12 +3,12 @@
 namespace Tack.Utils;
 internal static class Formatting
 {
-    public static StringBuilder AppendWhen(this StringBuilder sb, char value, bool condition)
+    public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, char value)
     {
         if (condition) sb.Append(value);
         return sb;
     }
-    public static StringBuilder AppendWhen(this StringBuilder sb, string value, bool condition)
+    public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, string value)
     {
         if (condition) sb.Append(value);
         return sb;

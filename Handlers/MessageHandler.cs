@@ -139,9 +139,9 @@ internal static class MessageHandler
             sb
                 .Append(msg.Content)
                 .Append(' ')
-                .AppendWhen($"[{embed!.Title}] ", hasEmbed)
-                .AppendWhen($"( {embed!.Url} ) ", hasEmbed && !string.IsNullOrEmpty(embed!.Url))
-                .AppendWhen(attachmentLinks!.Join(" 🔗 "), hasAttachments);
+                .AppendWhen(hasEmbed, $"[{embed!.Title}] ")
+                .AppendWhen(hasEmbed && !string.IsNullOrEmpty(embed!.Url), $"( {embed!.Url} ) ")
+                .AppendWhen(hasAttachments, attachmentLinks!.Join(" 🔗 "));
 
             string m = sb.ToString();
 
