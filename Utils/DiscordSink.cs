@@ -124,7 +124,7 @@ internal sealed class DiscordSink : ILogEventSink
         return message;
     }
 
-    private static bool ShouldlogMessage(LogEventLevel minimumLogEventLevel, LogEventLevel messageLogEventLevel) => messageLogEventLevel >= minimumLogEventLevel;
+    private static bool ShouldlogMessage(LogEventLevel minimumLogEventLevel, LogEventLevel messageLogEventLevel) => (byte)messageLogEventLevel >= (byte)minimumLogEventLevel;
 }
 
 internal static class DiscordSinkExtensions
