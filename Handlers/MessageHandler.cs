@@ -130,10 +130,10 @@ internal static class MessageHandler
         foreach (var ev in evs)
         {
             bool hasEmbed = msg.Embeds?.Any() ?? false;
-            Embed? embed = msg.Embeds?[0];
+            Embed? embed = hasEmbed ? msg.Embeds![0] : null;
 
             bool hasAttachments = msg.Attachments?.Any() ?? false;
-            IEnumerable<string>? attachmentLinks = msg.Attachments?.Select(x => x.Url);
+            IEnumerable<string>? attachmentLinks = hasAttachments ? msg.Attachments?.Select(x => x.Url) : null;
 
             StringBuilder sb = new();
             sb
