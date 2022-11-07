@@ -132,7 +132,7 @@ internal static class MessageHandler
             bool hasEmbed = msg.Embeds?.Any() ?? false;
             Embed? embed = hasEmbed ? msg.Embeds![0] : null;
 
-            bool hasAttachments = msg.Attachments?.Any() ?? false;
+            bool hasAttachments = msg.Attachments?.Any(x => !string.IsNullOrEmpty(x.Url) && !string.IsNullOrWhiteSpace(x.Url)) ?? false;
             IEnumerable<string>? attachmentLinks = hasAttachments ? msg.Attachments?.Select(x => x.Url) : null;
 
             StringBuilder sb = new();
@@ -141,7 +141,7 @@ internal static class MessageHandler
                 .Append(' ')
                 .AppendWhen(hasEmbed, $"[{embed!.Title}] ")
                 .AppendWhen(hasEmbed && !string.IsNullOrEmpty(embed!.Url), $"( {embed!.Url} ) ")
-                .AppendWhen(hasAttachments, attachmentLinks!.Join(" 🔗 "));
+                .AppendWhen(hasAttachments && attachmentLinks is not null, attachmentLinks!.Join(" 🔗 "));
 
             string m = sb.ToString();
 
