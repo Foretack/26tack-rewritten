@@ -189,7 +189,6 @@ internal static class MessageHandler
                 SendMessage(ev.OutChannel, messages.Dequeue());
                 await Task.Delay(2500);
             }
-            continue;
         }
     }
     #endregion
