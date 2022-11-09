@@ -139,14 +139,11 @@ internal static class MessageHandler
             sb
                 .Append(msg.Content)
                 .Append(' ')
-                .AppendWhen(hasEmbed, $"[{embed!.Title}] ")
-                .AppendWhen(hasEmbed && !string.IsNullOrEmpty(embed!.Url), $"( {embed!.Url} ) ")
-                .AppendWhen(hasAttachments && attachmentLinks is not null, attachmentLinks!.Join(" 🔗 "));
+                .AppendWhen(hasEmbed, $"[{embed?.Title}] ")
+                .AppendWhen(hasEmbed && !string.IsNullOrEmpty(embed?.Url), $"( {embed?.Url} ) ")
+                .AppendWhen(hasAttachments && attachmentLinks is not null, attachmentLinks?.Join(" 🔗 ")!);
 
             string m = sb.ToString();
-
-            // Message is split by 2 new lines
-            string[] sMessage = m.Split("\n\n");
 
             if (ev.UseRegex && ev.HasGroupReplacements)
             {
@@ -155,7 +152,7 @@ internal static class MessageHandler
                     for (int i = 0; i < match.Groups.Count; i++)
                     {
                         if (!ev.RegexGroupReplacements.ContainsKey(i)) continue;
-                        m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
+                        m = m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
                     }
                 }
             }
@@ -166,6 +163,9 @@ internal static class MessageHandler
 
             // Prepend operation
             m = $"{ev.PrependText} " + m;
+
+            // Message is split by 2 new lines
+            string[] sMessage = m.Split("\n\n");
 
             // Strip formatting symbols & show newlines
             sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", " {⤶} ")).ToArray();

@@ -244,7 +244,9 @@ internal static class StreamMonitor
 
     private static void ServiceStarted(object? sender, OnServiceStartedArgs e)
     {
+#if !DEBUG
         MessageHandler.SendMessage(_relayChannel, $"OBSOLETE Hello");
+#endif
     }
     #endregion
 

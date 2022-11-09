@@ -10,8 +10,8 @@ internal sealed class Tf2NewsPrinter : IModule
 
     public Tf2NewsPrinter() => Enable();
 
-    private const int ArrowLength = 28;
-    private readonly Regex _arrow = new(@"<:arrow:[0-9]+>");
+    private int _arrowLength;
+    private readonly Regex _arrow = new(@"<:arrow:[0-9]+>|:arrow:");
     private readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
 
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
@@ -26,14 +26,15 @@ internal sealed class Tf2NewsPrinter : IModule
         && !_arrow.IsMatch(message.Content)))
             return;
 
+        if (_arrowLength == 0) _arrowLength = _arrow.Match(message.Content).Length;
         var lines = message.Content.Split('\n');
         foreach (var line in lines)
         {
-            if (line.Length < ArrowLength + 4) continue;
-            if (line[..4] == "    " && _arrow.IsMatch(line[4..(ArrowLength + 4)]))
-                MessageHandler.SendMessage(_relayChannel, "-> " + line[(ArrowLength + 4)..]);
-            else if (_arrow.IsMatch(line[..ArrowLength]))
-                MessageHandler.SendMessage(_relayChannel, "● " + line[ArrowLength..]);
+            if (line.Length < _arrowLength + 4) continue;
+            if (line[..4] == "    " && _arrow.IsMatch(line[4..(_arrowLength + 4)]))
+                MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
+            else if (_arrow.IsMatch(line[.._arrowLength]))
+                MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
             else if (line.StartsWith("https://www.teamfortress.com"))
                 MessageHandler.SendMessage(_relayChannel, line);
             else continue;
