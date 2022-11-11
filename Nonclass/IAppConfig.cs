@@ -17,6 +17,8 @@ public interface IAppConfig
     string MainPrefix { get; }
 
     string LoggingWebhookUrl { get; }
+    string ImageHostLink { get; }
+    string ImageHostAuth { get; }
 
     ulong Mentions { get; }
     ulong Feed { get; }
