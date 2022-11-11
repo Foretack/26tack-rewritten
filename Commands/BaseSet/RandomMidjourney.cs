@@ -35,7 +35,6 @@ internal sealed class RandomMidjourney : Command
 
         using var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(10);
-        requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
 
         byte[] bytes = await requests.GetByteArrayAsync(row.link);
         MultipartFormDataContent content = new()
@@ -43,6 +42,7 @@ internal sealed class RandomMidjourney : Command
             { new ByteArrayContent(bytes), "file", $"image{Random.Shared.Next(1000)}.{row.link_ext}" }
         };
 
+        requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
         HttpResponseMessage response = await requests.PostAsync(AppConfigLoader.Config.ImageHostLink, content);
         string responseString = await response.Content.ReadAsStringAsync();
         if (!responseString.Contains("occluder.space"))
