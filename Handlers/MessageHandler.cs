@@ -1,4 +1,6 @@
-﻿using AsyncAwaitBestPractices;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using AsyncAwaitBestPractices;
 using Tack.Core;
 using Tack.Database;
 using Tack.Models;
@@ -9,9 +11,9 @@ using TwitchLib.Communication.Events;
 namespace Tack.Handlers;
 internal static class MessageHandler
 {
-    #region Properties
+    #region Fields
     private static ChatColor _currentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
-    private static DiscordEvent[] _discordEvents = DbQueries.NewInstance().GetDiscordEvents();
+    private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
@@ -35,9 +37,15 @@ internal static class MessageHandler
         OnDiscordMsg += OnDiscordMessageReceived;
         MainClient.Client.OnMessageSent += OnMessageSent;
         MainClient.Client.OnMessageThrottled += OnMessageThrottled;
+
+        Time.DoEvery(TimeSpan.FromHours(6), async () => await ReloadDiscordTriggers());
     }
 
-    public static void ReloadDiscordTriggers() { _discordEvents = DbQueries.NewInstance().GetDiscordEvents(); }
+    public static async Task ReloadDiscordTriggers()
+    {
+        using var db = new DbQueries();
+        _discordEvents = await db.GetDiscordTriggers();
+    }
     #endregion
 
     #region Sending
@@ -115,86 +123,77 @@ internal static class MessageHandler
 
     private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
-        DiscordEvent[] evs = _discordEvents.Where(
-            x => x.ChannelID == msg.ChannelId
-            && (msg.Author.Username.StripDescriminator().Contains(x.NameContains)
-            || x.NameContains == "_ANY_")
-            ).ToArray();
+        DiscordTrigger[] evs = _discordEvents.Where(x =>
+            x.ChannelId == msg.ChannelId && (msg.Author.Username.Contains(x.NameContains) || x.NameContains == "_ANY_")
+        ).ToArray();
         if (evs.Length == 0) return;
-        foreach (DiscordEvent? ev in evs)
+        foreach (var ev in evs)
         {
-            if (ev.Remove?.Contains(" _SHOW_ALL_") ?? false)
-            {
-                // Remove "_SHOW_ALL_" to properly .Remove()
-                string newRemove = ev.Remove.Replace(" _SHOW_ALL_", "");
-                // Get links of all attachments in message
-                IEnumerable<string> attachmentLinks = msg.Attachments.Select(x => x.Url + ' ');
-                // Message clean content + attachment links joined with 🔗
-                string m = $"{msg.Content} \n\n" + string.Join(" 🔗 ", attachmentLinks);
-                // Remove operation
-                if (!string.IsNullOrEmpty(newRemove)) m = m.Replace(newRemove, "");
-                // Prepend operation
-                m = $"{ev.Prepend} " + m;
-                // Message is split by 2 new lines
-                string[] sMessage = m.Split("\n\n");
-                // Strip formatting symbols & show newlines
-                sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", "[⤶] ")).ToArray();
+            bool hasEmbed = msg.Embeds?.Any() ?? false;
+            Embed? embed = hasEmbed ? msg.Embeds![0] : null;
 
-                var messages = new Queue<string>();
-                foreach (string message in sMessage)
+            bool hasAttachments = msg.Attachments?.Any(x => !string.IsNullOrEmpty(x.Url) && !string.IsNullOrWhiteSpace(x.Url)) ?? false;
+            IEnumerable<string>? attachmentLinks = hasAttachments ? msg.Attachments?.Select(x => x.Url) : null;
+
+            StringBuilder sb = new();
+            sb
+                .Append(msg.Content)
+                .Append(' ')
+                .AppendWhen(hasEmbed, $"[{embed?.Title}] ")
+                .AppendWhen(hasEmbed && !string.IsNullOrEmpty(embed?.Url), $"( {embed?.Url} ) ")
+                .AppendWhen(hasAttachments && attachmentLinks is not null, attachmentLinks?.Join(" 🔗 ")!);
+
+            string m = sb.ToString();
+
+            if (ev.UseRegex && ev.HasGroupReplacements)
+            {
+                foreach (Match match in ev.ReplacementRegex.Matches(m))
                 {
-                    // Split message into chunks if length is >= 475
-                    if (message.Length >= 475)
+                    for (int i = 0; i < match.Groups.Count; i++)
                     {
-                        IEnumerable<char[]> chunks = message.Chunk(475);
-                        foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
-                        continue;
+                        if (!ev.RegexGroupReplacements.ContainsKey(i)) continue;
+                        m = m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
                     }
-                    messages.Enqueue(message);
                 }
+            }
 
-                // Get color
-                ChatColor _color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor _clr) ? _clr : ChatColor.BlueViolet;
+            // Remove operation
+            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText != "_ALL_") m = m.Replace(ev.RemoveText, "");
+            else if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText == "_ALL_") m = string.Empty;
 
-                // Send messages every 2.5 seconds
-                while (messages.Count > 0)
+            // Prepend operation
+            m = $"{ev.PrependText} " + m;
+
+            // Message is split by 2 new lines
+            string[] sMessage = m.Split("\n\n");
+
+            // Strip formatting symbols & show newlines
+            sMessage = sMessage.Select(x => x.StripSymbols().Replace("\n", " {⤶} ")).ToArray();
+
+            Queue<string> messages = new();
+            foreach (string message in sMessage)
+            {
+                // Split message into chunks if length is >= 475
+                if (message.Length >= 475)
                 {
-                    SendColoredMessage(ev.OutputChannel, messages.Dequeue(), _color);
-                    await Task.Delay(2500);
+                    IEnumerable<char[]> chunks = message.Chunk(475);
+                    foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
+                    continue;
                 }
-                continue;
-            }
-            string content = msg.Content.Replace("\n", " ⤶ ").StripSymbols();
-            IReadOnlyCollection<Embed> embeds = msg.Embeds;
-
-            if (content.Length < 50
-            && embeds.Count > 0)
-            {
-                int embedCount = embeds.Count;
-                Embed embed = embeds.First();
-                content =
-                    $"{embed.Title.StripSymbols()} " +
-                    $"{(embed.Url is null ? string.Empty : $"( {embed.Url} )")} " +
-                    $"{(embedCount > 1 ? $"[+{"embed".PluralizeWith(embedCount - 1)}]" : string.Empty)}";
-            }
-            else if (content.Length >= 50
-            && content.Length <= 450
-            && embeds.Count > 0)
-            {
-                int embedCount = embeds.Count;
-                content += $" [+{"Embed".PluralizeWith(embedCount)}]";
+                messages.Enqueue(message);
             }
 
-            if (ev.Remove is not null) content = ev.Remove == "_ALL_" ? string.Empty : content.Replace(ev.Remove, string.Empty);
-            if (ev.Prepend is not null) content = $"{ev.Prepend} {content}";
-            ChatColor color = Enum.TryParse<ChatColor>(ev.Color, out ChatColor clr) ? clr : ChatColor.BlueViolet;
-            SendColoredMessage(ev.OutputChannel, content, color);
+            // Send messages every 2.5 seconds
+            while (messages.Count > 0)
+            {
+                SendMessage(ev.OutChannel, messages.Dequeue());
+                await Task.Delay(2500);
+            }
         }
     }
     #endregion
 }
 
-internal sealed record DiscordEvent(ulong ChannelID, string NameContains, string? Remove, string OutputChannel, string? Prepend, string Color);
 internal enum ChatColor
 {
     FANCY_NOT_SET_STATE_NAME,

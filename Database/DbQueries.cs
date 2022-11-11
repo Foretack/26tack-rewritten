@@ -1,6 +1,5 @@
 ﻿using Dasync.Collections;
 using SqlKata.Execution;
-using Tack.Handlers;
 using Tack.Models;
 using Tack.Utils;
 
@@ -126,21 +125,12 @@ internal sealed class DbQueries : DbConnection
         return inserted > 0;
     }
 
-    public DiscordEvent[] GetDiscordEvents()
+    public async Task<DiscordTrigger[]> GetDiscordTriggers()
     {
-        var query = base["discord_triggers"]
-            .Get();
+        var query = await base["discord_triggers"]
+            .GetAsync();
 
-        var events = query.Select(
-            x => new DiscordEvent(
-                (ulong)x.channel_id,
-                x.name_contains,
-                x.remove_text,
-                x.output_channel,
-                x.prepend_text,
-                x.color
-                )
-            ).ToArray();
+        var events = query.Select(x => new DiscordTrigger(x)).ToArray();
 
         return events;
     }

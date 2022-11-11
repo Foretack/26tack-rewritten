@@ -4,7 +4,6 @@ using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Events;
 using TwitchLib.Communication.Models;
-using C = Tack.Core.Core;
 
 namespace Tack.Core;
 public static class MainClient
@@ -54,17 +53,17 @@ public static class MainClient
 
     private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
     {
-        C.RestartProcess(nameof(ClientConnectionErrorEvent));
+        Program.RestartProcess(nameof(ClientConnectionErrorEvent));
     }
 
     private static void ClientErrorEvent(object? sender, OnErrorEventArgs e)
     {
-        C.RestartProcess(nameof(ClientErrorEvent));
+        Program.RestartProcess(nameof(ClientErrorEvent));
     }
 
     private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
     {
-        C.RestartProcess(nameof(ClientDisconnectedEvent));
+        Program.RestartProcess(nameof(ClientDisconnectedEvent));
     }
     #endregion
 }

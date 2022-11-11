@@ -1,9 +1,9 @@
-﻿using Tack.Database;
+﻿using Tack.Core;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
-using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
 internal sealed class Debug : Command
@@ -32,15 +32,15 @@ internal sealed class Debug : Command
                 MessageHandler.SendMessage(channel, s.ToString());
                 break;
             case "restart":
-                C.RestartProcess($"manual restart from user `{user}`");
+                Program.RestartProcess($"manual restart from user `{user}`");
                 break;
             case "pull":
-                string output = await C.GitPull() ?? "Command execution failed, check console :(";
+                string output = await Program.GitPull() ?? "Command execution failed, check console :(";
                 MessageHandler.SendMessage(channel, output);
                 break;
             case "triggers":
             case "reloadtriggers":
-                MessageHandler.ReloadDiscordTriggers();
+                await MessageHandler.ReloadDiscordTriggers();
                 break;
             case "printarr":
                 MessageHandler.SendMessage(channel, ctx.IrcMessage.Message.Split(' ').AsString());
@@ -59,6 +59,57 @@ internal sealed class Debug : Command
                 string targetChannel = args[1];
                 ExtendedChannel? echannel = await db.GetExtendedChannel(targetChannel);
                 MessageHandler.SendMessage(channel, $"{echannel}");
+                break;
+            case "properties":
+                if (args.Length < 2)
+                {
+                    MessageHandler.SendMessage(channel, "specify type");
+                    return;
+                }
+                var t = Type.GetType(args[1]);
+                if (t is null)
+                {
+                    MessageHandler.SendMessage(channel, "type not found");
+                    return;
+                }
+                var properties = t.GetProperties().Select(x =>
+                $"{(x.CanRead && !x.CanWrite ? "(Readonly)" : string.Empty)} " +
+                $"{(x.GetMethod is not null && x.GetMethod.IsStatic ? "(Static)" : string.Empty)} " +
+                $"{x.GetMethod?.Name} -> {x.GetMethod?.ReturnType}");
+                MessageHandler.SendMessage(channel, properties.Join(" | "));
+                break;
+            case "fields":
+                if (args.Length < 2)
+                {
+                    MessageHandler.SendMessage(channel, "specify type");
+                    return;
+                }
+                var t_ = Type.GetType(args[1]);
+                if (t_ is null)
+                {
+                    MessageHandler.SendMessage(channel, "type not found");
+                    return;
+                }
+                var fields = t_.GetFields().Select(x =>
+                $"{(x.IsInitOnly ? "(Readonly)" : string.Empty)} " +
+                $"{(x.IsStatic ? "(Static)" : string.Empty)} " +
+                $"{x.FieldType.Name} {x.Name}");
+                MessageHandler.SendMessage(channel, fields.Join(" | "));
+                break;
+            case "methods":
+                if (args.Length < 2)
+                {
+                    MessageHandler.SendMessage(channel, "specify type");
+                    return;
+                }
+                var t__ = Type.GetType(args[1]);
+                if (t__ is null)
+                {
+                    MessageHandler.SendMessage(channel, "type not found");
+                    return;
+                }
+                var methods = t__.GetMethods().Select(x => $"{(x.IsPrivate ? "(Private)" : string.Empty)} {x.Name} -> {x.ReturnType}");
+                MessageHandler.SendMessage(channel, methods.Join(" | "));
                 break;
         }
     }

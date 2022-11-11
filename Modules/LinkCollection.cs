@@ -25,7 +25,6 @@ internal sealed class LinkCollection : ChatModule
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
-        var start = DateTime.Now;
         if (ircMessage.Message.Length < 10
         || ircMessage.Username == AppConfigLoader.Config.BotUsername
         || ircMessage.Username.Contains("bot")
@@ -42,7 +41,6 @@ internal sealed class LinkCollection : ChatModule
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
 
-        if (Time.Since(start).TotalMilliseconds >= 25) Log.Warning($"{nameof(LinkCollection)} module took too long to process a message (>=25ms)");
         return default;
     }
 

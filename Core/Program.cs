@@ -10,7 +10,7 @@ using Tack.Handlers;
 using Tack.Utils;
 
 namespace Tack.Core;
-public static class Core
+public static class Program
 {
     #region Properties
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();

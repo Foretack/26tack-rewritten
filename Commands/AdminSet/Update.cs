@@ -1,8 +1,8 @@
-﻿using Tack.Database;
+﻿using Tack.Core;
+using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
-using C = Tack.Core.Core;
 
 namespace Tack.Commands.AdminSet;
 internal sealed class Update : Command
@@ -21,7 +21,7 @@ internal sealed class Update : Command
         var db = new DbQueries();
         _ = await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
 
-        string? pullResult = await C.GitPull();
+        string? pullResult = await Program.GitPull();
 
         if (pullResult is null)
         {

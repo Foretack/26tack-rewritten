@@ -5,7 +5,6 @@ using Tack.Misc;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
-using C = Tack.Core.Core;
 
 namespace Tack.Commands.BaseSet;
 internal sealed class Ping : Command
@@ -16,19 +15,28 @@ internal sealed class Ping : Command
         aliases: new string[] { "pong", "peng", "pang", "pung" }
     );
 
-    public override async Task Execute(CommandContext ctx)
+    public Ping()
+    {
+        Time.DoEvery(30, () => RedisPing());
+    }
+
+    public override Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
-        string uptime = Time.SinceString(C.StartupTime);
-        await Redis.PublishAsync("shard:manage", "PING");
-        await Task.Delay(10);
+        string uptime = Time.SinceString(Program.StartupTime);
         string shardStatus = AnonymousClient.ShardStatus;
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
             $"● {latency}ms " +
             $"● Uptime: {uptime} ● Shard status: {shardStatus}");
 
+        return Task.CompletedTask;
+    }
+
+    private async Task RedisPing()
+    {
+        await Redis.PublishAsync("shard:manage", "PING");
     }
 }

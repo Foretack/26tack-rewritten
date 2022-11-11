@@ -12,10 +12,7 @@ internal class DiscordActivityNotifier : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; } = true;
 
-    public DiscordActivityNotifier()
-    {
-        DiscordPresences.OnUpdate += OnUpdate;
-    }
+    public DiscordActivityNotifier() => Enable();
 
     private void OnUpdate(object? sender, OnDiscordPresenceArgs e)
     {
@@ -28,14 +25,13 @@ internal class DiscordActivityNotifier : IModule
 
             if (spotify)
             {
-                CurrentSong = activity;
                 string lenString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
-
-                if (!ActOnCooldown())
+                if (!ActOnCooldown() && activity.Details != CurrentSong?.Details)
                 {
                     MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
                         $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
                 }
+                CurrentSong = activity;
                 continue;
             }
         }
@@ -47,7 +43,7 @@ internal class DiscordActivityNotifier : IModule
         if (!_onCooldown)
         {
             _onCooldown = true;
-            Time.Schedule(() => _onCooldown = false, TimeSpan.FromMinutes(2.5));
+            Time.Schedule(() => _onCooldown = false, TimeSpan.FromMinutes(10));
             return false;
         }
         return _onCooldown;

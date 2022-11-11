@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using System.Text.RegularExpressions;
+using Tack.Handlers;
 using Tack.Nonclass;
 
 namespace Tack.Modules;
@@ -9,7 +10,8 @@ internal sealed class Tf2NewsPrinter : IModule
 
     public Tf2NewsPrinter() => Enable();
 
-    private const string TfArrow = "<:arrow:1032084130399264858>";
+    private int _arrowLength;
+    private readonly Regex _arrow = new(@"<:arrow:[0-9]+>|:arrow:");
     private readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
 
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
@@ -20,17 +22,19 @@ internal sealed class Tf2NewsPrinter : IModule
         || message.Author.Username is null
         || message.ChannelId != 864407160422662184
         || message.Author.Username != "TF2 Community #updates"
-        || (!message.Content.StartsWith("**Team Fortress 2 Update Released**")
-        && !message.Content.StartsWith(TfArrow)))
+        || (!message.Content.Contains("Team Fortress 2 Update Released")
+        && !_arrow.IsMatch(message.Content)))
             return;
 
+        if (_arrowLength == 0) _arrowLength = _arrow.Match(message.Content).Length;
         var lines = message.Content.Split('\n');
         foreach (var line in lines)
         {
-            if (line[..4] == "    " && line[4..TfArrow.Length] == TfArrow)
-                MessageHandler.SendMessage(_relayChannel, "|-> " + line[(TfArrow.Length + 4)..]);
-            else if (line.StartsWith(TfArrow))
-                MessageHandler.SendMessage(_relayChannel, "● " + line[TfArrow.Length..]);
+            if (line.Length < _arrowLength + 4) continue;
+            if (line[..4] == "    " && _arrow.IsMatch(line[4..(_arrowLength + 4)]))
+                MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
+            else if (_arrow.IsMatch(line[.._arrowLength]))
+                MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
             else if (line.StartsWith("https://www.teamfortress.com"))
                 MessageHandler.SendMessage(_relayChannel, line);
             else continue;
@@ -42,13 +46,13 @@ internal sealed class Tf2NewsPrinter : IModule
     {
         MessageHandler.OnDiscordMsg += OnDiscordMessage;
         Enabled = true;
-        Log.Information($"{nameof(Tf2NewsPrinter)} Module enabled");
+        Log.Debug($"{nameof(Tf2NewsPrinter)} Module enabled");
     }
 
     public void Disable()
     {
         MessageHandler.OnDiscordMsg -= OnDiscordMessage;
         Enabled = false;
-        Log.Information($"{nameof(Tf2NewsPrinter)} Module disabled");
+        Log.Debug($"{nameof(Tf2NewsPrinter)} Module disabled");
     }
 }

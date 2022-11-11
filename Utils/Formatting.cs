@@ -1,10 +1,26 @@
-﻿namespace Tack.Utils;
+﻿using System.Text;
+
+namespace Tack.Utils;
 internal static class Formatting
 {
+    public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, char value)
+    {
+        if (condition) sb.Append(value);
+        return sb;
+    }
+    public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, string value)
+    {
+        if (condition) sb.Append(value);
+        return sb;
+    }
+
     public static string FormatException(this Exception exception)
     {
         return exception.Message;
     }
+
+    public static string Join(this IEnumerable<object> src, char seperator) => string.Join(seperator, src);
+    public static string Join(this IEnumerable<object> src, string separator) => string.Join(separator, src);
 
     public static string AsString<T>(this T[] arr)
     {

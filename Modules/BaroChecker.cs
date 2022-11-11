@@ -11,7 +11,7 @@ internal sealed class BaroChecker : IModule
 
     public BaroChecker()
     {
-        Time.DoEvery(TimeSpan.FromMinutes(15), async () => await Check()); // Always running; returns if disabled
+        Time.DoEvery(TimeSpan.FromMinutes(15), async () => await Check()); // Always running. returns if disabled
     }
 
     private bool _active = false;
