@@ -51,6 +51,6 @@ internal sealed class RandomMidjourney : Command
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"@{user}, \"{(row.prompt as string).Trim()}\" {responseString}");
+        MessageHandler.SendMessage(channel, $"@{user}, \"{(row.prompt as string)?.Trim()}\" {responseString}");
     }
 }
