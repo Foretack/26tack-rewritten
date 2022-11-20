@@ -45,12 +45,13 @@ internal sealed class RandomMidjourney : Command
         requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
         HttpResponseMessage response = await requests.PostAsync(AppConfigLoader.Config.ImageHostLink, content);
         string responseString = await response.Content.ReadAsStringAsync();
-        if (!responseString.Contains("occluder.space"))
+        if (!responseString.Contains(AppConfigLoader.Config.ImageHostLink[..5]))
         {
             MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"@{user}, \"{(row.prompt as string)?.Trim()}\" {responseString}");
+        string? ps = row.prompt as string;
+        MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^2] : ps)}\" {responseString}");
     }
 }
