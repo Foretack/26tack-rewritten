@@ -59,9 +59,8 @@ public static class Program
     // TODO: Don't rely on restarts
     public static void RestartProcess(string triggerSource)
     {
-        Log.Fatal($"The program is restarting...");
+        Log.Fatal($"The program is being restarted by {triggerSource} ...");
         var db = new DbQueries();
-        _ = db.LogException(new ApplicationException($"PROGRAM RESTARTED BY {triggerSource}"));
         _ = Process.Start($"./{_assemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }
