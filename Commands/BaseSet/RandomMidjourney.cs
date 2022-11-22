@@ -52,6 +52,6 @@ internal sealed class RandomMidjourney : Command
         }
 
         string? ps = row.prompt as string;
-        MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^2] : ps)}\" {responseString}");
+        MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^1] : ps)}\" {responseString}");
     }
 }
