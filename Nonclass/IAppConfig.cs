@@ -14,7 +14,7 @@ public interface IAppConfig
     string BotAccessToken { get; }
     string BotClientId { get; }
     string SupibotApiToken { get; }
-    string MainPrefix { get; }
+    string MentionsRegex { get; }
 
     string LoggingWebhookUrl { get; }
     string ImageHostLink { get; }
@@ -23,4 +23,8 @@ public interface IAppConfig
     ulong Mentions { get; }
     ulong Feed { get; }
     ulong Errors { get; }
+
+    string BasePrefix { get; }
+    string AdminPrefix { get; }
+    string WarframePrefix { get; }
 }

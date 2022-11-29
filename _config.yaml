@@ -11,13 +11,18 @@ BotUsername:
 BotAccessToken:
 BotClientId:
 SupibotApiToken:
-MainPrefix: 
+MentionsRegex:
 
 LoggingWebhookUrl:
 ImageHostLink:
 ImageHostAuth: 
 
 # Discord channels
-Mentions: 
-Feed: 
-Errors: 
+Mentions:
+Feed:
+Errors:
+
+# Handler prefixes
+BasePrefix:
+AdminPrefix:
+WarframePrefix:

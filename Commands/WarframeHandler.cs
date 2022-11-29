@@ -5,8 +5,7 @@ namespace Tack.Commands;
 internal sealed class WarframeHandler : ChatCommandHandler
 {
     public override string Name => "Warframe";
-    public override string Prefix => "wf>";
-    internal const string BaseUrl = "https://api.warframestat.us/pc";
+    public override string Prefix => AppConfigLoader.Config.WarframePrefix;
 
     public WarframeHandler()
     {
