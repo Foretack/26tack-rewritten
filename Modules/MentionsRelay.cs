@@ -13,10 +13,10 @@ internal sealed class MentionsRelay : ChatModule
         OnDisabled = x => Log.Warning($"{x.Name} has been disabled!");
     }
 
-    private static readonly Regex Mention = new(@"4s?tac?k|fo(re?[esk]|ur|r)tr?ac?k|129708505|\btest(ing)? ?(guy|individual)|login_unavailable|783267696|occluder", RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private static readonly Regex _mention = new(AppConfigLoader.Config.MentionsRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     protected override async ValueTask OnMessage(TwitchMessage ircMessage)
     {
-        if (!Permission.IsBlacklisted(ircMessage.Username) && Mention.IsMatch(ircMessage.Message))
+        if (!Permission.IsBlacklisted(ircMessage.Username) && _mention.IsMatch(ircMessage.Message))
         {
             string msg = $"`[{DateTime.Now:F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
             await DiscordChat.SendMessage(AppConfigLoader.Config.Mentions, msg);
