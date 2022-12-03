@@ -10,7 +10,8 @@ internal sealed class Debug : Command
 {
     public override CommandInfo Info { get; } = new(
         name: "debug",
-        description: "command for testing stuff! Xdxd",
+        description: "command for testing and stuff!",
+        aliases: new[] {"d"},
         permission: PermissionLevels.Whitelisted
     );
 
@@ -73,7 +74,7 @@ internal sealed class Debug : Command
                     return;
                 }
                 var properties = t.GetProperties().Select(x =>
-                $"{(x.CanRead && !x.CanWrite ? "(Readonly)" : string.Empty)} " +
+                $"{(x is { CanRead: true, CanWrite: false } ? "(Readonly)" : string.Empty)} " +
                 $"{(x.GetMethod is not null && x.GetMethod.IsStatic ? "(Static)" : string.Empty)} " +
                 $"{x.GetMethod?.Name} -> {x.GetMethod?.ReturnType}");
                 MessageHandler.SendMessage(channel, properties.Join(" | "));
@@ -110,6 +111,18 @@ internal sealed class Debug : Command
                 }
                 var methods = t__.GetMethods().Select(x => $"{(x.IsPrivate ? "(Private)" : string.Empty)} {x.Name} -> {x.ReturnType}");
                 MessageHandler.SendMessage(channel, methods.Join(" | "));
+                break;
+            case "reloadconfig":
+                try
+                {
+                    AppConfigLoader.ReloadConfig();
+                    MessageHandler.SendMessage(channel, "Config reloaded!");
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Failed to reload config. {e.GetType().Name}: {e.Message}");
+                    MessageHandler.SendMessage(channel, "Failed to reload config.");
+                }
                 break;
         }
     }
