@@ -7,17 +7,6 @@ internal sealed class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        //User user = await $"twitch:users:{username}".GetOrCreate<User>(async () =>
-        //{
-        //    var r = await TwitchAPIHandler.GetUsers(username);
-        //    if (r is null)
-        //    {
-        //        User? call2 = await ExternalAPIHandler.GetIvrUser(username);
-        //        if (call2 is null) return default!;
-        //        return call2;
-        //    }
-        //    return new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
-        //}, true, TimeSpan.FromDays(1));
         var userCache = await Redis.Cache.TryGetObjectAsync<User>($"twitch:users:{username}");
         if (!userCache.keyExists)
         {
