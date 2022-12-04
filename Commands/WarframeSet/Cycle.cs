@@ -33,7 +33,6 @@ internal sealed class Cycle : Command
         string queryString = new T().QueryString;
 
         var cycleCache = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
-        T cycle = cycleCache.value;
         if (!cycleCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
@@ -43,8 +42,9 @@ internal sealed class Cycle : Command
                 return;
             }
             await Redis.Cache.SetObjectAsync($"warframe:cycles:{queryString}", r.Value, Time.Until(r.Value.Expiry));
-            cycle = r.Value;
+            cycleCache.value = r.Value;
         }
+        T cycle = cycleCache.value;
 
         if (Time.HasPassed(cycle.Expiry))
         {
