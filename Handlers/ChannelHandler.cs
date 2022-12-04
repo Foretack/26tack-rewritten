@@ -37,7 +37,7 @@ internal static class ChannelHandler
         Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
 
-        await "twitch:channels".SetKey(FetchedChannels);
+        await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
 
         IAsyncEnumerable<ExtendedChannel> c = new AsyncEnumerable<ExtendedChannel>(async y =>
         {
@@ -60,7 +60,7 @@ internal static class ChannelHandler
         Time.DoEvery(TimeSpan.FromHours(1), async () =>
         {
             await ReloadFetchedChannels();
-            await "twitch:channels".SetKey(FetchedChannels);
+            await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
         });
     }
     #endregion
@@ -188,7 +188,7 @@ internal static class StreamMonitor
         _monitoringService.Start();
 
         Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
-        Time.DoEvery(300, async () => await "twitch:channels:streams".SetKey(StreamData.Select(x => x.Value)));
+        Time.DoEvery(300, async () => await Redis.Cache.SetObjectAsync("twitch:channels:streams", StreamData.Select(x => x.Value)));
     }
 
     public static void Reset()

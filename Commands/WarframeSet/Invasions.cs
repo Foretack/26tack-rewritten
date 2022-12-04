@@ -18,17 +18,19 @@ internal sealed class Invasions : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        InvasionNode[] invasionNodes = await "warframe:invasions".GetOrCreate<InvasionNode[]>(async () =>
+        var invasionNodesCache = await Redis.Cache.TryGetObjectAsync<InvasionNode[]>("warframe:invasions");
+        if (!invasionNodesCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch current invasions :( ({r.Exception.Message})");
-                return default!;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                return;
             }
-            return r.Value;
-        }, true, TimeSpan.FromMinutes(5));
-        if (invasionNodes is null) return;
+            await Redis.Cache.SetObjectAsync("warframe:invasions", r.Value, TimeSpan.FromMinutes(5));
+            invasionNodesCache.value = r.Value;
+        }
+        InvasionNode[] invasionNodes = invasionNodesCache.value;
 
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");

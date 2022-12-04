@@ -20,25 +20,27 @@ internal sealed class SteelPath : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        SteelPathRewards rewards = await "warframe:steelpath:rewards".GetOrCreate<SteelPathRewards>(async () =>
+        var rewardsCache = await Redis.Cache.TryGetObjectAsync<SteelPathRewards>("warframe:steelpathrewards");
+        if (!rewardsCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
-                return default!;
+                return;
             }
-            return r.Value;
-        }, true);
-        if (rewards is null) return;
+            await Redis.Cache.SetObjectAsync("warframe:steelpathrewards", r.Value, Time.Until(r.Value.Expiry));
+            rewardsCache.value = r.Value;
+        }
+        SteelPathRewards rewards = rewardsCache.value;
+
 
         if (Time.HasPassed(rewards.Expiry))
         {
-            await "warframe:steelpath:rewards".RemoveKey();
+            await Redis.Cache.RemoveAsync("warframe:steelpathrewards");
             MessageHandler.SendMessage(channel, $"@{user}, Data is outdated. Try again later?");
             return;
         }
-        await "warframe:steelpath:rewards".SetKeyExpiry(Time.Until(rewards.Expiry));
 
         string rewardsString = $"Current item in rotation: {rewards.CurrentReward.Name} ({rewards.CurrentReward.Cost} Steel Essence) 🏹 ●";
         string nextInRotationString = $" Next in rotation: {rewards.Rotation[0].Name}";

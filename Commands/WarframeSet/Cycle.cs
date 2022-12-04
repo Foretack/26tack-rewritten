@@ -32,25 +32,26 @@ internal sealed class Cycle : Command
         string channel = ctx.IrcMessage.Channel;
         string queryString = new T().QueryString;
 
-        T cycle = await $"warframe:cycles:{queryString}".GetOrCreate<T>(async () =>
+        var cycleCache = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
+        T cycle = cycleCache.value;
+        if (!cycleCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request error! {r.Exception.Message}");
-                return default!;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                return;
             }
-            return r.Value;
-        }, true);
-        if (cycle is null) return;
+            await Redis.Cache.SetObjectAsync($"warframe:cycles:{queryString}", r.Value, Time.Until(r.Value.Expiry));
+            cycle = r.Value;
+        }
 
         if (Time.HasPassed(cycle.Expiry))
         {
-            await $"warframe:cycles:{queryString}".RemoveKey();
+            _ = await Redis.Cache.RemoveAsync($"warframe:cycles:{queryString}");
             MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
-        await $"warframe:cycles:{queryString}".SetKeyExpiry(Time.Until(cycle.Expiry));
 
         MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {Time.UntilString(cycle.Expiry)}");
     }

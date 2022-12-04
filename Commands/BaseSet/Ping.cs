@@ -37,6 +37,6 @@ internal sealed class Ping : Command
 
     private async Task RedisPing()
     {
-        await Redis.PublishAsync("shard:manage", "PING");
+        await Redis.PubSub.PublishAsync("shard:manage", "PING");
     }
 }

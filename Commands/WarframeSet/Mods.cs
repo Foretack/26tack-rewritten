@@ -29,17 +29,19 @@ internal sealed class Mods : Command
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
 
-        ModInfo mod = await $"warframe:mod:{modName}".GetOrCreate<ModInfo>(async () =>
+        var modCache = await Redis.Cache.TryGetObjectAsync<ModInfo>($"warframe:mod:{modName}");
+        if (!modCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
-                return default!;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                return;
             }
-            return r.Value;
-        }, true, TimeSpan.FromMinutes(30));
-        if (mod is null) return;
+            await Redis.Cache.SetObjectAsync($"warframe:mod:{modName}", r.Value, TimeSpan.FromHours(8));
+            modCache.value = r.Value;
+        }
+        ModInfo mod = modCache.value;
 
         int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.FusionLimit;
         if (level > mod.FusionLimit) level = mod.FusionLimit;
