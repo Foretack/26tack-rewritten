@@ -24,12 +24,6 @@ internal static class AnonymousClient
             _shardUpdates.Raise(x);
         }).ConfigureAwait(false);
 
-        await Redis.PubSub.SubscribeAsync<string>("shard:manage:ping", x =>
-        {
-            Console.WriteLine(x);
-            if (string.IsNullOrEmpty(x)) return;
-        }).ConfigureAwait(false);
-
         ShardUpdates.OnShardUpdate += (s, e) => MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, e.UpdateMessage);
     }
 }

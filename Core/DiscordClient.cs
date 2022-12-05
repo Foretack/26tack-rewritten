@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using AsyncAwaitBestPractices;
+﻿using AsyncAwaitBestPractices;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -38,9 +37,7 @@ internal sealed class DiscordChat
 
     public static async Task SendMessage(ulong channelId, string content)
     {
-        var obj = new { ToChannelId = channelId, Content = content };
-        var json = JsonSerializer.Serialize(obj);
-        await Redis.PubSub.PublishAsync("discord:messages:send", json);
+        await Redis.PubSub.PublishAsync("discord:messages:send", new { ToChannelId = channelId, Content = content });
     }
 }
 
