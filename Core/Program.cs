@@ -33,13 +33,13 @@ public static class Program
 
         StartupTime = DateTime.Now;
 
+        _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
         MainClient.Initialize();
         await AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
         ModulesHandler.Initialize();
         await DiscordClient.Initialize();
-        _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
 
         int seconds = 0;
         while (!MainClient.Connected)
