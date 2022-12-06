@@ -15,28 +15,16 @@ internal sealed class Ping : Command
         aliases: new string[] { "pong", "peng", "pang", "pung" }
     );
 
-    public Ping()
-    {
-        Time.DoEvery(30, () => RedisPing());
-    }
-
-    public override Task Execute(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
         string uptime = Time.SinceString(Program.StartupTime);
-        string shardStatus = AnonymousClient.ShardStatus;
+        var shardStatusCache = await Redis.Cache.TryGetObjectAsync<string>("shards:ping");
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
             $"● {latency}ms " +
-            $"● Uptime: {uptime} ● Shard status: {shardStatus}");
-
-        return Task.CompletedTask;
-    }
-
-    private async Task RedisPing()
-    {
-        await Redis.PublishAsync("shard:manage", "PING");
+            $"● Uptime: {uptime} ● Shard status: {(shardStatusCache.keyExists ? shardStatusCache.value : null)}");
     }
 }

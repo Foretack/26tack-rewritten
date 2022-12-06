@@ -39,17 +39,19 @@ internal sealed class Massping : Command
 
         if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        ChatterList chatterList = await $"twitch:users:{targetChannel}:chatters".GetOrCreate<ChatterList>(async () =>
+        var chatterListCache = await Redis.Cache.TryGetObjectAsync<ChatterList>($"twitch:users:{targetChannel}:chatters");
+        if (!chatterListCache.keyExists)
         {
             var res = await ExternalAPIHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
             if (!res.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, Could not fetch chatters of that channel :( -> {res.Exception.Message}");
-                return default!;
+                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {res.Exception.Message}");
+                return;
             }
-            return res.Value;
-        }, true, TimeSpan.FromMinutes(15));
-        if (chatterList is null) return;
+            await Redis.Cache.SetObjectAsync($"twitch:users:{targetChannel}:chatters", res.Value, TimeSpan.FromHours(1));
+            chatterListCache.value = res.Value;
+        }
+        ChatterList chatterList = chatterListCache.value;
 
         if (mods)
         {

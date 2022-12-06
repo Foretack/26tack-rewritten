@@ -40,17 +40,19 @@ internal sealed class Relics : Command
         string item = string.Join(' ', args).ToLower();
         string message;
 
-        RelicData relicData = await $"warframe:relicdata".GetOrCreate<RelicData>(async () =>
+        var relicDataCache = await Redis.Cache.TryGetObjectAsync<RelicData>("warframe:relicdata");
+        if (!relicDataCache.keyExists)
         {
             var r = await ExternalAPIHandler.GetRelicData();
             if (r is null)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, There was an error while trying to get relic information :(");
-                return default!;
+                MessageHandler.SendMessage(channel, $"@{user}, Error getting relic information :(");
+                return;
             }
-            return r;
-        }, true, TimeSpan.FromDays(1));
-        if (relicData is null) return;
+            await Redis.Cache.SetObjectAsync("warframe:relicdata", r, TimeSpan.FromDays(1));
+            relicDataCache.value = r;
+        }
+        RelicData relicData = relicDataCache.value;
 
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
         MessageHandler.SendMessage(channel, $"@{user}, {message}");

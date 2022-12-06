@@ -20,7 +20,7 @@ public static class Program
     #endregion
 
     #region Main
-    public static async Task<int> Main()
+    public static async Task Main()
     {
         LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
         Log.Logger = new LoggerConfiguration()
@@ -33,12 +33,13 @@ public static class Program
 
         StartupTime = DateTime.Now;
 
+        _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
         MainClient.Initialize();
-        AnonymousClient.Initialize();
+        await AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();
         ModulesHandler.Initialize();
-        DiscordClient.Initialize();
+        await DiscordClient.Initialize();
 
         int seconds = 0;
         while (!MainClient.Connected)
@@ -51,7 +52,6 @@ public static class Program
         await ChannelHandler.Connect(false);
 
         _ = Console.ReadLine();
-        return 0;
     }
     #endregion
 

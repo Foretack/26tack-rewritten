@@ -33,8 +33,8 @@ internal sealed class LongPing : Command
             return;
         }
 
-        string? prev = await "bot:longping".Get();
-        if (prev is not null)
+        var prev = await Redis.Cache.TryGetObjectAsync<string>("bot:longping");
+        if (!prev.keyExists)
         {
             MessageHandler.SendMessage(channel, $"[Cached] {prev}");
             return;
@@ -57,7 +57,7 @@ internal sealed class LongPing : Command
         if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
 
         string results = $"{_caughtCount} of {count} messages caught | ~{_latencySum / _caughtCount}ms";
-        await "bot:longping".SetExpiringKey(results, TimeSpan.FromMinutes(2.5));
+        await Redis.Cache.SetObjectAsync("bot:longping", results, TimeSpan.FromMinutes(2.5));
 
         _caughtCount = 0;
         _latencySum = 0;

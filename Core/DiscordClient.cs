@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using AsyncAwaitBestPractices;
+﻿using AsyncAwaitBestPractices;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -9,29 +8,20 @@ internal static class DiscordClient
 {
     private static readonly DiscordChat _discordChat = new();
     private static readonly DiscordPresences _discordPresences = new();
-    public static void Initialize()
+    public static async Task Initialize()
     {
-        Redis.Subscribe("discord:messages").OnMessage(async x =>
+        await Redis.PubSub.SubscribeAsync<DiscordMessage>("discord:messages", x =>
         {
-            await Task.Run(() =>
-            {
-                if (!x.Message.HasValue) return;
-                var message = JsonSerializer.Deserialize<DiscordMessage>(x.Message!);
-                if (message is null) return;
-                _discordChat.Raise(message);
-            }).ConfigureAwait(false);
-        });
-        Redis.Subscribe("discord:presences").OnMessage(async x =>
+            if (x is null) return;
+            _discordChat.Raise(x);
+        }).ConfigureAwait(false);
+
+        await Redis.PubSub.SubscribeAsync<DiscordPresence>("discord:presences", x =>
         {
-            await Task.Run(() =>
-            {
-                if (!x.Message.HasValue) return;
-                var presence = JsonSerializer.Deserialize<DiscordPresence>(x.Message!);
-                if (presence is null) return;
-                if (!presence.Activities.Any(x => x is not null)) return;
-                _discordPresences.Raise(presence);
-            }).ConfigureAwait(false);
-        });
+            if (x is null) return;
+            if (!x.Activities.Any(x => x is not null)) return;
+            _discordPresences.Raise(x);
+        }).ConfigureAwait(false);
     }
 }
 
@@ -47,9 +37,7 @@ internal sealed class DiscordChat
 
     public static async Task SendMessage(ulong channelId, string content)
     {
-        var obj = new { ToChannelId = channelId, Content = content };
-        var json = JsonSerializer.Serialize(obj);
-        _ = await Redis.PublishAsync("discord:messages:send", json);
+        await Redis.PubSub.PublishAsync("discord:messages:send", new { ToChannelId = channelId, Content = content });
     }
 }
 

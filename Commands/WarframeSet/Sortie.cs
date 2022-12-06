@@ -20,24 +20,26 @@ internal sealed class Sortie : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        CurrentSortie sortie = await "warframe:sortiedata".GetOrCreate<CurrentSortie>(async () =>
+        var sortieCache = await Redis.Cache.TryGetObjectAsync<CurrentSortie>("warframe:sortiedata");
+        if (!sortieCache.keyExists)
         {
             var r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
-                return default!;
+                return;
             }
-            return r.Value;
-        }, true);
-        if (sortie is null) return;
+            await Redis.Cache.SetObjectAsync("warframe:sortiedata", r.Value, Time.Until(r.Value.Expiry));
+            sortieCache.value = r.Value;
+        }
+        CurrentSortie sortie = sortieCache.value;
+
         if (Time.HasPassed(sortie.Expiry))
         {
-            await "warframe:sortiedata".RemoveKey();
+            await Redis.Cache.RemoveAsync("warframe:sortiedata");
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
-        await "warframe:sortiedata".SetKeyExpiry(Time.Until(sortie.Expiry));
 
         string sortieString = $"{sortie.Faction} " +
             $"➜ ● {sortie.Variants[0].MissionType} [{ModifierOf(sortie.Variants[0])}] " +

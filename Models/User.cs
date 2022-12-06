@@ -7,18 +7,20 @@ internal sealed class UserFactory
 {
     public async Task<User?> CreateUserAsync(string username)
     {
-        User user = await $"twitch:users:{username}".GetOrCreate<User>(async () =>
+        var userCache = await Redis.Cache.TryGetObjectAsync<User>($"twitch:users:{username}");
+        if (!userCache.keyExists)
         {
             var r = await TwitchAPIHandler.GetUsers(username);
             if (r is null)
             {
-                User? call2 = await ExternalAPIHandler.GetIvrUser(username);
-                if (call2 is null) return default!;
-                return call2;
+                var r2 = await ExternalAPIHandler.GetIvrUser(username);
+                if (r2 is null) return default!;
+                userCache.value = r2;
             }
-            return new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
-        }, true, TimeSpan.FromDays(1));
-        return user;
+            else
+                userCache.value = new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
+        }
+        return userCache.value;
     }
     public async Task<User[]?> CreateUserAsync(params string[] usernames)
     {
@@ -26,13 +28,13 @@ internal sealed class UserFactory
         List<User> users = new();
         foreach (var username in usernames)
         {
-            var cachedUser = await $"twitch:users:{username}".Get<User>();
-            if (cachedUser is null)
+            var userCache = await Redis.Cache.TryGetObjectAsync<User>($"twitch:users:{username}");
+            if (!userCache.keyExists)
             {
                 nonCachedUsernames.Add(username);
                 continue;
             }
-            users.Add(cachedUser);
+            users.Add(userCache.value);
         }
         if (nonCachedUsernames.Count > 0)
         {
@@ -42,7 +44,7 @@ internal sealed class UserFactory
             .Where(x => x is not null)
             .Select(x => new User(x.DisplayName, x.Login, x.Id, x.ProfileImageUrl, x.CreatedAt)))
             {
-                await $"twitch:users:{user.Username}".SetExpiringKey(user, TimeSpan.FromDays(1));
+                await Redis.Cache.SetObjectAsync($"twitch:users:{user.Username}", user, TimeSpan.FromDays(1));
                 users.Add(user);
             }
         }
