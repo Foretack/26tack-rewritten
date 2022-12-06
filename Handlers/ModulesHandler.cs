@@ -13,6 +13,7 @@ internal static class ModulesHandler
         AddModule(new BaroChecker());
         AddModule(new DiscordActivityNotifier());
         AddModule(new Tf2NewsPrinter());
+        AddModule(new Fish());
     }
 
     private static void AddModule(IModule module)
