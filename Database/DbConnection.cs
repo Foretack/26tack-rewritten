@@ -27,7 +27,7 @@ internal abstract class DbConnection : IDisposable
             _compiler = new();
             _connection.Open();
             _qf = new QueryFactory(_connection, _compiler);
-            Log.Information($"Initialized database: {ConnectionString}");
+            Log.Information($"Initialized database");
         }
         _initialized = true;
     }
@@ -41,7 +41,7 @@ internal abstract class DbConnection : IDisposable
     {
         if (!disposedValue)
         {
-            //
+            Log.Verbose("0");
         }
     }
 

@@ -32,7 +32,7 @@ public static class Program
         var db = new DbQueries();
         while (db.ConnectionState != System.Data.ConnectionState.Open)
         {
-            Log.Warning(db.ConnectionState.ToString());
+            Log.Warning("Bad database state: " + db.ConnectionState.ToString());
             await Task.Delay(1000);
         }
 
