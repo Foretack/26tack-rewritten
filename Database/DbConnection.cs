@@ -25,6 +25,7 @@ internal abstract class DbConnection : IDisposable
         {
             _connection = new(ConnectionString);
             _compiler = new();
+            _connection.Open();
             _qf = new QueryFactory(_connection, _compiler);
             Log.Information($"Initialized database: {ConnectionString}");
         }
