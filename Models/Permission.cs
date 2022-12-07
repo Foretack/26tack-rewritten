@@ -46,7 +46,7 @@ public sealed class Permission
 
     public static bool IsBlacklisted(string username)
     {
-        return _blacklistedUsers.Contains(username);
+        return false;
     }
 
     public static void BlacklistUser(string username) { _blacklistedUsers.Add(username); }
