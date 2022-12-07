@@ -30,7 +30,11 @@ public static class Program
             .CreateLogger();
 
         var db = new DbQueries();
-        await Task.Delay(5000);
+        while (db.ConnectionState != System.Data.ConnectionState.Open)
+        {
+            Log.Warning(db.ConnectionState.ToString());
+            await Task.Delay(1000);
+        }
 
         StartupTime = DateTime.Now;
 

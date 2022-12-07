@@ -1,4 +1,5 @@
-﻿using Npgsql;
+﻿using System.Data;
+using Npgsql;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 
@@ -31,6 +32,8 @@ internal abstract class DbConnection : IDisposable
     }
 
     public SqlKata.Query this[string table] => QueryFactory.Query(table);
+
+    public ConnectionState ConnectionState => _qf.Connection.State;
 
     private bool disposedValue;
     protected virtual void Dispose(bool disposing)
