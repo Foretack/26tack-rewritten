@@ -29,6 +29,8 @@ public static class Program
             .WriteTo.Discord(AppConfigLoader.Config.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .CreateLogger();
 
+        var db = new DbQueries();
+        await Task.Delay(5000);
 
         StartupTime = DateTime.Now;
 
