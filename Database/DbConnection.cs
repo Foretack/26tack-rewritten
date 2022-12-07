@@ -36,16 +36,7 @@ internal abstract class DbConnection : IDisposable
     {
         if (!disposedValue)
         {
-            if (disposing)
-            {
-                _connection.Close();
-                _connection.Dispose();
-                _qf.Dispose();
-            }
-
-            _compiler = default!;
-            _connection = default!;
-            disposedValue = true;
+            //
         }
     }
 
