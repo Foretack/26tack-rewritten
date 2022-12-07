@@ -11,50 +11,20 @@ internal abstract class DbConnection : IDisposable
         $"Password={AppConfigLoader.Config.DbPass};" +
         $"Database={AppConfigLoader.Config.DbName}";
 
-    public QueryFactory QueryFactory { get; protected set; }
+    public QueryFactory QueryFactory { get; private init; }
 
     private static bool _initialized;
-    private NpgsqlConnection _connection;
-    private PostgresCompiler _compiler;
+    private static NpgsqlConnection _connection;
+    private static PostgresCompiler _compiler;
 
-    protected DbConnection(int logLevel = 1)
+    protected DbConnection()
     {
-        QueryFactory = new QueryFactory(_connection, _compiler);
-        QueryFactory.Logger = compiled =>
+        if (!_initialized)
         {
-            switch (logLevel)
-            {
-                // Fatal
-                case 5:
-                    Log.Fatal(compiled.ToString());
-                    break;
-                // Error
-                case 4:
-                    Log.Error(compiled.ToString());
-                    break;
-                // Warning
-                case 3:
-                    Log.Warning(compiled.ToString());
-                    break;
-                // Information
-                case 2:
-                    Log.Information(compiled.ToString());
-                    break;
-                // Debug (Default)
-                default:
-                case 1:
-                    Log.Debug(compiled.ToString());
-                    break;
-                // Verbose
-                case 0:
-                    Log.Verbose(compiled.ToString());
-                    break;
-            }
-        };
-
-        if (_initialized) return;
-        _connection = new(ConnectionString);
-        _compiler = new();
+            _connection = new(ConnectionString);
+            _compiler = new();
+        }
+        QueryFactory = new QueryFactory(_connection, _compiler);
         _initialized = true;
     }
 
