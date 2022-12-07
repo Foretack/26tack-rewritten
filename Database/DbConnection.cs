@@ -11,11 +11,12 @@ internal abstract class DbConnection : IDisposable
         $"Password={AppConfigLoader.Config.DbPass};" +
         $"Database={AppConfigLoader.Config.DbName}";
 
-    public QueryFactory QueryFactory { get; private init; }
+    public QueryFactory QueryFactory => _qf;
 
     private static bool _initialized;
     private static NpgsqlConnection _connection;
     private static PostgresCompiler _compiler;
+    private static QueryFactory _qf;
 
     protected DbConnection()
     {
@@ -23,8 +24,8 @@ internal abstract class DbConnection : IDisposable
         {
             _connection = new(ConnectionString);
             _compiler = new();
+            _qf = new QueryFactory(_connection, _compiler);
         }
-        QueryFactory = new QueryFactory(_connection, _compiler);
         _initialized = true;
     }
 
@@ -39,10 +40,9 @@ internal abstract class DbConnection : IDisposable
             {
                 _connection.Close();
                 _connection.Dispose();
-                QueryFactory.Dispose();
+                _qf.Dispose();
             }
 
-            QueryFactory.Dispose();
             _compiler = default!;
             _connection = default!;
             disposedValue = true;
