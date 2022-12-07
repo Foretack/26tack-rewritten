@@ -14,7 +14,7 @@ internal sealed class LinkCollection : ChatModule
         Time.DoEvery(10, async () => await Commit());
     }
 
-    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,})+(/([-a-zA-Z0-9@:%._\+~#=/]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,})+(/([-a-zA-Z0-9@:%._\+~#=/?]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     private static readonly List<(string Username, string Channel, string Link)>[] _commitLists = new[]
     {
         new List<(string, string, string)>(),
