@@ -12,10 +12,10 @@ internal abstract class DbConnection : IDisposable
         $"Database={AppConfigLoader.Config.DbName}";
 
     public QueryFactory QueryFactory { get; protected set; }
-    public HttpClient Requests { get; private set; } = new();
 
-    private NpgsqlConnection _connection = new(ConnectionString);
-    private PostgresCompiler _compiler = new();
+    private static bool _initialized;
+    private NpgsqlConnection _connection;
+    private PostgresCompiler _compiler;
 
     protected DbConnection(int logLevel = 1)
     {
@@ -51,6 +51,11 @@ internal abstract class DbConnection : IDisposable
                     break;
             }
         };
+
+        if (_initialized) return;
+        _connection = new(ConnectionString);
+        _compiler = new();
+        _initialized = true;
     }
 
     public SqlKata.Query this[string table] => QueryFactory.Query(table);
@@ -64,13 +69,11 @@ internal abstract class DbConnection : IDisposable
             {
                 _connection.Close();
                 _connection.Dispose();
-                Requests.Dispose();
                 QueryFactory.Dispose();
             }
 
             QueryFactory = default!;
             _compiler = default!;
-            Requests = default!;
             _connection = default!;
             disposedValue = true;
         }
