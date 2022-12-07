@@ -6,7 +6,6 @@ using Tack.Utils;
 namespace Tack.Database;
 internal sealed class DbQueries : DbConnection
 {
-    public DbQueries(int logLevel = 1) : base(logLevel) { }
 
     public static DbQueries NewInstance()
     {

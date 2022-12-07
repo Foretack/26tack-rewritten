@@ -42,7 +42,7 @@ internal abstract class DbConnection : IDisposable
                 QueryFactory.Dispose();
             }
 
-            QueryFactory = default!;
+            QueryFactory.Dispose();
             _compiler = default!;
             _connection = default!;
             disposedValue = true;
