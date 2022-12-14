@@ -15,10 +15,14 @@ internal sealed class LinkCollection : ChatModule
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,})+(/([-a-zA-Z0-9@:%._\+~#=/?&]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
-    private static readonly List<(string Username, string Channel, string Link)>[] _commitLists = new[]
+    private static readonly List<LinkData>[] _commitLists = new[]
     {
-        new List<(string, string, string)>(),
-        new List<(string, string, string)>()
+        new List<LinkData>(),
+        new List<LinkData>()
+    };
+    private static readonly string[] _bots =
+    {
+        "streamelements", "streamlabs", "scriptorex", "apulxd", "rewardmore", "iogging", "ttdb"
     };
     private static readonly IEnumerable<string> _columns = new[] { "username", "channel", "link_text" };
     private bool _toggle = false;
@@ -28,7 +32,7 @@ internal sealed class LinkCollection : ChatModule
         if (ircMessage.Message.Length < 10
         || ircMessage.Username == AppConfigLoader.Config.BotUsername
         || ircMessage.Username.Contains("bot")
-        || ircMessage.Username == "streamelements"
+        || _bots.Contains(ircMessage.Username)
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
             return default;
 
@@ -56,4 +60,10 @@ internal sealed class LinkCollection : ChatModule
             list.Clear();
         }
     }
+
+    private record struct LinkData(string Username, string Channel, string Link)
+    {
+        public static implicit operator LinkData((string, string, string) tuple) =>
+            new LinkData(tuple.Item1, tuple.Item2, tuple.Item3);
+    };
 }
