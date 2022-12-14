@@ -42,7 +42,8 @@ internal sealed class DiscordSink : ILogEventSink
                     new
                     {
                         title = _title,
-                        description = logEvent.RenderMessage(_formatProvider),
+                        description =  $"`{logEvent.Exception.GetType().Name}:` "
+                            + logEvent.RenderMessage(_formatProvider),
                         color = _color,
                         fields = new[]
                         {
