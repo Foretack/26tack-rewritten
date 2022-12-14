@@ -36,7 +36,15 @@ internal sealed class RandomMidjourney : Command
         using var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(10);
 
-        byte[] bytes = await requests.GetByteArrayAsync(row.link);
+        byte[] bytes;
+        try { bytes = await requests.GetByteArrayAsync(row.link); }
+        catch
+        {
+            await db["midjourney_images"].Where("link", "=", $"{row.link}").DeleteAsync();
+            MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
+            return;
+        }
+
         MultipartFormDataContent content = new()
         {
             { new ByteArrayContent(bytes), "file", $"image{Random.Shared.Next(1000)}.{row.link_ext}" }
