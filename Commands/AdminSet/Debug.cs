@@ -11,7 +11,7 @@ internal sealed class Debug : Command
     public override CommandInfo Info { get; } = new(
         name: "debug",
         description: "command for testing and stuff!",
-        aliases: new[] {"d"},
+        aliases: new[] { "d" },
         permission: PermissionLevels.Whitelisted
     );
 
@@ -120,7 +120,9 @@ internal sealed class Debug : Command
                 }
                 catch (Exception e)
                 {
-                    Log.Error($"Failed to reload config. {e.GetType().Name}: {e.Message}");
+                    Log.Error("Failed to reload config. {type}: {message}",
+                        e.GetType().Name,
+                        e.Message);
                     MessageHandler.SendMessage(channel, "Failed to reload config.");
                 }
                 break;

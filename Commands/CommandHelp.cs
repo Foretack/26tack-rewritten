@@ -33,7 +33,7 @@ internal static class CommandHelp
         if (!s || handler is null)
         {
             MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
-            Log.Error($"help command failed to get the handler for a prefix somehow pajaS");
+            Log.Error("help command failed to get the handler for a prefix somehow pajaS");
             return;
         }
 

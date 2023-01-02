@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Tack.Database;
 using Tack.Models;
@@ -16,13 +17,17 @@ internal static class ExternalAPIHandler
 
         try
         {
-            Stream response = await requests.GetStreamAsync(url);
-            T? result = await JsonSerializer.DeserializeAsync<T>(response);
+            var response = await requests.GetAsync(url);
+            T? result = await response.Content.ReadFromJsonAsync<T>();
+            if (result is null)
+            {
+                return new Result<T>(result!, false, new JsonException("Failed to serialize"));
+            }
             return new Result<T>(result!, true, default!);
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, $"Exception throw :: GET {url} => {ex.Message}");
+            Log.Warning(ex, "GET {url} => {message}", url, ex.Message);
             return new Result<T>(default!, false, ex);
         }
     }
@@ -82,17 +87,17 @@ internal static class ExternalAPIHandler
             Stream response = await requests.GetStreamAsync(url);
             requests.Dispose();
             T value = (await JsonSerializer.DeserializeAsync<T>(response))!;
-            Log.Verbose($"called {url} [{value}]");
+            Log.Verbose("called {url} [{value}]", url, value);
             return new Result<T>(value, true, default!);
         }
         catch (TaskCanceledException tex)
         {
-            Log.Warning($"Call for `{typeof(T)}` timed out ({timeout}s)");
+            Log.Warning("Call for `{type}` timed out ({timeout}s)", typeof(T), timeout);
             return new Result<T>(default!, false, tex);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Exception thrown during api call for `{typeof(T)}`");
+            Log.Error(ex, "Exception thrown during api call for `{type}`", typeof(T));
             return new Result<T>(default!, false, ex);
         }
     }

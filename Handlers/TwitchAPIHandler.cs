@@ -44,7 +44,7 @@ internal static class TwitchAPIHandler
         }
         catch (TooManyRequestsException _a)
         {
-            Log.Error(_a, $"Failed to fetch users: {string.Join(';', logins ?? ids!)}");
+            Log.Error(_a, "Failed to fetch users: {users}", string.Join(';', logins ?? ids!));
             return Array.Empty<TLU::User>();
         }
         catch (Exception _c)

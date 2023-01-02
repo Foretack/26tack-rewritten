@@ -23,51 +23,43 @@ internal static class CommandHandler
     {
         Handlers.Add(handler.Prefix, handler);
         Prefixes.Add(handler.Prefix);
-        Log.Verbose($"Loaded Handler {handler.GetType()}");
+        Log.Verbose("Loaded Handler {handlerType}", handler.GetType());
     }
     #endregion
 
     #region Handling
-    public static async ValueTask HandleCommand(CommandContext ctx)
+    public static void HandleCommand(CommandContext ctx)
     {
         string cmdName = ctx.CommandName;
-        await Task.Run(() =>
+        string prefix = Prefixes.First(x => ctx.IrcMessage.Message.StartsWith(x));
+
+        if (!Handlers.TryGetValue(prefix, out var handler)) return;
+        if (handler is null) return;
+
+        if (CommandList.Info.Aliases.Contains(cmdName[prefix.Length..]))
         {
-            try
-            {
-                string prefix = Prefixes.First(x => ctx.IrcMessage.Message.StartsWith(x));
-                bool s = Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
-                if (!s || handler is null) return;
+            var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+            CommandList.Run(newContext).SafeFireAndForget();
+        }
+        if (CommandHelp.Info.Aliases.Contains(cmdName[prefix.Length..]))
+        {
+            var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
+            CommandHelp.Run(newContext).SafeFireAndForget();
+            return;
+        }
 
-                if (CommandList.Info.Aliases.Contains(cmdName.Replace(prefix, string.Empty)))
-                {
-                    var ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
-                    CommandList.Run(ctx2).SafeFireAndForget();
-                    return;
-                }
-                if (CommandHelp.Info.Name == cmdName.Replace(prefix, string.Empty))
-                {
-                    var ctx2 = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
-                    CommandHelp.Run(ctx2).SafeFireAndForget();
-                    return;
-                }
+        if (!handler.Commands.Any(x => x.Key.Contains(cmdName[prefix.Length..]))) return;
+        var command = handler.Commands.First(x => x.Key.Contains(cmdName[prefix.Length..])).Value;
 
-                Command command = handler.Commands.First(kvp => kvp.Key.Contains(cmdName.Replace(prefix, string.Empty))).Value;
-                if (!ctx.Permission.Permits(command)) return;
-                var cd = new Cooldown(ctx.IrcMessage.Username,
-                                           ctx.IrcMessage.Channel,
-                                           handler.UseUnifiedCooldowns ? handler : command.Info);
-                if (!Cooldown.CheckAndHandleCooldown(cd)) return;
+        if (!ctx.Permission.Permits(command)) return;
 
-                command
-                .Execute(ctx)
-                .SafeFireAndForget(onException: ex => Log.Error(ex, $"Error running the command \"{cmdName}\""));
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, $"Something went wrong with executing \"{cmdName}\"");
-            }
-        });
+        var cooldown = new Cooldown(
+            ctx.IrcMessage.Username,
+            ctx.IrcMessage.Channel,
+            handler.UseUnifiedCooldowns ? handler : command.Info);
+        if (!Cooldown.CheckAndHandleCooldown(cooldown)) return;
+
+        command.Execute(ctx).SafeFireAndForget(ex => Log.Error(ex, "Error running the command \"{cmdName}\"", cmdName));
     }
     #endregion
 }

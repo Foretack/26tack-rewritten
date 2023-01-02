@@ -28,7 +28,7 @@ internal static class CommandList
         if (!s || handler is null)
         {
             MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
-            Log.Error($"commands command failed to get the handler for a prefix somehow pajaS");
+            Log.Error("commands command failed to get the handler for a prefix somehow pajaS");
             return;
         }
 

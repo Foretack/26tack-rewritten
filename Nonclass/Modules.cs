@@ -40,7 +40,7 @@ public abstract class ChatModule : IModule
         Enabled = true;
         MessageHandler.OnTwitchMsg += OnTwitchMessage;
         OnEnabled.Invoke(this);
-        Log.Debug($"Enabled module: {Name}");
+        Log.Debug("Enabled module: {name}", Name);
     }
 
     public void Disable()
@@ -48,6 +48,6 @@ public abstract class ChatModule : IModule
         Enabled = false;
         MessageHandler.OnTwitchMsg -= OnTwitchMessage;
         OnDisabled.Invoke(this);
-        Log.Debug($"Disabled module: {Name}");
+        Log.Debug("Disabled module: {name}", Name);
     }
 }

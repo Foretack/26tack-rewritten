@@ -35,7 +35,7 @@ internal sealed class BaroChecker : IModule
                 _scheduled = false;
             }, baro.Activation);
             _scheduled = true;
-            Log.Debug($"Scheduled baro arrival: {Time.UntilString(baro.Activation)}");
+            Log.Debug("Scheduled baro arrival: {time}", Time.UntilString(baro.Activation));
         }
 
         if (_active && baro.Active)
@@ -47,7 +47,7 @@ internal sealed class BaroChecker : IModule
                 _scheduled = false;
             }, baro.Expiry);
             _scheduled = true;
-            Log.Debug($"Scheduled baro departure: {Time.UntilString(baro.Expiry)}");
+            Log.Debug("Scheduled baro departure: {time}", Time.UntilString(baro.Expiry));
         }
     }
 
@@ -69,13 +69,13 @@ internal sealed class BaroChecker : IModule
 
     public void Enable()
     {
-        Log.Debug($"Enabled {Name}");
+        Log.Debug("Enabled {name}", Name);
         Enabled = true;
     }
 
     public void Disable()
     {
-        Log.Debug($"Disabled {Name}");
+        Log.Debug("Disabled {name}", Name);
         Enabled = false;
     }
 }

@@ -11,7 +11,7 @@ internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {
-        Time.DoEvery(10, async () => await Commit());
+        Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,})+(/([-a-zA-Z0-9@:%._\+~#=/?&]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
@@ -56,8 +56,16 @@ internal sealed class LinkCollection : ChatModule
             var list = _commitLists[_toggle ? 1 : 0];
             if (!list.Any() || list.Count == 0) return;
             var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
-            _ = await db["collected_links"].InsertAsync(_columns, data);
-            list.Clear();
+            try
+            {
+                _ = await db["collected_links"].InsertAsync(_columns, data);
+                list.Clear();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to commit link list to DB");
+                Log.Error("List size: {size}", list.Count);
+            }
         }
     }
 

@@ -19,7 +19,7 @@ internal static class ModulesHandler
     private static void AddModule(IModule module)
     {
         _modules.Add(module.Name, module);
-        Log.Verbose($"Loaded module: {module.Name}");
+        Log.Verbose("Loaded module: {name}", module.Name);
     }
 
     public static bool EnableModule(string name)

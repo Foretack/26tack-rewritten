@@ -29,26 +29,36 @@ public sealed class Cooldown
         if (_userCooldownPool.Any(x => x.User == cd.User && x.CooldownOptions.Name == cd.CooldownOptions.Name) // same user + same command
         || _channelCooldownPool.Any(x => x.Channel == cd.Channel && x.CooldownOptions.Name == cd.CooldownOptions.Name)) // same channel + same command
         {
-            Log.Verbose($"[{cd.User};{cd.Channel};{cd.CooldownOptions.Name}] is on cooldown");
+            Log.Verbose("[{user};{channel};{command}] is on cooldown",
+                cd.User,
+                cd.Channel,
+                cd.CooldownOptions.Name);
             return false;
         }
 
         // Add cooldowns to their respective lists
         RegisterNewCooldown(cd);
-        Log.Verbose($"+ [{cd.User};{cd.Channel};{cd.CooldownOptions.Name}]");
+        Log.Verbose("+ [{user};{channel};{command}]",
+            cd.User,
+            cd.Channel,
+            cd.CooldownOptions.Name);
 
         // Remove USER cooldown
         Time.Schedule(() =>
         {
             _ = _userCooldownPool.Remove(cd);
-            Log.Verbose($"- [{cd.User};{cd.CooldownOptions.Name}]");
+            Log.Verbose("- [{user};{command}]",
+                cd.User,
+                cd.CooldownOptions.Name);
         }, TimeSpan.FromSeconds(uCD));
 
         // Remove CHANNEL cooldown
         Time.Schedule(() =>
         {
             _ = _channelCooldownPool.Remove(cd);
-            Log.Verbose($"- [{cd.Channel};{cd.CooldownOptions.Name}]");
+            Log.Verbose("- [{channel};{command}]",
+                cd.Channel,
+                cd.CooldownOptions.Name);
         }, TimeSpan.FromSeconds(cCD));
 
         // Command can't be executed

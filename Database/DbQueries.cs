@@ -143,7 +143,7 @@ internal sealed class DbQueries : DbConnection
         var row = query.FirstOrDefault();
         if (row is null)
         {
-            Log.Error($"Could not get extended channel \"{channel}\"");
+            Log.Error("Could not get extended channel \"{channel}\"", channel);
             return null;
         }
         var extd = new ExtendedChannel(

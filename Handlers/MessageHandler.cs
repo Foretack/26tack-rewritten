@@ -74,11 +74,14 @@ internal static class MessageHandler
     }
     private static void OnMessageSent(object? sender, OnMessageSentArgs e)
     {
-        Log.Debug($"Sent message: {e.SentMessage.Message}");
+        Log.Debug("Sent message: {message}", e.SentMessage.Message);
     }
     private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
     {
-        Log.Warning($"Message throttled: {e.Message} ({e.SentMessageCount} sent in {e.AllowedInPeriod})");
+        Log.Warning("Message throttled: {message} ({count} sent in {period})",
+            e.Message,
+            e.SentMessageCount,
+            e.AllowedInPeriod);
     }
     #endregion
 
@@ -86,18 +89,20 @@ internal static class MessageHandler
     internal static void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
         var message = args.DiscordMessage;
-        Log.Verbose($"Discord message received => {message.Author.Username} {message.ChannelName}: {message.Content}");
-        HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, $"Error processing Discord message: "));
+        Log.Verbose("Discord message received => {username} {channel}: {content}",
+            message.Author.Username,
+            message.ChannelName,
+            message.Content);
+        HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, "Error processing Discord message: "));
     }
-    private static async void OnMessage(object? sender, OnMessageArgs e)
+    private static void OnMessage(object? sender, OnMessageArgs e)
     {
-        Log.Verbose($"#{e.ChatMessage.Channel} {e.ChatMessage.Username}: {e.ChatMessage.Message}");
-        await HandleIrcMessage(e.ChatMessage);
+        HandleIrcMessage(e.ChatMessage);
     }
     #endregion
 
     #region Handling
-    private static async ValueTask HandleIrcMessage(TwitchMessage ircMessage)
+    private static void HandleIrcMessage(TwitchMessage ircMessage)
     {
         try
         {
@@ -112,12 +117,12 @@ internal static class MessageHandler
                 string commandName = splitMessage[0].Replace(CommandHandler.Prefixes.First(x => message.StartsWith(x)), string.Empty);
                 var permission = new Permission(ircMessage);
                 var ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
-                await CommandHandler.HandleCommand(ctx);
+                CommandHandler.HandleCommand(ctx);
             }
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Handling message failed.");
+            Log.Error(ex, "Handling message failed.");
         }
     }
 

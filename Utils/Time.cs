@@ -1,4 +1,7 @@
-﻿namespace Tack.Utils;
+﻿using System.Runtime.CompilerServices;
+using AsyncAwaitBestPractices;
+
+namespace Tack.Utils;
 internal static class Time
 {
     public static TimeSpan Until(DateTime time) => time.ToLocalTime() - DateTime.Now;
@@ -6,9 +9,7 @@ internal static class Time
     public static TimeSpan Since(DateTime time) => DateTime.Now - time.ToLocalTime();
     public static string SinceString(DateTime time) => (DateTime.Now - time.ToLocalTime()).FormatTimeLeft();
     public static void Schedule(Action action, DateTime dueTime) => Schedule(action, Until(dueTime));
-    public static void Schedule(Func<Task> task, DateTime dueTime) => Schedule(task, Until(dueTime));
     public static void DoEvery(int seconds, Action action) => DoEvery(TimeSpan.FromSeconds(seconds), action);
-    public static void DoEvery(int seconds, Func<Task> task) => DoEvery(TimeSpan.FromSeconds(seconds), task);
     public static bool HasPassed(DateTime datetime) => Time.Until(datetime) <= TimeSpan.Zero;
     public static bool HasPassed(TimeSpan timespan) => timespan <= TimeSpan.Zero;
 
@@ -16,7 +17,7 @@ internal static class Time
     {
         if (dueTime.TotalMilliseconds < 0)
         {
-            Log.Warning($"{nameof(Schedule)} attempted to schedule something in the past ({dueTime})");
+            Log.Warning("Attempted to schedule something in the past ({dueTime})", dueTime);
             return;
         }
         Timer? t = null;
@@ -27,17 +28,20 @@ internal static class Time
         },
         null, dueTime, Timeout.InfiniteTimeSpan);
     }
-    public static void Schedule(Func<Task> task, TimeSpan dueTime)
+    public static void Schedule(Func<Task> task, TimeSpan dueTime,
+    [CallerFilePath] string path = default!,
+    [CallerLineNumber] int lineNumber = default)
     {
         if (dueTime.TotalMilliseconds < 0)
         {
-            Log.Warning($"{nameof(Schedule)} attempted to schedule something in the past ({dueTime})");
+            Log.Warning("Attempted to schedule something in the past ({dueTime})", dueTime);
             return;
         }
         Timer? t = null;
-        t = new Timer(async _ =>
+        t = new Timer(_ =>
         {
-            await task.Invoke();
+            task.Invoke().SafeFireAndForget(
+                ex => Log.Error(ex, "Scheduled task failed at: \n{path}:{num}", path, lineNumber));
             t?.Dispose();
         },
         null, dueTime, Timeout.InfiniteTimeSpan);
@@ -47,24 +51,27 @@ internal static class Time
     {
         if (period.TotalMilliseconds < 0)
         {
-            Log.Warning($"{nameof(DoEvery)} attempted to set negative period ({period})");
+            Log.Warning("Attempted to set negative period ({period})", period);
             return;
         }
         System.Timers.Timer timer = new();
         timer.Interval = period.TotalMilliseconds;
         timer.Enabled = true;
-        timer.Elapsed += async (_, _) => await Task.Run(() => action.Invoke());
+        timer.Elapsed += (_, _) => Task.Run(() => action.Invoke());
     }
-    public static void DoEvery(TimeSpan period, Func<Task> task)
+    public static void DoEvery(TimeSpan period, Func<Task> task,
+    [CallerFilePath] string path = default!,
+    [CallerLineNumber] int lineNumber = default)
     {
         if (period.TotalMilliseconds < 0)
         {
-            Log.Warning($"{nameof(DoEvery)} attempted to set negative period ({period})");
+            Log.Warning("Attempted to set negative period ({period})", period);
             return;
         }
         System.Timers.Timer timer = new();
         timer.Interval = period.TotalMilliseconds;
         timer.Enabled = true;
-        timer.Elapsed += async (_, _) => await task.Invoke();
+        timer.Elapsed += (_, _) => task.Invoke().SafeFireAndForget(
+            ex => Log.Error(ex, "Recurring task failed at: \n{path}:{line}", path, lineNumber));
     }
 }

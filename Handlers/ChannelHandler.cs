@@ -34,7 +34,6 @@ internal static class ChannelHandler
             StreamMonitor.Stop();
         }
 
-        Log.Information($"Starting to {(isReconnect ? "re" : string.Empty)}join channels");
         RegisterEvents(isReconnect);
 
         await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
@@ -50,7 +49,7 @@ internal static class ChannelHandler
             if (x.Priority >= 50)
             {
                 MainClient.Client.JoinChannel(x.Username);
-                Log.Debug($"[Main] Queued join: {x.Username}");
+                Log.Debug("[Main] Queued join: {username}", x.Username);
                 await Task.Delay(1000);
             }
         });
@@ -101,7 +100,7 @@ internal static class ChannelHandler
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Erros occured whilst trying to part {channel} :");
+            Log.Error(ex, "Errors occured whilst trying to part {channel} :", channel);
         }
 
         return fetched;
@@ -133,28 +132,28 @@ internal static class ChannelHandler
     #endregion
 
     #region Client events
-    private static void AnonOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
-    {
-        Log.Warning($"[Anon] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
-    }
 
     private static void MainOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
     {
-        Log.Warning($"[Main] Failed to join {e.Exception.Channel}: {e.Exception.Details}");
+        Log.Warning("[Main] Failed to join {channel}: {details}",
+            e.Exception.Channel,
+            e.Exception.Details);
         _joinFailureChannels.Add(FetchedChannels.First(x => x.Username == e.Exception.Channel));
         _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
     }
 
     private static void MainOnLeftChannel(object? sender, OnLeftChannelArgs e)
     {
-        Log.Information($"[Main] Left channel {e.Channel}");
+        Log.Information("[Main] Left channel {channel}",
+            e.Channel);
         _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Username == e.Channel));
         _ = MainJoinedChannelNames.Remove(e.Channel);
     }
 
     private static void MainOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
     {
-        Log.Information($"[Main] Joined channel {e.Channel}");
+        Log.Information("[Main] Joined channel {channel}",
+            e.Channel);
         MainJoinedChannels.Add(FetchedChannels.First(x => x.Username == e.Channel));
         MainJoinedChannelNames.Add(e.Channel);
     }
@@ -188,7 +187,7 @@ internal static class StreamMonitor
         _monitoringService.Start();
 
         Time.DoEvery(TimeSpan.FromHours(6), () => Reset());
-        Time.DoEvery(300, async () => await Redis.Cache.SetObjectAsync("twitch:channels:streams", StreamData.Select(x => x.Value)));
+        Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Redis.Cache.SetObjectAsync("twitch:channels:streams", StreamData.Select(x => x.Value)));
     }
 
     public static void Reset()

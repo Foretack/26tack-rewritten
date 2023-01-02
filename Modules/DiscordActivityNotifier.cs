@@ -52,14 +52,14 @@ internal class DiscordActivityNotifier : IModule
     public void Enable()
     {
         DiscordPresences.OnUpdate += OnUpdate;
-        Log.Debug($"Enabled {Name}");
+        Log.Debug("Enabled {name}", Name);
         Enabled = true;
     }
 
     public void Disable()
     {
         DiscordPresences.OnUpdate -= OnUpdate;
-        Log.Debug($"Disabled {Name}");
+        Log.Debug("Disabled {name}", Name);
         Enabled = false;
     }
 }
