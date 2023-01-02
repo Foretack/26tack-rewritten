@@ -48,8 +48,8 @@ internal static class CommandHandler
             return;
         }
 
-        if (!handler.Commands.Any(x => x.Key.Contains(cmdName[prefix.Length..]))) return;
-        var command = handler.Commands.First(x => x.Key.Contains(cmdName[prefix.Length..])).Value;
+        if (!handler.Commands.Any(x => x.Key.Contains(cmdName))) return;
+        var command = handler.Commands.First(x => x.Key.Contains(cmdName)).Value;
 
         if (!ctx.Permission.Permits(command)) return;
 
