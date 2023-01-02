@@ -36,12 +36,12 @@ internal static class CommandHandler
         if (!Handlers.TryGetValue(prefix, out var handler)) return;
         if (handler is null) return;
 
-        if (CommandList.Info.Aliases.Contains(cmdName[prefix.Length..]))
+        if (CommandList.Info.Aliases.Contains(cmdName))
         {
             var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
             CommandList.Run(newContext).SafeFireAndForget();
         }
-        if (CommandHelp.Info.Aliases.Contains(cmdName[prefix.Length..]))
+        if (CommandHelp.Info.Aliases.Contains(cmdName))
         {
             var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
             CommandHelp.Run(newContext).SafeFireAndForget();
