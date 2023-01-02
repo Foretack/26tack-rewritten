@@ -27,7 +27,7 @@ internal abstract class DbConnection : IDisposable
             _compiler = new();
             _connection.Open();
             _qf = new QueryFactory(_connection, _compiler);
-            _qf.Logger = x => Log.Debug("Query: {q}\n Bindings: {b}", x.Sql, x.Bindings);
+            _qf.Logger = x => Log.Verbose("Query: {q}", x.RawSql);
             Log.Information("Initialized database");
         }
         _initialized = true;
