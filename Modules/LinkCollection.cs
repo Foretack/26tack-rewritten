@@ -59,6 +59,7 @@ internal sealed class LinkCollection : ChatModule
             try
             {
                 _ = await db["collected_links"].InsertAsync(_columns, data);
+                Log.Debug("{l} links added", list.Count);
                 list.Clear();
             }
             catch (Exception ex)
