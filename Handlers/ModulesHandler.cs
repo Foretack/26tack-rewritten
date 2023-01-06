@@ -14,6 +14,7 @@ internal static class ModulesHandler
         AddModule(new DiscordActivityNotifier());
         AddModule(new Tf2NewsPrinter());
         AddModule(new Fish());
+        AddModule(new FeedsReader());
     }
 
     private static void AddModule(IModule module)
