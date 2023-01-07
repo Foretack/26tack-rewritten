@@ -1,11 +1,14 @@
 ﻿using Tack.Handlers;
-using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Modules;
-internal sealed class Fish : ChatModule
+internal sealed class Fish : IModule
 {
+
+    public string Name => this.GetType().Name;
+    public bool Enabled { get; private set; }
+
     private readonly string[] _emotes =
     {
         "ApuApustaja",
@@ -19,20 +22,36 @@ internal sealed class Fish : ChatModule
         "paaaajaW"
     };
 
-    protected override async ValueTask OnMessage(TwitchMessage ircMessage)
+    public Fish()
     {
-        if (ircMessage.Channel != "supinic" && ircMessage.Channel != "pajlada") return;
-        if (!ircMessage.Message.StartsWith("$$fish")
-        && !ircMessage.Message.StartsWith("$$ fish")) return;
+        Enable();
+        Time.DoEvery(TimeSpan.FromHours(1), TryFish);
+    }
+
+    private async Task TryFish()
+    {
+        if (!Enabled) return;
         if (Rng(100) != 0) return;
 
         bool includeEmotes = Rng();
-        await Task.Delay(TimeSpan.FromSeconds(Rng(10, 600)));
-        MessageHandler.SendMessage(ircMessage.Channel,
+        await Task.Delay(TimeSpan.FromSeconds(Rng(10, 1800)));
+        MessageHandler.SendMessage("pajlada",
             $"$$fish {(includeEmotes ? _emotes.Choice() : null)}");
     }
 
     private bool Rng() => Rng(2) == 1;
     private int Rng(int end) => Rng(0, end);
     private int Rng(int start, int end) => Random.Shared.Next(start, end);
+
+    public void Enable()
+    {
+        Enabled = true;
+        Log.Debug("{type} Enabled", typeof(Fish));
+    }
+
+    public void Disable()
+    {
+        Enabled = false;
+        Log.Debug("{type} Disabled", typeof(Fish));
+    }
 }
