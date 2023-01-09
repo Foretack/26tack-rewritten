@@ -1,6 +1,7 @@
 ﻿using CodeHollow.FeedReader;
 using Tack.Database;
 using Tack.Handlers;
+using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -9,7 +10,6 @@ internal sealed class FeedsReader : IModule
 {
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; }
-    private readonly string _channel = AppConfigLoader.Config.RelayChannel;
 
     public FeedsReader()
     {
@@ -21,9 +21,9 @@ internal sealed class FeedsReader : IModule
     {
         if (!Enabled) return;
 
-        var subs = await Redis.Cache.GetObjectAsync<IDictionary<string, string>>("rss:subscriptions");
-        var latest = await Redis.Cache.FetchObjectAsync<IDictionary<string, string>>("rss:latest",
-            () => Task.FromResult(subs));
+        var subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RSSFeedSubscription>>("rss:subscriptions");
+        var latest = await Redis.Cache.FetchObjectAsync<Dictionary<string, string>>("rss:latest",
+            () => Task.FromResult(new Dictionary<string, string>()));
 
         foreach (var sub in subs)
         {
@@ -32,7 +32,7 @@ internal sealed class FeedsReader : IModule
                 latest.Add(sub.Key, string.Empty);
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
             }
-            var feedReadResult = await FeedReader.ReadAsync(sub.Value);
+            var feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
             if (feedReadResult is null) continue;
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
@@ -41,10 +41,14 @@ internal sealed class FeedsReader : IModule
             if (item is null) continue;
             if (item.Title == latest[sub.Key]) continue;
 
-            MessageHandler.SendMessage(_channel, $"💡 {item.Title} -- {item.Link}");
             Log.Information("💡 New item from {sub}: {title} -- {link}", sub, item.Title, item.Link);
             latest[sub.Key] = item.Title;
             await Redis.Cache.SetObjectAsync("rss:latest", latest);
+
+            foreach (var channel in sub.Value.Channels)
+            {
+                MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+            }
         }
     }
 
