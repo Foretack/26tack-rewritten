@@ -44,4 +44,9 @@ internal static class ModulesHandler
         _modules[name].Disable();
         return true;
     }
+
+    public static string ListEnabledModules()
+    {
+        return string.Join(';', _modules.Where(x => x.Value.Enabled).Select(x => x.Value.Name));
+    }
 }

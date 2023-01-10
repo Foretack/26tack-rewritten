@@ -126,6 +126,9 @@ internal sealed class Debug : Command
                     MessageHandler.SendMessage(channel, "Failed to reload config.");
                 }
                 break;
+            case "modules":
+                MessageHandler.SendMessage(channel, ModulesHandler.ListEnabledModules());
+                break;
         }
     }
 
