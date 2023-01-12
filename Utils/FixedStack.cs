@@ -1,6 +1,8 @@
 ﻿namespace Tack.Utils;
 internal sealed class FixedStack<T> : Stack<T>
 {
+    public bool IsFull => base.Count >= _maxSize;
+
     private readonly int _maxSize;
 
     public FixedStack(int maxSize) : base(maxSize + 1)
@@ -10,7 +12,7 @@ internal sealed class FixedStack<T> : Stack<T>
 
     public new void Push(T item)
     {
-        if (base.Count >= _maxSize) return;
+        if (IsFull) return;
         base.Push(item);
     }
 }

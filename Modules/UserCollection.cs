@@ -26,6 +26,8 @@ internal class UserCollection : ChatModule
 
     private async Task Commit()
     {
+        if (!_users.IsFull) return;
+
         var db = new DbQueries();
         StringBuilder sb = new();
 
@@ -36,9 +38,11 @@ internal class UserCollection : ChatModule
         sb[^2] = ' ';
         _users.Clear();
 
-        await db.QueryFactory.StatementAsync($"INSERT INTO twitch_users (username, id) " +
+        int inserted = await db.QueryFactory.StatementAsync($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
             $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
+        Log.Debug("{c} users inserted", inserted);
+
         await Task.Delay(TimeSpan.FromSeconds(5));
         await UpdateRandomUsers(db);
     }
@@ -49,6 +53,7 @@ internal class UserCollection : ChatModule
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
         var users = await ExternalAPIHandler.GetIvrUsersById(castedRows);
+        Log.Debug("Fetched {c} users from Ivr", users.Length);
         foreach (var user in users)
         {
             if (user.Banned && user.BanReason == "TOS_INDEFINITE")
@@ -57,8 +62,11 @@ internal class UserCollection : ChatModule
             }
 
             await db.QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE) WHERE id = {user.Id}");
+            Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
+
             await Task.Delay(1000);
         }
+        Log.Debug("Finished updating users");
     }
 
     private record struct TwitchUser(string Username, string Id);
