@@ -64,7 +64,7 @@ internal class UserCollection : ChatModule
                     username = user.Login,
                     id = user.Id,
                     avatar_url = user.Logo,
-                    created_at = user.CreatedAt,
+                    created_at = user.CreatedAt ?? DateTime.MinValue,
                     added_at = DateTime.Now
                 }
             });
