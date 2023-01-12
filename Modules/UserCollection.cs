@@ -53,22 +53,10 @@ internal class UserCollection : ChatModule
         {
             if (user.Banned && user.BanReason == "TOS_INDEFINITE")
             {
-                await db["twitch_users"].Where("id", "=", user.Id).UpdateAsync(new { banned = true });
+                await db.QueryFactory.StatementAsync($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
             }
 
-            await db["twitch_users"].Where("id", "=", user.Id).UpdateAsync(new
-            {
-                account = new
-                {
-                    display_name = user.DisplayName,
-                    username = user.Login,
-                    id = user.Id,
-                    avatar_url = user.Logo,
-                    created_at = user.CreatedAt ?? DateTime.MinValue,
-                    added_at = DateTime.Now
-                }
-            });
-
+            await db.QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE) WHERE id = {user.Id}");
             await Task.Delay(1000);
         }
     }
