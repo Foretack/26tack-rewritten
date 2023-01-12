@@ -9,7 +9,7 @@ using Tack.Utils;
 namespace Tack.Modules;
 internal class UserCollection : ChatModule
 {
-    private readonly FixedStack<TwitchUser> _users = new(100);
+    private readonly FixedStack<TwitchUser> _users = new(500);
 
     public UserCollection()
     {
@@ -45,7 +45,7 @@ internal class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users OFFSET floor(random() * (SELECT count(*) FROM twitch_users)) LIMIT 25").GetAsync();
+        var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users OFFSET floor(random() * (SELECT count(*) FROM twitch_users)) LIMIT 45").GetAsync();
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
         var users = await ExternalAPIHandler.GetIvrUsersById(castedRows);
