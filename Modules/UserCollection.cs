@@ -45,7 +45,7 @@ internal class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        var rows = await db.QueryFactory.Query().SelectRaw("SELECT (id) FROM twitch_users " +
+        var rows = await db.QueryFactory.Query().SelectRaw("(id) FROM twitch_users " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM twitch_users)) LIMIT 10;").GetAsync();
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
@@ -69,6 +69,8 @@ internal class UserCollection : ChatModule
                     added_at = DateTime.Now
                 }
             });
+
+            await Task.Delay(1000);
         }
     }
 
