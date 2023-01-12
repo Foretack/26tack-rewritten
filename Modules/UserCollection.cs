@@ -36,7 +36,7 @@ internal class UserCollection : ChatModule
         sb[^2] = ' ';
         _users.Clear();
 
-        await db.QueryFactory.Query().InsertAsync($"INTO twitch_users (username, id) " +
+        await db.QueryFactory.StatementAsync($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
             $"ON CONFLICT ON unique_username DO NOTHING;");
         await Task.Delay(TimeSpan.FromSeconds(5));
