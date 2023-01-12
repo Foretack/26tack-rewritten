@@ -45,7 +45,7 @@ internal static class ExternalAPIHandler
     public static async Task<IvrUser[]> GetIvrUsersById(int[] ids)
     {
         var requests = new HttpClient();
-        requests.Timeout = TimeSpan.FromSeconds(5);
+        requests.Timeout = TimeSpan.FromSeconds(ids.Length * 2);
         requests.DefaultRequestHeaders.Add("User-Agent", "occluder");
 
         string url = $"https://api.ivr.fi/v2/twitch/user?id={string.Join(',', ids)}";
