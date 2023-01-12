@@ -3,7 +3,7 @@ internal sealed class FixedStack<T> : Stack<T>
 {
     private readonly int _maxSize;
 
-    public FixedStack(int maxSize) : base(maxSize)
+    public FixedStack(int maxSize) : base(maxSize + 1)
     {
         _maxSize = maxSize;
     }

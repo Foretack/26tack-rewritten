@@ -15,7 +15,7 @@ internal sealed class UserFactory
             {
                 var r2 = await ExternalAPIHandler.GetIvrUser(username);
                 if (r2 is null) return default!;
-                userCache.value = r2;
+                userCache.value = new(r2.DisplayName, r2.Login, r2.Id.ToString(), r2.Logo, r2.CreatedAt);
             }
             else
                 userCache.value = new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
