@@ -56,7 +56,7 @@ internal static class ExternalAPIHandler
 
         Log.Debug($"GET {get.StatusCode} {url}");
 
-        var users = await get.Content.ReadFromJsonAsync<IvrUser[]>();
+        var users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions);
         if (users is null) throw new Exception("Users is null");
 
         return users;
