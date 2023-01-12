@@ -1,12 +1,15 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tack.Database;
 using Tack.Models;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
 {
+    private static JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     public static async Task<Result<T>> GetInto<T>(string url, int timeout = 5)
     {
         var requests = new HttpClient()
