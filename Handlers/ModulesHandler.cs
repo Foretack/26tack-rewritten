@@ -15,6 +15,7 @@ internal static class ModulesHandler
         AddModule(new Tf2NewsPrinter());
         AddModule(new Fish());
         AddModule(new FeedsReader());
+        AddModule(new UserCollection());
     }
 
     private static void AddModule(IModule module)
