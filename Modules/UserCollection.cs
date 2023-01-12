@@ -14,7 +14,7 @@ internal class UserCollection : ChatModule
     public UserCollection()
     {
 #if !DEBUG
-        Time.DoEvery(TimeSpan.FromHours(1.01), Commit);
+        Time.DoEvery(TimeSpan.FromMinutes(15.01), Commit);
 #endif
     }
 
@@ -38,7 +38,7 @@ internal class UserCollection : ChatModule
 
         await db.QueryFactory.StatementAsync($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
-            $"ON CONFLICT ON unique_username DO NOTHING;");
+            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
         await Task.Delay(TimeSpan.FromSeconds(5));
         await UpdateRandomUsers(db);
     }
