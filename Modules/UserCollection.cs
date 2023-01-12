@@ -45,8 +45,7 @@ internal class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        var rows = await db.QueryFactory.Query().SelectRaw("(id) FROM twitch_users " +
-            $"OFFSET floor(random() * (SELECT COUNT(*) FROM twitch_users)) LIMIT 25;").GetAsync();
+        var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users OFFSET floor(random() * (SELECT count(*) FROM twitch_users)) LIMIT 25").GetAsync();
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
         var users = await ExternalAPIHandler.GetIvrUsersById(castedRows);
