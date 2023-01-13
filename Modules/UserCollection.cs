@@ -19,7 +19,8 @@ internal sealed class UserCollection : ChatModule
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
-        _users.Push(new(ircMessage.Username, ircMessage.UserId));
+        if (!_users.Any(x => x.Username == ircMessage.Username))
+            _users.Push(new(ircMessage.Username, ircMessage.UserId));
         return default;
     }
 
