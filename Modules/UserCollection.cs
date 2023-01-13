@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using SqlKata.Execution;
 using Tack.Database;
-using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
@@ -52,21 +51,7 @@ internal class UserCollection : ChatModule
         var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users OFFSET floor(random() * (SELECT count(*) FROM twitch_users)) LIMIT 45").GetAsync();
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
-        var users = await ExternalAPIHandler.GetIvrUsersById(castedRows);
-        Log.Debug("Fetched {c} users from Ivr", users.Length);
-        foreach (var user in users)
-        {
-            if (user.Banned && user.BanReason == "TOS_INDEFINITE")
-            {
-                await db.QueryFactory.StatementAsync($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
-            }
-
-            await db.QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE) WHERE id = {user.Id}");
-            Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
-
-            await Task.Delay(1000);
-        }
-        Log.Debug("Finished updating users");
+        await db.UpdateUsers(castedRows);
     }
 
     private record struct TwitchUser(string Username, string Id);
