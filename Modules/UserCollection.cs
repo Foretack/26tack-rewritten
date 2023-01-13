@@ -6,7 +6,7 @@ using Tack.Nonclass;
 using Tack.Utils;
 
 namespace Tack.Modules;
-internal class UserCollection : ChatModule
+internal sealed class UserCollection : ChatModule
 {
     private readonly FixedStack<TwitchUser> _users = new(500);
 
