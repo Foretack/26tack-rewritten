@@ -173,7 +173,7 @@ internal sealed class DbQueries : DbConnection
                 await QueryFactory.StatementAsync($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
             }
 
-            await QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE) WHERE id = {user.Id}");
+            await QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
             Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
             updated++;
             await Task.Delay(1000);

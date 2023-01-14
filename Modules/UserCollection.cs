@@ -49,7 +49,7 @@ internal sealed class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users OFFSET floor(random() * (SELECT count(*) FROM twitch_users)) LIMIT 45").GetAsync();
+        var rows = await db.QueryFactory.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync();
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
         await db.UpdateUsers(castedRows);
