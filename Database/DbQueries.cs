@@ -1,5 +1,6 @@
 ﻿using Dasync.Collections;
 using SqlKata.Execution;
+using Tack.Handlers;
 using Tack.Models;
 using Tack.Utils;
 
@@ -157,6 +158,29 @@ internal sealed class DbQueries : DbConnection
             );
 
         return extd;
+    }
+
+    public async Task<int> UpdateUsers(int[] ids)
+    {
+        var users = await ExternalAPIHandler.GetIvrUsersById(ids);
+        Log.Debug("Fetched {c} users from Ivr", users.Length);
+
+        int updated = 0;
+        foreach (var user in users)
+        {
+            if (user.Banned && user.BanReason == "TOS_INDEFINITE")
+            {
+                await QueryFactory.StatementAsync($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
+            }
+
+            await QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
+            Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
+            updated++;
+            await Task.Delay(1000);
+        }
+
+        Log.Debug("Finished updating users; Updated {c} users", updated);
+        return updated;
     }
 
     ~DbQueries() => Dispose();

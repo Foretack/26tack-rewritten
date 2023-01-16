@@ -1,13 +1,15 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tack.Database;
 using Tack.Models;
-using M = Tack.Models;
 
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
 {
+    private static JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     public static async Task<Result<T>> GetInto<T>(string url, int timeout = 5)
     {
         var requests = new HttpClient()
@@ -32,23 +34,32 @@ internal static class ExternalAPIHandler
         }
     }
 
-    public static async Task<M::User?> GetIvrUser(string username)
+    public static async Task<IvrUser> GetIvrUser(string username)
     {
         var requests = new HttpClient();
         requests.Timeout = TimeSpan.FromSeconds(2);
 
-        try
-        {
-            Stream resp = await requests.GetStreamAsync($"https://api.ivr.fi/twitch/resolve/{username}");
-            IvrUser ivrUser = (await JsonSerializer.DeserializeAsync<IvrUser>(resp))!;
-            var user = new M::User(ivrUser.DisplayName, ivrUser.Login, ivrUser.Id.ToString(), ivrUser.Logo, ivrUser.CreatedAt);
-            return user;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to resolve user data from Ivr");
-            return null;
-        }
+        var users = await requests.GetFromJsonAsync<IvrUser[]>($"https://api.ivr.fi/v2/twitch/user?login={username}");
+        if (users is null) throw new Exception("Users is null");
+
+        return users.First();
+    }
+
+    public static async Task<IvrUser[]> GetIvrUsersById(int[] ids)
+    {
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(ids.Length * 2);
+        requests.DefaultRequestHeaders.Add("User-Agent", "occluder");
+
+        string url = $"https://api.ivr.fi/v2/twitch/user?id={string.Join(',', ids)}";
+        var get = await requests.GetAsync(url);
+
+        Log.Debug($"GET {get.StatusCode} {url}");
+
+        var users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions);
+        if (users is null) throw new Exception("Users is null");
+
+        return users;
     }
 
     #region Warframe
