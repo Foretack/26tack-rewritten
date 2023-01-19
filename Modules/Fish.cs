@@ -31,7 +31,7 @@ internal sealed class Fish : IModule
     private async Task TryFish()
     {
         if (!Enabled) return;
-        if (Rng(20) != 0) return;
+        if (Rng(9) != 0) return;
 
         bool includeEmotes = Rng();
         await Task.Delay(TimeSpan.FromSeconds(Rng(10, 1800)));
