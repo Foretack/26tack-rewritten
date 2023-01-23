@@ -176,7 +176,7 @@ internal sealed class DbQueries : DbConnection
             await QueryFactory.StatementAsync($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
             Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
             updated++;
-            await Task.Delay(1000);
+            await Task.Delay(100);
         }
 
         Log.Debug("Finished updating users; Updated {c} users", updated);
