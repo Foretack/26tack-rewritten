@@ -43,7 +43,7 @@ public record IvrUser(
     [property: JsonPropertyName("chatColor")] string ChatColor,
     [property: JsonPropertyName("logo")] string Logo,
     [property: JsonPropertyName("banner")] string Banner,
-    [property: JsonPropertyName("verifiedBot")] bool VerifiedBot,
+    [property: JsonPropertyName("verifiedBot")] bool? VerifiedBot,
     [property: JsonPropertyName("createdAt")] DateTime? CreatedAt,
     [property: JsonPropertyName("updatedAt")] DateTime? UpdatedAt,
     [property: JsonPropertyName("emotePrefix")] string EmotePrefix,
