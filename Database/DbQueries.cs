@@ -34,7 +34,7 @@ internal sealed class DbQueries : DbConnection
         Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = query.Invoke(base.QueryFactory.Query(table));
         _blocked = false;
-        Log.Verbose("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
 
         return result;
     }
@@ -57,7 +57,7 @@ internal sealed class DbQueries : DbConnection
         Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = await query.Invoke(base.QueryFactory.Query(table));
         _blocked = false;
-        Log.Verbose("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
 
         return result;
     }
@@ -80,7 +80,7 @@ internal sealed class DbQueries : DbConnection
         Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = await query.Invoke(base.QueryFactory.Query());
         _blocked = false;
-        Log.Verbose("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
 
         return result;
     }
@@ -103,7 +103,7 @@ internal sealed class DbQueries : DbConnection
         Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         int result = await base.QueryFactory.StatementAsync(sql);
         _blocked = false;
-        Log.Verbose("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
 
         return result;
     }
