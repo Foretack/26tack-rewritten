@@ -267,7 +267,7 @@ internal sealed class DbQueries : DbConnection
             }
 
             updated += await Queue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
-            Log.Debug("User updated: {u}#{i}", user.Login, user.Id);
+            Log.Verbose("User updated: {u}#{i}", user.Login, user.Id);
             await Task.Delay(100);
         }
 
