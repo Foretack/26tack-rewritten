@@ -12,7 +12,7 @@ internal abstract class DbConnection : IDisposable
         $"Password={AppConfigLoader.Config.DbPass};" +
         $"Database={AppConfigLoader.Config.DbName}";
 
-    public QueryFactory QueryFactory => _qf;
+    protected QueryFactory QueryFactory => _qf;
 
     private static bool _initialized;
     private static NpgsqlConnection _connection;
@@ -33,12 +33,11 @@ internal abstract class DbConnection : IDisposable
         _initialized = true;
     }
 
-    public SqlKata.Query this[string table] => QueryFactory.Query(table);
+    protected SqlKata.Query this[string table] => QueryFactory.Query(table);
 
     public ConnectionState ConnectionState => _qf.Connection.State;
     protected virtual void Dispose(bool disposing)
     {
-        Log.Verbose("DbQueries disposed");
     }
 
     public void Dispose()

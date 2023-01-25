@@ -56,8 +56,9 @@ internal sealed class RandomLink : Command
                 .Append(')')
                 .Append("LIMIT 1");
 
-            var query = await db.QueryFactory.Query()
-                .SelectRaw($"* FROM collected_links {queryString}").GetAsync();
+            var query = await db.Queue(q => q
+            .SelectRaw($"* FROM collected_links {queryString}")
+            .GetAsync());
 
             var row = query.FirstOrDefault();
             if (row is null)
