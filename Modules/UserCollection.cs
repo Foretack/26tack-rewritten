@@ -40,7 +40,7 @@ internal sealed class UserCollection : ChatModule
 
         int inserted = await db.Queue($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
-            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
+            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;", 10000);
         Log.Debug("{c} users inserted", inserted);
 
         await Task.Delay(TimeSpan.FromSeconds(5));

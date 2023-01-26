@@ -8,104 +8,99 @@ using Tack.Utils;
 namespace Tack.Database;
 internal sealed class DbQueries : DbConnection
 {
-    private static bool _blocked;
+    private static readonly SemaphoreSlim _operationLock = new(1);
 
     public static DbQueries NewInstance()
     {
         return new DbQueries();
     }
 
-    public async Task<TResult> Queue<TResult>(string table, Func<SqlKata.Query, TResult> query,
+    public async Task<TResult> Queue<TResult>(string table, Func<SqlKata.Query, TResult> query, int retryDelayMs = 1000,
     [CallerFilePath] string path = default!,
     [CallerLineNumber] int lineNumber = default)
     {
-        const int delay = 1000;
-        int delayCount = 0;
+        int delayMs = await BlockOperation(retryDelayMs, path, lineNumber);
 
-        while (_blocked)
-        {
-            Log.Warning("[DB] An operation is already in progress, delaying by {ms}ms", delay);
-            delayCount++;
-            await Task.Delay(delay);
-        }
-        Log.Verbose("[DB] Queue now running: {path}:{line}", path, lineNumber);
+        await _operationLock.WaitAsync().ConfigureAwait(false);
+        Log.Verbose("[DB] Operation in progress. Locking Semaphore...");
 
-        _blocked = true;
-        Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = query.Invoke(base.QueryFactory.Query(table));
-        _blocked = false;
-        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+
+        _operationLock.Release();
+        Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
     }
-    public async Task<TResult> Queue<TResult>(string table, Func<SqlKata.Query, Task<TResult>> query,
+    public async Task<TResult> Queue<TResult>(string table, Func<SqlKata.Query, Task<TResult>> query, int retryDelayMs = 1000,
     [CallerFilePath] string path = default!,
     [CallerLineNumber] int lineNumber = default)
     {
-        const int delay = 1000;
-        int delayCount = 0;
+        int delayMs = await BlockOperation(retryDelayMs, path, lineNumber);
 
-        while (_blocked)
-        {
-            Log.Warning("[DB] An operation is already in progress, delaying by {ms}ms", delay);
-            delayCount++;
-            await Task.Delay(delay);
-        }
-        Log.Verbose("[DB] Queue now running: {path}:{line}", path, lineNumber);
+        await _operationLock.WaitAsync().ConfigureAwait(false);
+        Log.Verbose("[DB] Operation in progress. Locking Semaphore...");
 
-        _blocked = true;
-        Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = await query.Invoke(base.QueryFactory.Query(table));
-        _blocked = false;
-        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+
+        _operationLock.Release();
+        Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
     }
-    public async Task<TResult> Queue<TResult>(Func<SqlKata.Query, Task<TResult>> query,
+    public async Task<TResult> Queue<TResult>(Func<SqlKata.Query, Task<TResult>> query, int retryDelayMs = 1000,
     [CallerFilePath] string path = default!,
     [CallerLineNumber] int lineNumber = default)
     {
-        const int delay = 1000;
-        int delayCount = 0;
+        int delayMs = await BlockOperation(retryDelayMs, path, lineNumber);
 
-        while (_blocked)
-        {
-            Log.Warning("[DB] An operation is already in progress, delaying by {ms}ms", delay);
-            delayCount++;
-            await Task.Delay(delay);
-        }
-        Log.Verbose("[DB] Queue now running: {path}:{line}", path, lineNumber);
+        await _operationLock.WaitAsync().ConfigureAwait(false);
+        Log.Verbose("[DB] Operation in progress. Locking Semaphore...");
 
-        _blocked = true;
-        Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         TResult result = await query.Invoke(base.QueryFactory.Query());
-        _blocked = false;
-        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+
+        _operationLock.Release();
+        Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
     }
-    public async Task<int> Queue(string sql,
+    public async Task<int> Queue(string sql, int retryDelayMs = 1000,
     [CallerFilePath] string path = default!,
     [CallerLineNumber] int lineNumber = default)
     {
-        const int delay = 1000;
-        int delayCount = 0;
+        int delayMs = await BlockOperation(retryDelayMs, path, lineNumber);
 
-        while (_blocked)
-        {
-            Log.Warning("[DB] An operation is already in progress, delaying by {ms}ms", delay);
-            delayCount++;
-            await Task.Delay(delay);
-        }
-        Log.Verbose("[DB] Queue now running: {path}:{line}", path, lineNumber);
+        await _operationLock.WaitAsync().ConfigureAwait(false);
+        Log.Verbose("[DB] Operation in progress. Locking Semaphore...");
 
-        _blocked = true;
-        Log.Verbose("[DB] Operation in progress, _blocked is set to {bool}", _blocked);
         int result = await base.QueryFactory.StatementAsync(sql);
-        _blocked = false;
-        Log.Debug("[DB] Operation finished, _blocked is set to {bool} | Delayed by: {total}ms", _blocked, delay * delayCount);
+
+        _operationLock.Release();
+        Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
+    }
+
+    private async Task<int> BlockOperation(int retryDelayMs, string path, int lineNumber)
+    {
+        int delayCount = 0;
+
+        while (_operationLock.CurrentCount == 0)
+        {
+            delayCount++;
+            if (delayCount % 100 == 0)
+            {
+                Log.Error("[DB] Aborting operation at [{path}:{line}]: Delayed for too long ({time}ms)", path, lineNumber, retryDelayMs * delayCount);
+                throw new TimeoutException("Operation delayed for too long. Aborting...");
+            }
+            else if (delayCount % 10 == 0)
+            {
+                Log.Warning("[DB] Operation at {path}:{line} is taking too much time! ({time}ms)", path, lineNumber, retryDelayMs * delayCount);
+            }
+            await Task.Delay(retryDelayMs);
+        }
+        Log.Verbose("[DB] Now running queue: {path}:{line}", path, lineNumber);
+
+        return delayCount * retryDelayMs;
     }
 
     public async Task<bool> LogException(Exception exception)

@@ -40,7 +40,7 @@ internal sealed class RandomMidjourney : Command
         try { bytes = await requests.GetByteArrayAsync(row.link); }
         catch
         {
-            await db.Queue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
+            _ = await db.Queue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
             MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
             return;
         }
