@@ -27,7 +27,7 @@ internal sealed class DbQueries : DbConnection
         TResult result = query.Invoke(base.QueryFactory.Query(table));
 
         _operationLock.Release();
-        Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
+        Log.Debug("| [DB] Operation finished. Semaphore released \n | Total delay: {total}ms", delayMs);
 
         return result;
     }
