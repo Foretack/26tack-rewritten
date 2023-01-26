@@ -258,15 +258,15 @@ internal sealed class DbQueries : DbConnection
         {
             if (user.Banned && user.BanReason == "TOS_INDEFINITE")
             {
-                _ = await Queue($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
+                updated += await Queue($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
             }
 
-            updated += await Queue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
+            int u = await Queue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}", 2500);
             Log.Verbose("User updated: {u}#{i}", user.Login, user.Id);
-            await Task.Delay(100);
+            await Task.Delay(250);
         }
 
-        Log.Debug("Finished updating users; Updated {c} users", updated);
+        Log.Debug("Finished updating users; {c} total updates", updated);
         return updated;
     }
 
