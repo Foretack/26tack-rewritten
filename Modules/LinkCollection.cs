@@ -58,7 +58,7 @@ internal sealed class LinkCollection : ChatModule
             var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
             try
             {
-                _ = await db.Queue("collected_links", q => q.InsertAsync(_columns, data), 2500);
+                _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
                 Log.Debug("{l} links added", list.Count);
                 list.Clear();
             }

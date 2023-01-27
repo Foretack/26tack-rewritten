@@ -38,7 +38,7 @@ internal sealed class UserCollection : ChatModule
         sb[^2] = ' ';
         _users.Clear();
 
-        int inserted = await db.Queue($"INSERT INTO twitch_users (username, id) " +
+        int inserted = await db.Enqueue($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
             $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;", 10000);
         Log.Debug("{c} users inserted", inserted);
@@ -49,7 +49,7 @@ internal sealed class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        var rows = await db.Queue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
+        var rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
         var castedRows = rows.Select(x => (int)x.id).ToArray();
 
         await db.UpdateUsers(castedRows);
