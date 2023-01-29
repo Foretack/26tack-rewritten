@@ -5,6 +5,7 @@ using CliWrap;
 using CliWrap.Buffered;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Utils;
@@ -29,7 +30,7 @@ public static class Program
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
-            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
             .WriteTo.Discord(AppConfigLoader.Config.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .CreateLogger();
 
