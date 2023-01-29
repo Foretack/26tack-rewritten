@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using AsyncAwaitBestPractices;
 using Serilog.Configuration;
@@ -66,7 +67,7 @@ internal sealed class DiscordSink : ILogEventSink
             return;
         }
 
-        var discordMessage_ = new
+        _ = await _httpClient.PostAsJsonAsync(_webhookUrl, new
         {
             embeds = new[]
             {
@@ -77,9 +78,7 @@ internal sealed class DiscordSink : ILogEventSink
                     color = _color
                 }
             }
-        };
-        StringContent content_ = new(JsonSerializer.Serialize(discordMessage_), Encoding.UTF8, "application/json");
-        _ = await _httpClient.PostAsync(_webhookUrl, content_);
+        });
     }
 
     private void SpecifyEmbedLevel(LogEventLevel level)

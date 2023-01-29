@@ -22,7 +22,11 @@ public static class Program
     #region Main
     public static async Task Main()
     {
-        LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+        if (OperatingSystem.IsWindows())
+            LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+        else
+            LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
+
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message}{NewLine}{Exception}{NewLine}")

@@ -11,7 +11,7 @@ internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection()
     {
-        Time.DoEvery(TimeSpan.FromMinutes(5.01), async () => await Commit());
+        Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,10})+(/([-a-zA-Z0-9@:%._\+~#=/?&]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
@@ -58,7 +58,7 @@ internal sealed class LinkCollection : ChatModule
             var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
             try
             {
-                _ = await db["collected_links"].InsertAsync(_columns, data);
+                _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
                 Log.Debug("{l} links added", list.Count);
                 list.Clear();
             }
