@@ -47,16 +47,8 @@ public static class Program
 
         _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
 
-        if (!(await Redis.Cache.KeyExistsAsync("bot:settings")))
-        {
-            await Redis.Cache.GetSetObjectAsync("bot:settings", new ProgramSettings()
-            {
-                LogLevel = LogEventLevel.Information,
-                EnabledModules = new()
-            });
-        }
-
-        Settings = await Redis.Cache.GetObjectAsync<ProgramSettings>("bot:settings");
+        Settings = await Redis.Cache.FetchObjectAsync<ProgramSettings>("bot:settings", () =>
+        Task.FromResult(new ProgramSettings() { LogLevel = LogEventLevel.Information, EnabledModules = new() }));
         LogSwitch.MinimumLevel = Settings.LogLevel;
 
         MainClient.Initialize();
