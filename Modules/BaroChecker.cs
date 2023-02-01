@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Core;
+using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
@@ -9,8 +10,9 @@ internal sealed class BaroChecker : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; } = true;
 
-    public BaroChecker()
+    public BaroChecker(bool enabled)
     {
+        if (!enabled) Enabled = false;
         Time.DoEvery(TimeSpan.FromMinutes(15), async () => await Check()); // Always running. returns if disabled
     }
 
@@ -69,13 +71,20 @@ internal sealed class BaroChecker : IModule
 
     public void Enable()
     {
-        Log.Debug("Enabled {name}", Name);
         Enabled = true;
+        UpdateSettings();
+        Log.Debug("Enabled {name}", Name);
     }
 
     public void Disable()
     {
-        Log.Debug("Disabled {name}", Name);
         Enabled = false;
+        UpdateSettings();
+        Log.Debug("Disabled {name}", Name);
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }

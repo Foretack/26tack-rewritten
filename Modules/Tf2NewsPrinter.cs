@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Tack.Core;
 using Tack.Handlers;
 using Tack.Nonclass;
 
@@ -8,7 +9,10 @@ internal sealed class Tf2NewsPrinter : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; }
 
-    public Tf2NewsPrinter() => Enable();
+    public Tf2NewsPrinter(bool enabled)
+    {
+        if (enabled) Enable();
+    }
 
     private int _arrowLength;
     private readonly Regex _arrow = new(@"<:arrow:[0-9]+>|:arrow:");
@@ -46,6 +50,7 @@ internal sealed class Tf2NewsPrinter : IModule
     {
         MessageHandler.OnDiscordMsg += OnDiscordMessage;
         Enabled = true;
+        UpdateSettings();
         Log.Debug($"{nameof(Tf2NewsPrinter)} Module enabled");
     }
 
@@ -53,6 +58,12 @@ internal sealed class Tf2NewsPrinter : IModule
     {
         MessageHandler.OnDiscordMsg -= OnDiscordMessage;
         Enabled = false;
+        UpdateSettings();
         Log.Debug($"{nameof(Tf2NewsPrinter)} Module disabled");
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }

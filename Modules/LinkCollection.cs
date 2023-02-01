@@ -9,8 +9,9 @@ using Tack.Utils;
 namespace Tack.Modules;
 internal sealed class LinkCollection : ChatModule
 {
-    public LinkCollection()
+    public LinkCollection(bool enabled)
     {
+        if (!enabled) Disable();
         Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
     }
 

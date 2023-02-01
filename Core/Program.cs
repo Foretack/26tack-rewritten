@@ -8,12 +8,14 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Tack.Database;
 using Tack.Handlers;
+using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Core;
 public static class Program
 {
     #region Properties
+    public static ProgramSettings Settings { get; private set; }
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 
@@ -44,6 +46,19 @@ public static class Program
         StartupTime = DateTime.Now;
 
         _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
+
+        if (!(await Redis.Cache.KeyExistsAsync("bot:settings")))
+        {
+            await Redis.Cache.GetSetObjectAsync("bot:settings", new ProgramSettings()
+            {
+                LogLevel = LogEventLevel.Information,
+                EnabledModules = new()
+            });
+        }
+
+        Settings = await Redis.Cache.GetObjectAsync<ProgramSettings>("bot:settings");
+        LogSwitch.MinimumLevel = Settings.LogLevel;
+
         MainClient.Initialize();
         await AnonymousClient.Initialize();
         MessageHandler.Initialize();
@@ -60,6 +75,8 @@ public static class Program
         }
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
+
+        Time.DoEvery(TimeSpan.FromMinutes(1), Settings.UpdateCachedSettings);
 
         while (true)
         {

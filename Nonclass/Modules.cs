@@ -1,4 +1,5 @@
 ﻿using AsyncAwaitBestPractices;
+using Tack.Core;
 using Tack.Handlers;
 using Tack.Models;
 
@@ -40,6 +41,7 @@ public abstract class ChatModule : IModule
         Enabled = true;
         MessageHandler.OnTwitchMsg += OnTwitchMessage;
         OnEnabled.Invoke(this);
+        UpdateSettings();
         Log.Debug("Enabled module: {name}", Name);
     }
 
@@ -48,6 +50,12 @@ public abstract class ChatModule : IModule
         Enabled = false;
         MessageHandler.OnTwitchMsg -= OnTwitchMessage;
         OnDisabled.Invoke(this);
+        UpdateSettings();
         Log.Debug("Disabled module: {name}", Name);
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }

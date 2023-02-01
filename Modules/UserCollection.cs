@@ -10,11 +10,12 @@ internal sealed class UserCollection : ChatModule
 {
     private readonly FixedStack<TwitchUser> _users = new(500);
 
-    public UserCollection()
+    public UserCollection(bool enabled)
     {
 #if !DEBUG
         Time.DoEvery(TimeSpan.FromMinutes(15), Commit);
 #endif
+        if (!enabled) Disable();
     }
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
