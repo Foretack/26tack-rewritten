@@ -61,7 +61,17 @@ public static class Program
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
 
-        _ = Console.ReadLine();
+        while (true)
+        {
+            string? input = Console.ReadLine();
+            if (string.IsNullOrEmpty(input)) continue;
+
+            if (Enum.TryParse<LogEventLevel>(input, out var level))
+            {
+                LogSwitch.MinimumLevel = level;
+                Console.WriteLine($"Switching logging level to: {level}");
+            }
+        }
     }
     #endregion
 
