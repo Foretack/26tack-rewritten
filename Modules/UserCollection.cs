@@ -23,7 +23,7 @@ internal sealed class UserCollection : ChatModule
         if (!_users.IsFull && !_users.Any(x => x.Username == ircMessage.Username))
         {
             _users.Push(new(ircMessage.Username, ircMessage.UserId));
-            Log.Verbose("[{header}] Added user to list: {user} ({count}/{max})", Name, ircMessage.Username, _users.Count, 500);
+            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, ircMessage.Username, _users.Count, 500);
         }
 
         return default;
@@ -32,7 +32,7 @@ internal sealed class UserCollection : ChatModule
     private async Task Commit()
     {
         if (!_users.IsFull) return;
-        Log.Debug("[{header}] Committing user list...", Name);
+        Log.Debug("[{@header}] Committing user list...", Name);
         var db = new DbQueries();
         StringBuilder sb = new();
 
