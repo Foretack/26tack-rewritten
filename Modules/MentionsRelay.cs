@@ -6,9 +6,9 @@ using Tack.Nonclass;
 namespace Tack.Modules;
 internal sealed class MentionsRelay : ChatModule
 {
-    public MentionsRelay()
+    public MentionsRelay(bool enabled)
     {
-
+        if (!enabled) Disable();
         OnEnabled = x => Log.Information($"{x.Name} enabled");
         OnDisabled = x => Log.Warning($"{x.Name} has been disabled!");
     }

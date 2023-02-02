@@ -1,4 +1,5 @@
 ﻿using CodeHollow.FeedReader;
+using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -11,9 +12,9 @@ internal sealed class FeedsReader : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; }
 
-    public FeedsReader()
+    public FeedsReader(bool enabled)
     {
-        Enable();
+        if (enabled) Enable();
         Time.DoEvery(TimeSpan.FromMinutes(5), ReadFeeds);
     }
 
@@ -55,12 +56,19 @@ internal sealed class FeedsReader : IModule
     public void Enable()
     {
         Enabled = true;
-        Log.Debug("{type} Enabled", typeof(FeedsReader));
+        UpdateSettings();
+        Log.Debug("Enabled {name}", Name);
     }
 
     public void Disable()
     {
         Enabled = false;
-        Log.Debug("{type} Disabled", typeof(FeedsReader));
+        UpdateSettings();
+        Log.Debug("Disabled {name}", Name);
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }

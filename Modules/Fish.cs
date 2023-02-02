@@ -1,4 +1,5 @@
-﻿using Tack.Handlers;
+﻿using Tack.Core;
+using Tack.Handlers;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -22,9 +23,9 @@ internal sealed class Fish : IModule
         "paaaajaW"
     };
 
-    public Fish()
+    public Fish(bool enabled)
     {
-        Enable();
+        if (enabled) Enable();
         Time.DoEvery(TimeSpan.FromHours(1), TryFish);
     }
 
@@ -46,12 +47,19 @@ internal sealed class Fish : IModule
     public void Enable()
     {
         Enabled = true;
-        Log.Debug("{type} Enabled", typeof(Fish));
+        UpdateSettings();
+        Log.Debug("Enabled {name}", Name);
     }
 
     public void Disable()
     {
         Enabled = false;
-        Log.Debug("{type} Disabled", typeof(Fish));
+        UpdateSettings();
+        Log.Debug("Disabled {name}", Name);
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }

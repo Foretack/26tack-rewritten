@@ -1,4 +1,5 @@
-﻿using Tack.Modules;
+﻿using Tack.Core;
+using Tack.Modules;
 using Tack.Nonclass;
 
 namespace Tack.Handlers;
@@ -8,14 +9,14 @@ internal static class ModulesHandler
 
     public static void Initialize()
     {
-        AddModule(new LinkCollection());
-        AddModule(new MentionsRelay());
-        AddModule(new BaroChecker());
-        AddModule(new DiscordActivityNotifier());
-        AddModule(new Tf2NewsPrinter());
-        AddModule(new Fish());
-        AddModule(new FeedsReader());
-        AddModule(new UserCollection());
+        AddModule(new LinkCollection(Program.Settings[nameof(LinkCollection)]));
+        AddModule(new MentionsRelay(Program.Settings[nameof(MentionsRelay)]));
+        AddModule(new BaroChecker(Program.Settings[nameof(BaroChecker)]));
+        AddModule(new DiscordActivityNotifier(Program.Settings[nameof(DiscordActivityNotifier)]));
+        AddModule(new Tf2NewsPrinter(Program.Settings[nameof(Tf2NewsPrinter)]));
+        AddModule(new Fish(Program.Settings[nameof(Fish)]));
+        AddModule(new FeedsReader(Program.Settings[nameof(FeedsReader)]));
+        AddModule(new UserCollection(Program.Settings[nameof(UserCollection)]));
     }
 
     private static void AddModule(IModule module)

@@ -12,7 +12,10 @@ internal class DiscordActivityNotifier : IModule
     public string Name => this.GetType().Name;
     public bool Enabled { get; private set; } = true;
 
-    public DiscordActivityNotifier() => Enable();
+    public DiscordActivityNotifier(bool enabled)
+    {
+        if (!enabled) Disable();
+    }
 
     private void OnUpdate(object? sender, OnDiscordPresenceArgs e)
     {
@@ -51,15 +54,20 @@ internal class DiscordActivityNotifier : IModule
 
     public void Enable()
     {
-        DiscordPresences.OnUpdate += OnUpdate;
-        Log.Debug("Enabled {name}", Name);
         Enabled = true;
+        UpdateSettings();
+        Log.Debug("Enabled {name}", Name);
     }
 
     public void Disable()
     {
-        DiscordPresences.OnUpdate -= OnUpdate;
-        Log.Debug("Disabled {name}", Name);
         Enabled = false;
+        UpdateSettings();
+        Log.Debug("Disabled {name}", Name);
+    }
+
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
     }
 }
