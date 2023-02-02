@@ -45,6 +45,7 @@ internal sealed class LinkCollection : ChatModule
             return default;
 
         _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
+        Log.Verbose("[{header}] Link added: {link}", Name, link);
 
         return default;
     }
@@ -52,6 +53,7 @@ internal sealed class LinkCollection : ChatModule
     private async Task Commit()
     {
         _toggle = !_toggle;
+        Log.Debug("[{header}] Commiting link list...", Name);
         using (DbQueries db = new DbQueries())
         {
             var list = _commitLists[_toggle ? 1 : 0];

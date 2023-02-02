@@ -22,13 +22,14 @@ internal sealed class UserCollection : ChatModule
     {
         if (!_users.Any(x => x.Username == ircMessage.Username))
             _users.Push(new(ircMessage.Username, ircMessage.UserId));
+        Log.Verbose("[{header}] Added user to list: {user}-{id}", Name, ircMessage.Username, ircMessage.UserId);
         return default;
     }
 
     private async Task Commit()
     {
         if (!_users.IsFull) return;
-
+        Log.Debug("[{header}] Committing user list...", Name);
         var db = new DbQueries();
         StringBuilder sb = new();
 
