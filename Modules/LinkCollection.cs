@@ -44,8 +44,9 @@ internal sealed class LinkCollection : ChatModule
         || !link.StartsWith('h'))
             return default;
 
-        _commitLists[_toggle ? 0 : 1].Add((ircMessage.Username, ircMessage.Channel, link));
-        Log.Verbose("[{header}] Link added: {link}", Name, link);
+        var list = _commitLists[_toggle ? 0 : 1];
+        list.Add((ircMessage.Username, ircMessage.Channel, link));
+        Log.Verbose("[{header}] Link added: {link} ({total})", Name, link, list.Count);
 
         return default;
     }
