@@ -20,10 +20,10 @@ internal sealed class UserCollection : ChatModule
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
     {
-        if (!_users.Any(x => x.Username == ircMessage.Username))
+        if (!_users.Any(x => x.Username == ircMessage.Username) && !_users.IsFull)
         {
             _users.Push(new(ircMessage.Username, ircMessage.UserId));
-            Log.Verbose("[{header}] Added user to list: {user}-{id}", Name, ircMessage.Username, ircMessage.UserId);
+            Log.Verbose("[{header}] Added user to list: {user} ({count}/{max})", Name, ircMessage.Username, _users.Count, 500);
         }
 
         return default;
