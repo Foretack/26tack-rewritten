@@ -118,7 +118,7 @@ internal abstract class DbConnection : IDisposable
             }
             await Task.Delay(retryDelayMs);
         }
-        Log.Verbose("[DB] Now running queue: {path}:{line}", path, lineNumber);
+        Log.Verbose("[DB] Now running: {path}:{line}", path, lineNumber);
 
         return delayCount * retryDelayMs;
     }

@@ -210,6 +210,7 @@ internal static class StreamMonitor
     #region Monitor events
     private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
+        Log.Information("[{header}] {channel} has gone offline!", nameof(StreamMonitor), e.Channel);
         TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
         MessageHandler.SendColoredMessage(
@@ -220,6 +221,7 @@ internal static class StreamMonitor
 
     private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
+        Log.Debug("[{header}] {channel} tick", nameof(StreamMonitor), e.Channel);
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
@@ -234,6 +236,7 @@ internal static class StreamMonitor
 
     private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
+        Log.Information("[{header}] {channel} has gone live!", nameof(StreamMonitor), e.Channel);
         StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
         MessageHandler.SendColoredMessage(
             _relayChannel,

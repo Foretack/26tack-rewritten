@@ -89,7 +89,8 @@ internal static class MessageHandler
     internal static void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
         var message = args.DiscordMessage;
-        Log.Verbose("Discord message received => {username} {channel}: {content}",
+        Log.Verbose("[{header}] {username} {channel}: {content}",
+            $"Discord:{message.GuildName}",
             message.Author.Username,
             message.ChannelName,
             message.Content);
