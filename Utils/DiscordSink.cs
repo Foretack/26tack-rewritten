@@ -1,7 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
-using AsyncAwaitBestPractices;
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -9,6 +8,7 @@ using Serilog.Events;
 namespace Tack.Utils;
 internal sealed class DiscordSink : ILogEventSink
 {
+    private readonly ConcurrentQueue<StringContent> _logQueue = new();
     private readonly IFormatProvider _formatProvider;
     private readonly string _webhookUrl;
     private readonly LogEventLevel _restrictedToMinimumLevel;
@@ -22,14 +22,15 @@ internal sealed class DiscordSink : ILogEventSink
         _formatProvider = formatProvider;
         _webhookUrl = webhookUrl;
         _restrictedToMinimumLevel = restrictedToMinimumLevel;
+        Time.DoEvery(TimeSpan.FromSeconds(3), SendWebhook);
     }
 
     public void Emit(LogEvent logEvent)
     {
-        SendMessage(logEvent).SafeFireAndForget();
+        SendMessage(logEvent);
     }
 
-    private async ValueTask SendMessage(LogEvent logEvent)
+    private void SendMessage(LogEvent logEvent)
     {
         if (!ShouldlogMessage(_restrictedToMinimumLevel, logEvent.Level)) return;
 
@@ -63,11 +64,11 @@ internal sealed class DiscordSink : ILogEventSink
                 }
             };
             StringContent content = new(JsonSerializer.Serialize(discordMessage), Encoding.UTF8, "application/json");
-            _ = await _httpClient.PostAsync(_webhookUrl, content);
+            _logQueue.Enqueue(content);
             return;
         }
 
-        _ = await _httpClient.PostAsJsonAsync(_webhookUrl, new
+        var discordMessage_ = new
         {
             embeds = new[]
             {
@@ -78,7 +79,9 @@ internal sealed class DiscordSink : ILogEventSink
                     color = _color
                 }
             }
-        });
+        };
+        StringContent content_ = new(JsonSerializer.Serialize(discordMessage_), Encoding.UTF8, "application/json");
+        _logQueue.Enqueue(content_);
     }
 
     private void SpecifyEmbedLevel(LogEventLevel level)
@@ -111,6 +114,14 @@ internal sealed class DiscordSink : ILogEventSink
                 break;
             default:
                 break;
+        }
+    }
+
+    private async Task SendWebhook()
+    {
+        if (_logQueue.TryDequeue(out var content))
+        {
+            await _httpClient.PostAsync(_webhookUrl, content);
         }
     }
 
