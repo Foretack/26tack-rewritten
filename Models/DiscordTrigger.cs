@@ -22,7 +22,8 @@ internal sealed class DiscordTrigger
         PrependText = x.prepend_text;
         UseRegex = x.use_regex;
 
-        if (!UseRegex) return;
+        if (!UseRegex)
+            return;
         ReplacementRegex = new Regex(x.replacement_regex);
         string replaceWith = x.replace_with;
         if (string.IsNullOrEmpty(replaceWith))
@@ -31,12 +32,14 @@ internal sealed class DiscordTrigger
             return;
         }
 
-        var r = replaceWith.Split(";;").Select(x => x.Split("::"));
-        foreach (var replacement in r)
+        IEnumerable<string[]> r = replaceWith.Split(";;").Select(x => x.Split("::"));
+        foreach (string[]? replacement in r)
         {
             if (int.TryParse(replacement[0], out int number))
                 RegexGroupReplacements.Add(number, replacement[1] ?? string.Empty);
         }
-        if (RegexGroupReplacements.Count > 0) HasGroupReplacements = true;
+
+        if (RegexGroupReplacements.Count > 0)
+            HasGroupReplacements = true;
     }
 }

@@ -5,32 +5,25 @@ internal static class Formatting
 {
     public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, char value)
     {
-        if (condition) sb.Append(value);
+        if (condition)
+            _ = sb.Append(value);
         return sb;
     }
     public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, string value)
     {
-        if (condition) sb.Append(value);
+        if (condition)
+            _ = sb.Append(value);
         return sb;
     }
 
-    public static string FormatException(this Exception exception)
-    {
-        return exception.Message;
-    }
+    public static string FormatException(this Exception exception) => exception.Message;
 
     public static string Join(this IEnumerable<object> src, char seperator) => string.Join(seperator, src);
     public static string Join(this IEnumerable<object> src, string separator) => string.Join(separator, src);
 
-    public static string AsString<T>(this T[] arr)
-    {
-        return $"[\"{string.Join("\", \"", arr)}\"]";
-    }
+    public static string AsString<T>(this T[] arr) => $"[\"{string.Join("\", \"", arr)}\"]";
 
-    public static string AsString<T>(this List<T> list)
-    {
-        return $"[\"{string.Join("\", \"", list)}\"]";
-    }
+    public static string AsString<T>(this List<T> list) => $"[\"{string.Join("\", \"", list)}\"]";
 
     public static string FormatTimeLeft(this TimeSpan time)
     {
@@ -78,9 +71,11 @@ internal static class Formatting
         int dCount = str.Count(x => x == '#');
 
         // No descriminator
-        if (dCount == 0) return str;
+        if (dCount == 0)
+            return str;
         // Descriminator at the end, if the last 4 chars are numbers
-        if (int.TryParse(str[^4..], out _)) return str[..^3]; // Return the string before the last '#', not including it
+        if (int.TryParse(str[^4..], out _))
+            return str[..^3]; // Return the string before the last '#', not including it
 
         // If someone's name has a '#' and there isn't a descriminator for whatever reason
         return str;
@@ -104,23 +99,11 @@ internal static class Formatting
             : str.StartsWith("internal:") ? "<I>" + str.Split(':')[1] : "@" + str.Split(':')[1];
     }
 
-    public static string PluralizeWith(this string str, int num)
-    {
-        return num == 1 ? $"{num} {str}" : $"{num} {str}s";
-    }
+    public static string PluralizeWith(this string str, int num) => num == 1 ? $"{num} {str}" : $"{num} {str}s";
 
-    public static string PluralizeOn(this string str, int count)
-    {
-        return count == 1 ? str : str + 's';
-    }
+    public static string PluralizeOn(this string str, int count) => count == 1 ? str : str + 's';
 
-    public static string PluralizeOn(this string str, int count, bool withE)
-    {
-        return count == 1 && withE ? str : str + "es";
-    }
+    public static string PluralizeOn(this string str, int count, bool withE) => count == 1 && withE ? str : str + "es";
 
-    public static string PluralizeOn(this string str, int count, string specialCase)
-    {
-        return count == 1 ? str : specialCase;
-    }
+    public static string PluralizeOn(this string str, int count, string specialCase) => count == 1 ? str : specialCase;
 }

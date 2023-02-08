@@ -16,7 +16,7 @@ public sealed class CambionCycle : IWorldCycle
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
     [JsonPropertyName("active")]
-    public string Active { get; set; }
+    public string? Active { get; set; }
     public string State => Active;
     public string QueryString { get; } = "cambionCycle";
 }
@@ -33,6 +33,6 @@ public sealed class ZarimanCycle : IWorldCycle
     [JsonPropertyName("expiry")]
     public DateTime Expiry { get; set; }
     [JsonPropertyName("state")]
-    public string State { get; set; }
+    public string? State { get; set; }
     public string QueryString { get; } = "zarimanCycle";
 }

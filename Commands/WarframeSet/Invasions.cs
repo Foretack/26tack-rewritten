@@ -18,19 +18,21 @@ internal sealed class Invasions : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        var invasionNodesCache = await Redis.Cache.TryGetObjectAsync<InvasionNode[]>("warframe:invasions");
-        if (!invasionNodesCache.keyExists)
+        (bool keyExists, InvasionNode[] value) = await Redis.Cache.TryGetObjectAsync<InvasionNode[]>("warframe:invasions");
+        if (!keyExists)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
+            Result<InvasionNode[]> r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
+
             await Redis.Cache.SetObjectAsync("warframe:invasions", r.Value, TimeSpan.FromMinutes(5));
-            invasionNodesCache.value = r.Value;
+            value = r.Value;
         }
-        InvasionNode[] invasionNodes = invasionNodesCache.value;
+
+        InvasionNode[] invasionNodes = value;
 
         string message = await SumItems(invasionNodes);
         MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
@@ -49,7 +51,8 @@ internal sealed class Invasions : Command
                 foreach (string item in items.Select(x => x.Key))
                 {
                     bool s = dict.TryAdd(item, 1);
-                    if (!s) dict[item] += 1;
+                    if (!s)
+                        dict[item] += 1;
                 }
             }
 

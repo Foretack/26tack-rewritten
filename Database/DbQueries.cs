@@ -7,10 +7,7 @@ using Tack.Utils;
 namespace Tack.Database;
 internal sealed class DbQueries : DbConnection
 {
-    public static DbQueries NewInstance()
-    {
-        return new DbQueries();
-    }
+    public static DbQueries NewInstance() => new();
 
     public async Task<bool> LogException(Exception exception)
     {
@@ -39,12 +36,12 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<ExtendedChannel[]> GetChannels()
     {
-        var query = await Enqueue("channels", q => q
+        IEnumerable<dynamic> query = await Enqueue("channels", q => q
             .Where("priority", ">", -10)
             .OrderByDesc("priority")
             .GetAsync());
 
-        var channels = query.Select(
+        ExtendedChannel[]? channels = query.Select(
             x => new ExtendedChannel(
                 x.display_name,
                 x.username,
@@ -66,14 +63,14 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<string[]> GetWhitelistedUsers()
     {
-        var query = await Enqueue("whitelisted_users", q => q.Select("username").GetAsync());
+        IEnumerable<dynamic> query = await Enqueue("whitelisted_users", q => q.Select("username").GetAsync());
 
         return query.Select(x => (string)x.username).ToArray();
     }
 
     public async Task<string[]> GetBlacklistedUsers()
     {
-        var query = await Enqueue("blacklisted_users", q => q
+        IEnumerable<dynamic> query = await Enqueue("blacklisted_users", q => q
             .Select("username")
             .GetAsync());
 
@@ -105,7 +102,7 @@ internal sealed class DbQueries : DbConnection
     {
         int inserted = await Enqueue("blacklisted_users", q => q.InsertAsync(new
         {
-            username = username,
+            username,
             id = int.Parse(id)
         }));
 
@@ -116,7 +113,7 @@ internal sealed class DbQueries : DbConnection
     {
         int inserted = await Enqueue("whitelisted_users", q => q.InsertAsync(new
         {
-            username = username
+            username
         }));
 
         return inserted > 0;
@@ -124,26 +121,27 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<DiscordTrigger[]> GetDiscordTriggers()
     {
-        var query = await Enqueue("discord_triggers", q => q
+        IEnumerable<dynamic> query = await Enqueue("discord_triggers", q => q
             .GetAsync());
 
-        var events = query.Select(x => new DiscordTrigger(x)).ToArray();
+        DiscordTrigger[] events = query.Select(x => new DiscordTrigger(x)).ToArray();
 
         return events;
     }
 
     public async Task<ExtendedChannel?> GetExtendedChannel(string channel)
     {
-        var query = await Enqueue("channels", q => q
+        IEnumerable<dynamic> query = await Enqueue("channels", q => q
             .Where("username", channel)
             .GetAsync());
 
-        var row = query.FirstOrDefault();
+        dynamic row = query.FirstOrDefault();
         if (row is null)
         {
             Log.Error("Could not get extended channel \"{channel}\"", channel);
             return null;
         }
+
         var extd = new ExtendedChannel(
             row.display_name,
             row.username,
@@ -159,11 +157,11 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<int> UpdateUsers(int[] ids)
     {
-        var users = await ExternalAPIHandler.GetIvrUsersById(ids);
+        IvrUser[] users = await ExternalAPIHandler.GetIvrUsersById(ids);
         Log.Debug("Fetched {c} users from Ivr", users.Length);
 
         int updated = 0;
-        foreach (var user in users)
+        foreach (IvrUser user in users)
         {
             if (user.Banned && user.BanReason == "TOS_INDEFINITE")
             {

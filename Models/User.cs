@@ -19,25 +19,27 @@ public sealed class User
     public static async Task<Result<User>> Get(string username)
     {
         GetUsersResponse helixUser = await TwitchAPIHandler.Instance.Api.Helix.Users.GetUsersAsync(logins: new() { username });
-        var user = helixUser.Users.FirstOrDefault();
+        HelixUser? user = helixUser.Users.FirstOrDefault();
 
         if (user is null)
         {
             Log.Error("Failed to get user {user} from Helix", username);
             return new Result<User>(default!, false, new ArgumentOutOfRangeException());
         }
+
         return new Result<User>(new(user), true, default!);
     }
 
     public static async Task<Result<ExtendedChannel>> GetChannel(ChannelHandler.Channel @base)
     {
-        var baseResult = await Get(@base.Name);
+        Result<User> baseResult = await Get(@base.Name);
         if (!baseResult.Success)
         {
             Log.Error("Failed to get user {user} from Helix", @base.Name);
             return new Result<ExtendedChannel>(default!, false, new ArgumentNullException());
         }
-        var value = baseResult.Value;
+
+        User value = baseResult.Value;
 
 
         return new Result<ExtendedChannel>(new(value.DisplayName, value.Username, value.Id, value.AvatarUrl, value.CreatedAt, @base.Priority, @base.Logged), true, default!);

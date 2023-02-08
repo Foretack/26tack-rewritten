@@ -11,7 +11,8 @@ internal sealed class LinkCollection : ChatModule
 {
     public LinkCollection(bool enabled)
     {
-        if (!enabled) Disable();
+        if (!enabled)
+            Disable();
         Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
     }
 
@@ -35,16 +36,20 @@ internal sealed class LinkCollection : ChatModule
         || ircMessage.Username.Contains("bot")
         || _bots.Contains(ircMessage.Username)
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
+        {
             return default;
+        }
 
         string? link = _regex.Match(ircMessage.Message).Value;
         if (link is null
         || link.Length < 10
         || link.Length > 400
         || !link.StartsWith('h'))
+        {
             return default;
+        }
 
-        var list = _commitLists[_toggle ? 0 : 1];
+        List<LinkData> list = _commitLists[_toggle ? 0 : 1];
         list.Add((ircMessage.Username, ircMessage.Channel, link));
         Log.Verbose("[{@header}] Link added: {link} ({total})", Name, link, list.Count);
 
@@ -55,28 +60,27 @@ internal sealed class LinkCollection : ChatModule
     {
         _toggle = !_toggle;
         Log.Debug("[{@header}] Commiting link list...", Name);
-        using (DbQueries db = new DbQueries())
+        using var db = new DbQueries();
+        List<LinkData> list = _commitLists[_toggle ? 1 : 0];
+        if (!list.Any() || list.Count == 0)
+            return;
+        IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
+        try
         {
-            var list = _commitLists[_toggle ? 1 : 0];
-            if (!list.Any() || list.Count == 0) return;
-            var data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
-            try
-            {
-                _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
-                Log.Debug("{l} links added", list.Count);
-                list.Clear();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to commit link list to DB");
-                Log.Error("List size: {size}", list.Count);
-            }
+            _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
+            Log.Debug("{l} links added", list.Count);
+            list.Clear();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to commit link list to DB");
+            Log.Error("List size: {size}", list.Count);
         }
     }
 
     private record struct LinkData(string Username, string Channel, string Link)
     {
         public static implicit operator LinkData((string, string, string) tuple) =>
-            new LinkData(tuple.Item1, tuple.Item2, tuple.Item3);
+            new(tuple.Item1, tuple.Item2, tuple.Item3);
     };
 }

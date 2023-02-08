@@ -22,19 +22,21 @@ internal sealed class Alerts : Command
         string channel = ctx.IrcMessage.Channel;
         var ab = new StringBuilder();
 
-        var alertsCache = await Redis.Cache.TryGetObjectAsync<Alert[]>("warframe:alerts");
-        if (!alertsCache.keyExists)
+        (bool keyExists, Alert[] value) = await Redis.Cache.TryGetObjectAsync<Alert[]>("warframe:alerts");
+        if (!keyExists)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
+            Result<Alert[]> r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
+
             await Redis.Cache.SetObjectAsync("warframe:alerts", r.Value, TimeSpan.FromMinutes(2.5));
-            alertsCache.value = r.Value;
+            value = r.Value;
         }
-        Alert[] alerts = alertsCache.value;
+
+        Alert[] alerts = value;
 
         string[] rewards = alerts
             .Where(x => x.Active)

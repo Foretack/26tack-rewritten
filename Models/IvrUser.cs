@@ -54,4 +54,3 @@ public record IvrUser(
     [property: JsonPropertyName("lastBroadcast")] LastBroadcast? LastBroadcast,
     [property: JsonPropertyName("panels")] IReadOnlyList<Panel> Panels
 );
-

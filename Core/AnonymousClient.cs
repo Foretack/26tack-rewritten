@@ -6,7 +6,7 @@ using Tack.Models;
 namespace Tack.Core;
 internal static class AnonymousClient
 {
-    public static string ShardStatus { get; private set; }
+    public static string? ShardStatus { get; private set; }
 
     private static readonly AnonymousChat _anonChat = new();
     private static readonly ShardUpdates _shardUpdates = new();
@@ -14,13 +14,15 @@ internal static class AnonymousClient
     {
         await Redis.PubSub.SubscribeAsync<TwitchMessage>("twitch:messages", x =>
         {
-            if (x is null) return;
+            if (x is null)
+                return;
             _anonChat.Raise(x);
         }).ConfigureAwait(false);
 
         await Redis.PubSub.SubscribeAsync<string>("shard:updates", x =>
         {
-            if (string.IsNullOrEmpty(x)) return;
+            if (string.IsNullOrEmpty(x))
+                return;
             _shardUpdates.Raise(x);
         }).ConfigureAwait(false);
 
@@ -33,20 +35,14 @@ internal sealed class AnonymousChat
     public static WeakEventManager<OnMessageArgs> TwitchMessageManager { get; } = new();
     public delegate void OnMessageHandler(object? sender, OnMessageArgs args);
 
-    public void Raise(TwitchMessage message)
-    {
-        TwitchMessageManager.RaiseEvent(this, new OnMessageArgs(message), nameof(MessageHandler.OnTwitchMsg));
-    }
+    public void Raise(TwitchMessage message) => TwitchMessageManager.RaiseEvent(this, new OnMessageArgs(message), nameof(MessageHandler.OnTwitchMsg));
 }
 
 public sealed class OnMessageArgs : EventArgs
 {
     public TwitchMessage ChatMessage { get; private set; }
 
-    public OnMessageArgs(TwitchMessage twitchMessage)
-    {
-        ChatMessage = twitchMessage;
-    }
+    public OnMessageArgs(TwitchMessage twitchMessage) => ChatMessage = twitchMessage;
 }
 
 internal sealed class ShardUpdates
@@ -67,8 +63,5 @@ public sealed class OnShardUpdateArgs : EventArgs
 {
     public string UpdateMessage { get; private set; }
 
-    public OnShardUpdateArgs(string updateMessage)
-    {
-        UpdateMessage = updateMessage;
-    }
+    public OnShardUpdateArgs(string updateMessage) => UpdateMessage = updateMessage;
 }

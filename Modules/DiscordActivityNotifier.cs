@@ -9,21 +9,24 @@ internal class DiscordActivityNotifier : IModule
 {
     public static Activity CurrentSong { get; private set; } = default!;
 
-    public string Name => this.GetType().Name;
+    public string Name => GetType().Name;
     public bool Enabled { get; private set; } = true;
 
     public DiscordActivityNotifier(bool enabled)
     {
-        if (!enabled) Disable();
+        if (!enabled)
+            Disable();
     }
 
     private void OnUpdate(object? sender, OnDiscordPresenceArgs e)
     {
-        var presence = e.DiscordPresence;
-        if (presence.Author.IsBot || presence.Activities.Count == 0) return;
-        foreach (var activity in presence.Activities)
+        DiscordPresence presence = e.DiscordPresence;
+        if (presence.Author.IsBot || presence.Activities.Count == 0)
+            return;
+        foreach (Activity? activity in presence.Activities)
         {
-            if (activity is null) continue;
+            if (activity is null)
+                continue;
             bool spotify = activity.LargeImage.Id.StartsWith("spotify");
 
             if (spotify)
@@ -34,6 +37,7 @@ internal class DiscordActivityNotifier : IModule
                     MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
                         $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
                 }
+
                 CurrentSong = activity;
                 continue;
             }
@@ -49,6 +53,7 @@ internal class DiscordActivityNotifier : IModule
             Time.Schedule(() => _onCooldown = false, TimeSpan.FromMinutes(10));
             return false;
         }
+
         return _onCooldown;
     }
 
@@ -66,8 +71,5 @@ internal class DiscordActivityNotifier : IModule
         Log.Debug("Disabled {name}", Name);
     }
 
-    private void UpdateSettings()
-    {
-        Program.Settings.EnabledModules[Name] = Enabled;
-    }
+    private void UpdateSettings() => Program.Settings.EnabledModules[Name] = Enabled;
 }

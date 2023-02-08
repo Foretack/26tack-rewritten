@@ -30,14 +30,14 @@ internal sealed class Market : Command
         string option1 = "activeOnly";
         bool activeOnly = Options.ParseBool(option1, ctx.IrcMessage.Message) ?? true;
         string desiredItem = string.Join('_', args.Where(x => !x.StartsWith(option1))).ToLower();
-        var res = await ExternalAPIHandler.GetInto<WarframeMarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
+        Result<WarframeMarketItems> res = await ExternalAPIHandler.GetInto<WarframeMarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
         if (!res.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :( -> {res.Exception.Message}");
             return false;
         }
 
-        var listings = res.Value;
+        WarframeMarketItems listings = res.Value;
         await Task.Run(() =>
         {
             Order[] orders = listings.Payload.Orders
@@ -65,16 +65,22 @@ internal sealed class Market : Command
                     sellersCount++;
                     sellersTotalPrice += o.Platinum * o.Platinum;
                     sellersTotalQuantity += o.Platinum;
-                    if (o.Platinum < cheapestSeller) cheapestSeller = o.Platinum;
-                    if (o.Platinum > mostExpensiveSeller) mostExpensiveSeller = o.Platinum;
+                    if (o.Platinum < cheapestSeller)
+                        cheapestSeller = o.Platinum;
+                    if (o.Platinum > mostExpensiveSeller)
+                        mostExpensiveSeller = o.Platinum;
                     continue;
                 }
+
                 buyersCount++;
                 buyersTotalPrice += o.Platinum * o.Quantity;
                 buyersTotalQuantity += o.Quantity;
-                if (o.Platinum < leastPayingBuyer) leastPayingBuyer = o.Platinum;
-                if (o.Platinum > mostPayingBuyer) mostPayingBuyer = o.Platinum;
+                if (o.Platinum < leastPayingBuyer)
+                    leastPayingBuyer = o.Platinum;
+                if (o.Platinum > mostPayingBuyer)
+                    mostPayingBuyer = o.Platinum;
             }
+
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
@@ -83,16 +89,16 @@ internal sealed class Market : Command
             .Append(activeOnly ? "Active" : "Total")
             .Append(" orders")
             .Append(sellersCount == 0
-                ? String.Empty
+                ? string.Empty
                 : $" ◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P")
             .Append(sellersCount == 1
-                ? String.Empty
+                ? string.Empty
                 : $" (▼{cheapestSeller}P · ▲{mostExpensiveSeller}P)")
             .Append(buyersCount == 0
-                ? String.Empty
+                ? string.Empty
                 : $" ◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P")
             .Append(buyersCount == 1
-                ? String.Empty
+                ? string.Empty
                 : $" (▲{mostPayingBuyer}P · ▼{leastPayingBuyer}P)");
 
             MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");

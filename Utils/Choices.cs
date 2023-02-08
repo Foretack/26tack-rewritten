@@ -2,6 +2,6 @@
 
 internal static class Choices
 {
-    public static T Choice<T>(this IEnumerable<T> en) { return en.ElementAt(Random.Shared.Next(en.Count())); }
-    public static char Choice(this string str) { return str[Random.Shared.Next(str.Length)]; }
+    public static T Choice<T>(this IEnumerable<T> en) => en.ElementAt(Random.Shared.Next(en.Count()));
+    public static char Choice(this string str) => str[Random.Shared.Next(str.Length)];
 }
