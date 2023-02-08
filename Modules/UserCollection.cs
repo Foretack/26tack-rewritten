@@ -15,8 +15,7 @@ internal sealed class UserCollection : ChatModule
 #if !DEBUG
         Time.DoEvery(TimeSpan.FromMinutes(15), Commit);
 #endif
-        if (!enabled)
-            Disable();
+        if (!enabled) Disable();
     }
 
     protected override ValueTask OnMessage(TwitchMessage ircMessage)
@@ -32,17 +31,15 @@ internal sealed class UserCollection : ChatModule
 
     private async Task Commit()
     {
-        if (!_users.IsFull)
-            return;
+        if (!_users.IsFull) return;
         Log.Debug("[{@header}] Committing user list...", Name);
         var db = new DbQueries();
         StringBuilder sb = new();
 
-        foreach (TwitchUser user in _users)
+        foreach (var user in _users)
         {
-            _ = sb.Append($"('{user.Username}', {user.Id}), ");
+            sb.Append($"('{user.Username}', {user.Id}), ");
         }
-
         sb[^2] = ' ';
         _users.Clear();
 
@@ -57,10 +54,10 @@ internal sealed class UserCollection : ChatModule
 
     private async Task UpdateRandomUsers(DbQueries db)
     {
-        IEnumerable<dynamic> rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
-        int[] castedRows = rows.Select(x => (int)x.id).ToArray();
+        var rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
+        var castedRows = rows.Select(x => (int)x.id).ToArray();
 
-        _ = await db.UpdateUsers(castedRows);
+        await db.UpdateUsers(castedRows);
     }
 
     private record struct TwitchUser(string Username, string Id);

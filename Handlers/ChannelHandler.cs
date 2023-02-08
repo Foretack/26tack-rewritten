@@ -25,8 +25,7 @@ public static class ChannelHandler
     #region Initialization
     internal static async Task Connect(bool isReconnect)
     {
-        if (_isInProgress)
-            return;
+        if (_isInProgress) return;
         _isInProgress = true;
 
         if (isReconnect)
@@ -42,8 +41,7 @@ public static class ChannelHandler
 
         IAsyncEnumerable<ExtendedChannel> c = new AsyncEnumerable<ExtendedChannel>(async y =>
         {
-            for (int i = 0; i < FetchedChannels.Count; i++)
-                await y.ReturnAsync(FetchedChannels[i]);
+            for (int i = 0; i < FetchedChannels.Count; i++) await y.ReturnAsync(FetchedChannels[i]);
             y.Break();
         });
 
@@ -71,16 +69,13 @@ public static class ChannelHandler
     /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
-        if (FetchedChannels.Any(x => x.Username == channel))
-            return false;
+        if (FetchedChannels.Any(x => x.Username == channel)) return false;
         var c = new Channel(channel, priority, logged);
-        Result<ExtendedChannel> extendedChannel = await User.GetChannel(c);
-        if (!extendedChannel.Success)
-            return false;
+        var extendedChannel = await User.GetChannel(c);
+        if (!extendedChannel.Success) return false;
         FetchedChannels.Add(extendedChannel.Value);
 
-        if (priority >= 50)
-            MainClient.Client.JoinChannel(channel);
+        if (priority >= 50) MainClient.Client.JoinChannel(channel);
 
         var db = new DbQueries();
         bool s = await db.AddChannel(extendedChannel.Value);
@@ -93,8 +88,7 @@ public static class ChannelHandler
         bool fetched = FetchedChannels.Any(x => x.Username == channel);
 
         ExtendedChannel? target = FetchedChannels.FirstOrDefault(x => x.Username == channel);
-        if (target is null)
-            return false;
+        if (target is null) return false;
 
         try
         {
@@ -119,7 +113,6 @@ public static class ChannelHandler
         {
             FetchedChannels = (await db.GetChannels()).ToList();
         }
-
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
@@ -130,8 +123,7 @@ public static class ChannelHandler
 
     private static void RegisterEvents(bool isReconnect)
     {
-        if (isReconnect)
-            return;
+        if (isReconnect) return;
 
         MainClient.Client.OnJoinedChannel += MainOnJoinedChannel;
         MainClient.Client.OnLeftChannel += MainOnLeftChannel;

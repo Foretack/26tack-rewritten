@@ -7,8 +7,7 @@ public static class Options
         {
             int i = message.IndexOf(paramName + seperator);
 
-            if (i <= 0)
-                return null;
+            if (i <= 0) return null;
 
             string param = message[(i + paramName.Length + seperator.Length)..].Split(splitter)[0];
 
@@ -26,8 +25,7 @@ public static class Options
         {
             int i = message.IndexOf(paramName + seperator);
 
-            if (i <= 0)
-                return null;
+            if (i <= 0) return null;
 
             string param = message[(i + paramName.Length + seperator.Length)..].Split(splitter)[0];
 
@@ -45,8 +43,7 @@ public static class Options
         {
             int i = message.IndexOf(paramName + seperator);
 
-            if (i <= 0)
-                return null;
+            if (i <= 0) return null;
 
             string param = message[(i + paramName.Length + seperator.Length)..].Split(splitter)[0];
 

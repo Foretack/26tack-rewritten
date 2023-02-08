@@ -29,12 +29,11 @@ internal sealed class LongPing : Command
         if (_commencing)
         {
             MessageHandler.SendMessage(channel, $"@{user}, A test is already commencing WTRuck You will be notified about its results");
-            if (!_notifyList.Contains(channel))
-                _notifyList.Add(channel);
+            if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
             return;
         }
 
-        (bool keyExists, string value) prev = await Redis.Cache.TryGetObjectAsync<string>("bot:longping");
+        var prev = await Redis.Cache.TryGetObjectAsync<string>("bot:longping");
         if (!prev.keyExists)
         {
             MessageHandler.SendMessage(channel, $"[Cached] {prev}");
@@ -52,12 +51,10 @@ internal sealed class LongPing : Command
             MessageHandler.SendMessage(BotUsername, $"test {i + 1} " + message);
             await Task.Delay(125);
         }
-
         await Task.Delay(2500);
 
         MessageHandler.OnTwitchMsg -= Read;
-        if (!_notifyList.Contains(channel))
-            _notifyList.Add(channel);
+        if (!_notifyList.Contains(channel)) _notifyList.Add(channel);
 
         string results = $"{_caughtCount} of {count} messages caught | ~{_latencySum / _caughtCount}ms";
         await Redis.Cache.SetObjectAsync("bot:longping", results, TimeSpan.FromMinutes(2.5));
@@ -70,7 +67,6 @@ internal sealed class LongPing : Command
             MessageHandler.SendMessage(c, results);
             _ = _notifyList.Remove(c);
         }
-
         _commencing = false;
     }
 
@@ -87,7 +83,6 @@ internal sealed class LongPing : Command
                 {
                     _ = message.Append(_s.Choice());
                 }
-
                 messages.Add(message.ToString());
             }
         });
@@ -98,7 +93,7 @@ internal sealed class LongPing : Command
     private static float _latencySum = 0;
     private void Read(object? sender, OnMessageArgs e)
     {
-        TwitchMessage ircMessage = e.ChatMessage;
+        var ircMessage = e.ChatMessage;
         long unixTimeMs = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         if (ircMessage.Channel == BotUsername
         && ircMessage.Username == BotUsername)

@@ -24,8 +24,7 @@ public sealed class Cooldown
         int uCD = cd.CooldownOptions.UserCooldown;
         int cCD = cd.CooldownOptions.ChannelCooldown;
 
-        if (uCD == 0 && cCD == 0)
-            return true;
+        if (uCD == 0 && cCD == 0) return true;
 
         if (_userCooldownPool.Any(x => x.User == cd.User && x.CooldownOptions.Name == cd.CooldownOptions.Name) // same user + same command
         || _channelCooldownPool.Any(x => x.Channel == cd.Channel && x.CooldownOptions.Name == cd.CooldownOptions.Name)) // same channel + same command
@@ -68,9 +67,9 @@ public sealed class Cooldown
 
     private static void RegisterNewCooldown(Cooldown newCooldown, bool user = true, bool channel = true)
     {
-        if (user)
-            _userCooldownPool.Add(newCooldown);
-        if (channel)
-            _channelCooldownPool.Add(newCooldown);
+        if (user) _userCooldownPool.Add(newCooldown);
+        if (channel) _channelCooldownPool.Add(newCooldown);
     }
 }
+
+

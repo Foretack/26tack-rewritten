@@ -21,10 +21,10 @@ internal sealed class Ping : Command
         string channel = ctx.IrcMessage.Channel;
         double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
         string uptime = Time.SinceString(Program.StartupTime);
-        (bool keyExists, string value) = await Redis.Cache.TryGetObjectAsync<string>("shards:ping");
+        var shardStatusCache = await Redis.Cache.TryGetObjectAsync<string>("shards:ping");
 
         MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
             $"● {latency}ms " +
-            $"● Uptime: {uptime} ● Shard status: {(keyExists ? value : null)}");
+            $"● Uptime: {uptime} ● Shard status: {(shardStatusCache.keyExists ? shardStatusCache.value : null)}");
     }
 }

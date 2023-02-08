@@ -21,14 +21,14 @@ internal sealed class Fissures : Command
 
         string fissuresString;
 
-        Result<Fissure[]> r = await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures");
+        var r = await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures");
         if (!r.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
             return;
         }
 
-        Fissure[] fissures = r.Value;
+        var fissures = r.Value;
         fissures = fissures.Where(x => x.Active).ToArray();
 
         if (args.Length == 0)
@@ -37,7 +37,6 @@ internal sealed class Fissures : Command
             await MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", UserColors.Coral);
             return;
         }
-
         bool includeStorms = Options.ParseBool("storms", ctx.IrcMessage.Message) ?? true;
 
         fissuresString = args[0].ToLower() switch

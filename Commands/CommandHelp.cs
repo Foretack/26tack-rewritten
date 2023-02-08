@@ -29,7 +29,6 @@ internal static class CommandHelp
             MessageHandler.SendMessage(channel, $"@{user}, you need to specify which command dummy ({prefix}commands for a list)");
             return;
         }
-
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
         if (!s || handler is null)
         {

@@ -8,7 +8,7 @@ using Tack.Models;
 namespace Tack.Handlers;
 internal static class ExternalAPIHandler
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+    private static JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public static async Task<Result<T>> GetInto<T>(string url, int timeout = 5)
     {
@@ -19,11 +19,13 @@ internal static class ExternalAPIHandler
 
         try
         {
-            HttpResponseMessage response = await requests.GetAsync(url);
+            var response = await requests.GetAsync(url);
             T? result = await response.Content.ReadFromJsonAsync<T>();
-            return result is null
-                ? new Result<T>(result!, false, new JsonException("Failed to serialize"))
-                : new Result<T>(result!, true, default!);
+            if (result is null)
+            {
+                return new Result<T>(result!, false, new JsonException("Failed to serialize"));
+            }
+            return new Result<T>(result!, true, default!);
         }
         catch (Exception ex)
         {
@@ -34,30 +36,30 @@ internal static class ExternalAPIHandler
 
     public static async Task<IvrUser> GetIvrUser(string username)
     {
-        var requests = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(2)
-        };
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(2);
 
-        IvrUser[]? users = await requests.GetFromJsonAsync<IvrUser[]>($"https://api.ivr.fi/v2/twitch/user?login={username}");
-        return users is null ? throw new Exception("Users is null") : users.First();
+        var users = await requests.GetFromJsonAsync<IvrUser[]>($"https://api.ivr.fi/v2/twitch/user?login={username}");
+        if (users is null) throw new Exception("Users is null");
+
+        return users.First();
     }
 
     public static async Task<IvrUser[]> GetIvrUsersById(int[] ids)
     {
-        var requests = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(ids.Length * 2)
-        };
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(ids.Length * 2);
         requests.DefaultRequestHeaders.Add("User-Agent", "occluder");
 
         string url = $"https://api.ivr.fi/v2/twitch/user?id={string.Join(',', ids)}";
-        HttpResponseMessage get = await requests.GetAsync(url);
+        var get = await requests.GetAsync(url);
 
         Log.Debug("GET {StatusCode} {url}", get.StatusCode, url);
 
-        IvrUser[]? users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions);
-        return users is null ? throw new Exception("Users is null") : users;
+        var users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions);
+        if (users is null) throw new Exception("Users is null");
+
+        return users;
     }
 
     #region Warframe
@@ -65,10 +67,8 @@ internal static class ExternalAPIHandler
 
     public static async Task<RelicData?> GetRelicData()
     {
-        var requests = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(5)
-        };
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(5);
 
         try
         {
@@ -87,10 +87,8 @@ internal static class ExternalAPIHandler
 
     public static async Task<Result<T>> WarframeStatusApi<T>(string endpoint, string platform = "pc", string language = "en", int timeout = 5)
     {
-        var requests = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(timeout)
-        };
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(timeout);
 
         try
         {
@@ -117,10 +115,8 @@ internal static class ExternalAPIHandler
 
     public static async Task<Result<string>> FindFromUniqueName(string category, string uniqueName, int timeout = 10)
     {
-        var requests = new HttpClient
-        {
-            Timeout = TimeSpan.FromSeconds(timeout)
-        };
+        var requests = new HttpClient();
+        requests.Timeout = TimeSpan.FromSeconds(timeout);
 
         try
         {

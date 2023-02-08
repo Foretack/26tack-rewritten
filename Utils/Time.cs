@@ -20,7 +20,6 @@ internal static class Time
             Log.Warning("Attempted to schedule something in the past ({dueTime})", dueTime);
             return;
         }
-
         Timer? t = null;
         t = new Timer(_ =>
         {
@@ -38,7 +37,6 @@ internal static class Time
             Log.Warning("Attempted to schedule something in the past ({dueTime})", dueTime);
             return;
         }
-
         Timer? t = null;
         t = new Timer(_ =>
         {
@@ -56,12 +54,9 @@ internal static class Time
             Log.Warning("Attempted to set negative period ({period})", period);
             return;
         }
-
-        System.Timers.Timer timer = new()
-        {
-            Interval = period.TotalMilliseconds,
-            Enabled = true
-        };
+        System.Timers.Timer timer = new();
+        timer.Interval = period.TotalMilliseconds;
+        timer.Enabled = true;
         timer.Elapsed += (_, _) => Task.Run(() => action.Invoke());
     }
     public static void DoEvery(TimeSpan period, Func<Task> task,
@@ -73,12 +68,9 @@ internal static class Time
             Log.Warning("Attempted to set negative period ({period})", period);
             return;
         }
-
-        System.Timers.Timer timer = new()
-        {
-            Interval = period.TotalMilliseconds,
-            Enabled = true
-        };
+        System.Timers.Timer timer = new();
+        timer.Interval = period.TotalMilliseconds;
+        timer.Enabled = true;
         timer.Elapsed += (_, _) => task.Invoke().SafeFireAndForget(
             ex => Log.Error(ex, "Recurring task failed at: \n{path}:{line}", path, lineNumber));
     }

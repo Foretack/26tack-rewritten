@@ -22,15 +22,13 @@ internal sealed class Debug : Command
         string[] args = ctx.Args;
         var db = new DbQueries();
 
-        if (args.Length == 0)
-            return;
+        if (args.Length == 0) return;
 
         switch (args[0])
         {
             case "throw":
                 string message = "none";
-                if (args.Length == 2)
-                    message = string.Join(" ", args[1..]);
+                if (args.Length == 2) message = string.Join(" ", args[1..]);
                 bool s = await db.LogException(new TestException(message));
                 MessageHandler.SendMessage(channel, s.ToString());
                 break;
@@ -59,7 +57,6 @@ internal sealed class Debug : Command
                     MessageHandler.SendMessage(channel, "specify channel");
                     return;
                 }
-
                 string targetChannel = args[1];
                 ExtendedChannel? echannel = await db.GetExtendedChannel(targetChannel);
                 MessageHandler.SendMessage(channel, $"{echannel}");
@@ -70,15 +67,13 @@ internal sealed class Debug : Command
                     MessageHandler.SendMessage(channel, "specify type");
                     return;
                 }
-
                 var t = Type.GetType(args[1]);
                 if (t is null)
                 {
                     MessageHandler.SendMessage(channel, "type not found");
                     return;
                 }
-
-                IEnumerable<string> properties = t.GetProperties().Select(x =>
+                var properties = t.GetProperties().Select(x =>
                 $"{(x is { CanRead: true, CanWrite: false } ? "(Readonly)" : string.Empty)} " +
                 $"{(x.GetMethod is not null && x.GetMethod.IsStatic ? "(Static)" : string.Empty)} " +
                 $"{x.GetMethod?.Name} -> {x.GetMethod?.ReturnType}");
@@ -90,15 +85,13 @@ internal sealed class Debug : Command
                     MessageHandler.SendMessage(channel, "specify type");
                     return;
                 }
-
                 var t_ = Type.GetType(args[1]);
                 if (t_ is null)
                 {
                     MessageHandler.SendMessage(channel, "type not found");
                     return;
                 }
-
-                IEnumerable<string> fields = t_.GetFields().Select(x =>
+                var fields = t_.GetFields().Select(x =>
                 $"{(x.IsInitOnly ? "(Readonly)" : string.Empty)} " +
                 $"{(x.IsStatic ? "(Static)" : string.Empty)} " +
                 $"{x.FieldType.Name} {x.Name}");
@@ -110,15 +103,13 @@ internal sealed class Debug : Command
                     MessageHandler.SendMessage(channel, "specify type");
                     return;
                 }
-
                 var t__ = Type.GetType(args[1]);
                 if (t__ is null)
                 {
                     MessageHandler.SendMessage(channel, "type not found");
                     return;
                 }
-
-                IEnumerable<string> methods = t__.GetMethods().Select(x => $"{(x.IsPrivate ? "(Private)" : string.Empty)} {x.Name} -> {x.ReturnType}");
+                var methods = t__.GetMethods().Select(x => $"{(x.IsPrivate ? "(Private)" : string.Empty)} {x.Name} -> {x.ReturnType}");
                 MessageHandler.SendMessage(channel, methods.Join(" | "));
                 break;
             case "reloadconfig":
@@ -134,7 +125,6 @@ internal sealed class Debug : Command
                         e.Message);
                     MessageHandler.SendMessage(channel, "Failed to reload config.");
                 }
-
                 break;
             case "modules":
                 MessageHandler.SendMessage(channel, ModulesHandler.ListEnabledModules());

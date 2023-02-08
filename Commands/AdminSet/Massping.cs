@@ -37,24 +37,21 @@ internal sealed class Massping : Command
             return;
         }
 
-        if (args.Length > 1 && args[1].ToLower() == "mods")
-            mods = true;
+        if (args.Length > 1 && args[1].ToLower() == "mods") mods = true;
 
-        (bool keyExists, ChatterList value) = await Redis.Cache.TryGetObjectAsync<ChatterList>($"twitch:users:{targetChannel}:chatters");
-        if (!keyExists)
+        var chatterListCache = await Redis.Cache.TryGetObjectAsync<ChatterList>($"twitch:users:{targetChannel}:chatters");
+        if (!chatterListCache.keyExists)
         {
-            Result<ChatterList> res = await ExternalAPIHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
+            var res = await ExternalAPIHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
             if (!res.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {res.Exception.Message}");
                 return;
             }
-
             await Redis.Cache.SetObjectAsync($"twitch:users:{targetChannel}:chatters", res.Value, TimeSpan.FromHours(1));
-            value = res.Value;
+            chatterListCache.value = res.Value;
         }
-
-        ChatterList chatterList = value;
+        ChatterList chatterList = chatterListCache.value;
 
         if (mods)
         {
@@ -62,7 +59,6 @@ internal sealed class Massping : Command
             MessageHandler.SendMessage(channel, sb.ToString());
             return;
         }
-
         AppendViewers(chatterList.Chatters.Viewers, ref sb);
         MessageHandler.SendMessage(channel, sb.ToString());
     }
@@ -72,11 +68,9 @@ internal sealed class Massping : Command
         var added = new List<string>();
         for (int i = 0; i < 250; i++)
         {
-            if (sb.Length >= 475)
-                break;
+            if (sb.Length >= 475) break;
             string mod = modList.Choice();
-            if (added.Contains(mod))
-                continue;
+            if (added.Contains(mod)) continue;
             _ = sb.Append(mod)
                 .Append(' ');
             added.Add(mod);
@@ -87,11 +81,9 @@ internal sealed class Massping : Command
         var added = new List<string>();
         for (int i = 0; i < 250; i++)
         {
-            if (sb.Length >= 475)
-                break;
+            if (sb.Length >= 475) break;
             string viewer = viewerList.Choice();
-            if (added.Contains(viewer))
-                continue;
+            if (added.Contains(viewer)) continue;
             _ = sb.Append(viewer)
                 .Append(' ');
             added.Add(viewer);

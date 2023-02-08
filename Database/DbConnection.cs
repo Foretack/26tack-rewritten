@@ -17,9 +17,9 @@ internal abstract class DbConnection : IDisposable
     protected QueryFactory QueryFactory => _qf;
 
     private static bool _initialized;
-    private static NpgsqlConnection? _connection;
-    private static PostgresCompiler? _compiler;
-    private static QueryFactory? _qf;
+    private static NpgsqlConnection _connection;
+    private static PostgresCompiler _compiler;
+    private static QueryFactory _qf;
 
     protected DbConnection()
     {
@@ -28,13 +28,10 @@ internal abstract class DbConnection : IDisposable
             _connection = new(ConnectionString);
             _compiler = new();
             _connection.Open();
-            _qf = new QueryFactory(_connection, _compiler)
-            {
-                Logger = x => Log.Verbose("Query: {q}", x.RawSql)
-            };
+            _qf = new QueryFactory(_connection, _compiler);
+            _qf.Logger = x => Log.Verbose("Query: {q}", x.RawSql);
             Log.Information("Initialized database");
         }
-
         _initialized = true;
     }
 
@@ -49,7 +46,7 @@ internal abstract class DbConnection : IDisposable
 
         TResult result = query.Invoke(QueryFactory.Query(table));
 
-        _ = _operationLock.Release();
+        _operationLock.Release();
         Log.Debug("| [DB] Operation finished. Semaphore released \n | Total delay: {total}ms", delayMs);
 
         return result;
@@ -65,7 +62,7 @@ internal abstract class DbConnection : IDisposable
 
         TResult result = await query.Invoke(QueryFactory.Query(table));
 
-        _ = _operationLock.Release();
+        _operationLock.Release();
         Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
@@ -81,7 +78,7 @@ internal abstract class DbConnection : IDisposable
 
         TResult result = await query.Invoke(QueryFactory.Query());
 
-        _ = _operationLock.Release();
+        _operationLock.Release();
         Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
@@ -97,7 +94,7 @@ internal abstract class DbConnection : IDisposable
 
         int result = await QueryFactory.StatementAsync(sql);
 
-        _ = _operationLock.Release();
+        _operationLock.Release();
         Log.Debug("| [DB] Operation finished. Semaphore released \n| Total delay: {total}ms", delayMs);
 
         return result;
@@ -119,10 +116,8 @@ internal abstract class DbConnection : IDisposable
             {
                 Log.Warning("[DB] Operation at {path}:{line} is taking too much time! ({time}ms)", path, lineNumber, retryDelayMs * delayCount);
             }
-
             await Task.Delay(retryDelayMs);
         }
-
         Log.Verbose("[DB] Now running: {path}:{line}", path, lineNumber);
 
         return delayCount * retryDelayMs;

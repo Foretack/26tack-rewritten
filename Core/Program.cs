@@ -15,17 +15,20 @@ namespace Tack.Core;
 public static class Program
 {
     #region Properties
-    public static ProgramSettings? Settings { get; private set; }
+    public static ProgramSettings Settings { get; private set; }
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 
-    private static readonly string _assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(_assemblyName)} can not be null.");
+    private static string _assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(_assemblyName)} can not be null.");
     #endregion
 
     #region Main
     public static async Task Main()
     {
-        LogSwitch.MinimumLevel = OperatingSystem.IsWindows() ? Serilog.Events.LogEventLevel.Verbose : Serilog.Events.LogEventLevel.Information;
+        if (OperatingSystem.IsWindows())
+            LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Verbose;
+        else
+            LogSwitch.MinimumLevel = Serilog.Events.LogEventLevel.Information;
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
@@ -60,10 +63,8 @@ public static class Program
         {
             await Task.Delay(1000);
             seconds++;
-            if (seconds >= 10)
-                RestartProcess("startup timed out");
+            if (seconds >= 10) RestartProcess("startup timed out");
         }
-
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
 
@@ -72,10 +73,9 @@ public static class Program
         while (true)
         {
             string? input = Console.ReadLine();
-            if (string.IsNullOrEmpty(input))
-                continue;
+            if (string.IsNullOrEmpty(input)) continue;
 
-            if (Enum.TryParse<LogEventLevel>(input, out LogEventLevel level))
+            if (Enum.TryParse<LogEventLevel>(input, out var level))
             {
                 LogSwitch.MinimumLevel = level;
                 Console.WriteLine($"Switching logging level to: {level}");
@@ -89,8 +89,7 @@ public static class Program
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal("The program is being restarted by {source} ...", triggerSource);
-
-        _ = new DbQueries();
+        var db = new DbQueries();
         _ = Process.Start($"./{_assemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }

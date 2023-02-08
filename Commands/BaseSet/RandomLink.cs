@@ -31,14 +31,14 @@ internal sealed class RandomLink : Command
         {
             var queryString = new StringBuilder();
 
-            string?[] options = new[]
+            var options = new[]
             {
                 contains is null ? null : $"link_text LIKE '%{contains}%'",
                 targetUser is null ? null : $"username LIKE '%{targetUser}%'",
                 targetChannel is null ? null : $"channel LIKE '%{targetChannel}%'"
             };
             var queryConditions = new StringBuilder();
-            string?[] selectedOptions = options.Where(x => x is not null).ToArray();
+            var selectedOptions = options.Where(x => x is not null).ToArray();
             if (selectedOptions.Length > 0)
             {
                 _ = queryConditions
@@ -56,11 +56,11 @@ internal sealed class RandomLink : Command
                 .Append(')')
                 .Append("LIMIT 1");
 
-            IEnumerable<dynamic> query = await db.Enqueue(q => q
+            var query = await db.Enqueue(q => q
             .SelectRaw($"* FROM collected_links {queryString}")
             .GetAsync());
 
-            dynamic row = query.FirstOrDefault();
+            var row = query.FirstOrDefault();
             if (row is null)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");

@@ -18,15 +18,21 @@ public abstract class ChatModule : IModule
     /// <summary>
     /// The name of the class that is derived from ChatModule
     /// </summary>
-    public string Name => GetType().Name;
+    public string Name => this.GetType().Name;
     public bool Enabled { get; protected set; } = true;
 
     protected Action<ChatModule> OnEnabled { get; set; } = _ => { };
     protected Action<ChatModule> OnDisabled { get; set; } = _ => { };
 
-    protected ChatModule() => Enable();
+    protected ChatModule()
+    {
+        Enable();
+    }
 
-    private void OnTwitchMessage(object? sender, Core.OnMessageArgs e) => OnMessage(e.ChatMessage).SafeFireAndForget(x => Log.Error(x, $"{Name} encountered an issue"));
+    private void OnTwitchMessage(object? sender, Core.OnMessageArgs e)
+    {
+        OnMessage(e.ChatMessage).SafeFireAndForget(x => Log.Error(x, $"{Name} encountered an issue"));
+    }
 
     protected abstract ValueTask OnMessage(TwitchMessage ircMessage);
 
@@ -48,5 +54,8 @@ public abstract class ChatModule : IModule
         Log.Debug("Disabled module: {name}", Name);
     }
 
-    private void UpdateSettings() => Program.Settings.EnabledModules[Name] = Enabled;
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
+    }
 }

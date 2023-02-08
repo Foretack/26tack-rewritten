@@ -25,7 +25,7 @@ internal sealed class ModuleControl : Command
         string moduleName = ctx.Args[0];
         string action = ctx.Args[1].ToLower();
 
-        if (action is not "enable" and not "disable")
+        if (action != "enable" && action != "disable")
         {
             MessageHandler.SendMessage(channel, $"@{user}, Unrecognized action: {action}");
             return Task.CompletedTask;
@@ -37,7 +37,6 @@ internal sealed class ModuleControl : Command
             MessageHandler.SendMessage(channel, $"{(enabled ? "Enabled" : "Error enabling")} {moduleName}");
             return Task.CompletedTask;
         }
-
         bool disabled = ModulesHandler.DisableModule(moduleName);
         MessageHandler.SendMessage(channel, $"{(disabled ? "Disabled" : "Error disabling")} {moduleName}");
         return Task.CompletedTask;

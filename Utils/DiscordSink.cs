@@ -25,12 +25,14 @@ internal sealed class DiscordSink : ILogEventSink
         Time.DoEvery(TimeSpan.FromSeconds(3), SendWebhook);
     }
 
-    public void Emit(LogEvent logEvent) => SendMessage(logEvent);
+    public void Emit(LogEvent logEvent)
+    {
+        SendMessage(logEvent);
+    }
 
     private void SendMessage(LogEvent logEvent)
     {
-        if (!ShouldlogMessage(_restrictedToMinimumLevel, logEvent.Level))
-            return;
+        if (!ShouldlogMessage(_restrictedToMinimumLevel, logEvent.Level)) return;
 
         SpecifyEmbedLevel(logEvent.Level);
         if (logEvent.Exception is not null)
@@ -55,7 +57,7 @@ internal sealed class DiscordSink : ILogEventSink
                             new
                             {
                                 name = "StackTrace:",
-                                value = FormatMessage(logEvent.Exception.StackTrace ?? string.Empty, 1000)
+                                value = FormatMessage(logEvent.Exception.StackTrace ?? String.Empty, 1000)
                             }
                         }
                     }
@@ -117,9 +119,9 @@ internal sealed class DiscordSink : ILogEventSink
 
     private async Task SendWebhook()
     {
-        if (_logQueue.TryDequeue(out StringContent? content))
+        if (_logQueue.TryDequeue(out var content))
         {
-            _ = await _httpClient.PostAsync(_webhookUrl, content);
+            await _httpClient.PostAsync(_webhookUrl, content);
         }
     }
 
@@ -140,5 +142,8 @@ internal static class DiscordSinkExtensions
 {
     public static LoggerConfiguration Discord(this LoggerSinkConfiguration loggerConfiguration, string webhookUrl,
                                               IFormatProvider formatProvider = default!,
-                                              LogEventLevel restrictedToMinimumLevel = LogEventLevel.Verbose) => loggerConfiguration.Sink(new DiscordSink(formatProvider, webhookUrl, restrictedToMinimumLevel));
+                                              LogEventLevel restrictedToMinimumLevel = LogEventLevel.Verbose)
+    {
+        return loggerConfiguration.Sink(new DiscordSink(formatProvider, webhookUrl, restrictedToMinimumLevel));
+    }
 }

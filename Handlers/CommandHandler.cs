@@ -33,17 +33,14 @@ internal static class CommandHandler
         string cmdName = ctx.CommandName;
         string prefix = Prefixes.First(x => ctx.IrcMessage.Message.StartsWith(x));
 
-        if (!Handlers.TryGetValue(prefix, out ChatCommandHandler? handler))
-            return;
-        if (handler is null)
-            return;
+        if (!Handlers.TryGetValue(prefix, out var handler)) return;
+        if (handler is null) return;
 
         if (CommandList.Info.Aliases.Contains(cmdName))
         {
             var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
             CommandList.Run(newContext).SafeFireAndForget();
         }
-
         if (CommandHelp.Info.Aliases.Contains(cmdName))
         {
             var newContext = new CommandContext(ctx.IrcMessage, ctx.Args, prefix, ctx.Permission);
@@ -51,19 +48,16 @@ internal static class CommandHandler
             return;
         }
 
-        if (!handler.Commands.Any(x => x.Key.Contains(cmdName)))
-            return;
-        Command command = handler.Commands.First(x => x.Key.Contains(cmdName)).Value;
+        if (!handler.Commands.Any(x => x.Key.Contains(cmdName))) return;
+        var command = handler.Commands.First(x => x.Key.Contains(cmdName)).Value;
 
-        if (!ctx.Permission.Permits(command))
-            return;
+        if (!ctx.Permission.Permits(command)) return;
 
         var cooldown = new Cooldown(
             ctx.IrcMessage.Username,
             ctx.IrcMessage.Channel,
             handler.UseUnifiedCooldowns ? handler : command.Info);
-        if (!Cooldown.CheckAndHandleCooldown(cooldown))
-            return;
+        if (!Cooldown.CheckAndHandleCooldown(cooldown)) return;
 
         command.Execute(ctx).SafeFireAndForget(ex => Log.Error(ex, "Error running the command \"{cmdName}\"", cmdName));
     }

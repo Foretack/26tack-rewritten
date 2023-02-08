@@ -7,7 +7,7 @@ namespace Tack.Modules;
 internal sealed class Fish : IModule
 {
 
-    public string Name => GetType().Name;
+    public string Name => this.GetType().Name;
     public bool Enabled { get; private set; }
 
     private readonly string[] _emotes =
@@ -25,17 +25,14 @@ internal sealed class Fish : IModule
 
     public Fish(bool enabled)
     {
-        if (enabled)
-            Enable();
+        if (enabled) Enable();
         Time.DoEvery(TimeSpan.FromHours(1), TryFish);
     }
 
     private async Task TryFish()
     {
-        if (!Enabled)
-            return;
-        if (Rng(9) != 0)
-            return;
+        if (!Enabled) return;
+        if (Rng(9) != 0) return;
 
         bool includeEmotes = Rng();
         await Task.Delay(TimeSpan.FromSeconds(Rng(10, 1800)));
@@ -61,5 +58,8 @@ internal sealed class Fish : IModule
         Log.Debug("Disabled {name}", Name);
     }
 
-    private void UpdateSettings() => Program.Settings.EnabledModules[Name] = Enabled;
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
+    }
 }

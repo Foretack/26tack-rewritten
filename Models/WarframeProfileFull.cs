@@ -6,19 +6,19 @@ namespace Tack.Models;
 public sealed class V5Root
 {
     [JsonPropertyName("tokens")]
-    public Token[]? Tokens { get; set; }
+    public Token[] Tokens { get; set; }
 }
 
 public sealed class Token
 {
     [JsonPropertyName("extension_id")]
-    public string? ExtensionId { get; set; }
+    public string ExtensionId { get; set; }
 
     [JsonPropertyName("token")]
-    public string? Key { get; set; }
+    public string Key { get; set; }
 
     [JsonPropertyName("helix_token")]
-    public string? HelixToken { get; set; }
+    public string HelixToken { get; set; }
 }
 #endregion
 

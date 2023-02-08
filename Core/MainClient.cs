@@ -12,39 +12,34 @@ public static class MainClient
     #region Properties
     public static bool Connected { get; private set; } = false;
     public static TwitchClient Client { get; private set; } = new TwitchClient();
-    public static User? Self { get; private set; }
+    public static User Self { get; private set; }
     #endregion
 
     #region Initialization
     public static async Task Initialize()
     {
-        var options = new ClientOptions
-        {
-            MessagesAllowedInPeriod = 150,
-            ThrottlingPeriod = TimeSpan.FromSeconds(30)
-        };
+        var options = new ClientOptions();
+        options.MessagesAllowedInPeriod = 150;
+        options.ThrottlingPeriod = TimeSpan.FromSeconds(30);
 
         var policy = new ReconnectionPolicy(10);
         policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
         var webSocketClient = new WebSocketClient(options);
-        Client = new TwitchClient(webSocketClient)
-        {
-            AutoReListenOnException = true
-        };
+        Client = new TwitchClient(webSocketClient);
+        Client.AutoReListenOnException = true;
 
         var credentials = new ConnectionCredentials(AppConfigLoader.Config.BotUsername, AppConfigLoader.Config.BotAccessToken);
         Client.Initialize(credentials);
 
-        Handlers.Result<User> userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+        var userResult = await User.Get(AppConfigLoader.Config.BotUsername);
         while (!userResult.Success)
         {
             Log.Fatal("[{header}] Fetching user failed. Retrying...", nameof(MainClient));
             await Task.Delay(1000);
             userResult = await User.Get(AppConfigLoader.Config.BotUsername);
         }
-
         Self = userResult.Value;
 
         Connect();
@@ -67,10 +62,19 @@ public static class MainClient
         Connected = true;
     }
 
-    private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e) => Program.RestartProcess(nameof(ClientConnectionErrorEvent));
+    private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
+    {
+        Program.RestartProcess(nameof(ClientConnectionErrorEvent));
+    }
 
-    private static void ClientErrorEvent(object? sender, OnErrorEventArgs e) => Program.RestartProcess(nameof(ClientErrorEvent));
+    private static void ClientErrorEvent(object? sender, OnErrorEventArgs e)
+    {
+        Program.RestartProcess(nameof(ClientErrorEvent));
+    }
 
-    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e) => Program.RestartProcess(nameof(ClientDisconnectedEvent));
+    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
+    {
+        Program.RestartProcess(nameof(ClientDisconnectedEvent));
+    }
     #endregion
 }

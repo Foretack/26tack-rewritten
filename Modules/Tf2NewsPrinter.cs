@@ -6,13 +6,12 @@ using Tack.Nonclass;
 namespace Tack.Modules;
 internal sealed class Tf2NewsPrinter : IModule
 {
-    public string Name => GetType().Name;
+    public string Name => this.GetType().Name;
     public bool Enabled { get; private set; }
 
     public Tf2NewsPrinter(bool enabled)
     {
-        if (enabled)
-            Enable();
+        if (enabled) Enable();
     }
 
     private int _arrowLength;
@@ -21,7 +20,7 @@ internal sealed class Tf2NewsPrinter : IModule
 
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
     {
-        Models.DiscordMessage? message = e.DiscordMessage;
+        var message = e.DiscordMessage;
         if (message is null
         || message.ChannelId == 0
         || message.Author.Username is null
@@ -29,25 +28,20 @@ internal sealed class Tf2NewsPrinter : IModule
         || message.Author.Username != "TF2 Community #updates"
         || (!message.Content.Contains("Team Fortress 2 Update Released")
         && !_arrow.IsMatch(message.Content)))
-        {
             return;
-        }
 
-        if (_arrowLength == 0)
-            _arrowLength = _arrow.Match(message.Content).Length;
-        string[] lines = message.Content.Split('\n');
-        foreach (string line in lines)
+        if (_arrowLength == 0) _arrowLength = _arrow.Match(message.Content).Length;
+        var lines = message.Content.Split('\n');
+        foreach (var line in lines)
         {
-            if (line.Length < _arrowLength + 4)
-                continue;
+            if (line.Length < _arrowLength + 4) continue;
             if (line[..4] == "    " && _arrow.IsMatch(line[4..(_arrowLength + 4)]))
                 MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
             else if (_arrow.IsMatch(line[.._arrowLength]))
                 MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
             else if (line.StartsWith("https://www.teamfortress.com"))
                 MessageHandler.SendMessage(_relayChannel, line);
-            else
-                continue;
+            else continue;
             await Task.Delay(500);
         }
     }
@@ -68,5 +62,8 @@ internal sealed class Tf2NewsPrinter : IModule
         Log.Debug($"{nameof(Tf2NewsPrinter)} Module disabled");
     }
 
-    private void UpdateSettings() => Program.Settings.EnabledModules[Name] = Enabled;
+    private void UpdateSettings()
+    {
+        Program.Settings.EnabledModules[Name] = Enabled;
+    }
 }

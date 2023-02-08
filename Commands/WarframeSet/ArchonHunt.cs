@@ -17,21 +17,19 @@ internal sealed class ArchonHunt : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        (bool keyExists, ArchonData value) = await Redis.Cache.TryGetObjectAsync<ArchonData>("warframe:archonhunt");
-        if (!keyExists)
+        var archonDataCache = await Redis.Cache.TryGetObjectAsync<ArchonData>("warframe:archonhunt");
+        if (!archonDataCache.keyExists)
         {
-            Result<ArchonData> r = await ExternalAPIHandler.WarframeStatusApi<ArchonData>("archonHunt", timeout: 10);
+            var r = await ExternalAPIHandler.WarframeStatusApi<ArchonData>("archonHunt", timeout: 10);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
-
             await Redis.Cache.SetObjectAsync("warframe:archonhunt", r.Value, Time.Until(r.Value.Expiry));
-            value = r.Value;
+            archonDataCache.value = r.Value;
         }
-
-        ArchonData archonData = value;
+        ArchonData archonData = archonDataCache.value;
 
         if (Time.HasPassed(archonData.Expiry))
         {

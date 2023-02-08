@@ -20,25 +20,23 @@ internal sealed class Sortie : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        (bool keyExists, CurrentSortie value) = await Redis.Cache.TryGetObjectAsync<CurrentSortie>("warframe:sortiedata");
-        if (!keyExists)
+        var sortieCache = await Redis.Cache.TryGetObjectAsync<CurrentSortie>("warframe:sortiedata");
+        if (!sortieCache.keyExists)
         {
-            Result<CurrentSortie> r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
+            var r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
                 return;
             }
-
             await Redis.Cache.SetObjectAsync("warframe:sortiedata", r.Value, Time.Until(r.Value.Expiry));
-            value = r.Value;
+            sortieCache.value = r.Value;
         }
-
-        CurrentSortie sortie = value;
+        CurrentSortie sortie = sortieCache.value;
 
         if (Time.HasPassed(sortie.Expiry))
         {
-            _ = await Redis.Cache.RemoveAsync("warframe:sortiedata");
+            await Redis.Cache.RemoveAsync("warframe:sortiedata");
             MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
@@ -53,7 +51,7 @@ internal sealed class Sortie : Command
 
     private string ModifierOf(Variant variant)
     {
-        string[] split = variant.Modifier.Split(": ");
+        var split = variant.Modifier.Split(": ");
         return split[0] switch
         {
             "Eximus Stronghold" => "+Eximus",
