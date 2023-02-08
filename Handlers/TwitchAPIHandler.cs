@@ -13,10 +13,10 @@ internal sealed class TwitchAPIHandler
         Api = new TwitchAPI(settings: new ApiSettings()
         {
             AccessToken = config.BotAccessToken,
-            ClientId = config.BotClientId
+            ClientId = config.BotClientId,
         });
 
-        TwitchAPIHandler.Instance.Api.Helix.Settings.AccessToken = config.BotAccessToken;
-        TwitchAPIHandler.Instance.Api.Helix.Settings.ClientId = config.BotClientId;
+        Api.Helix.Settings.AccessToken = config.BotAccessToken;
+        Api.Helix.Settings.ClientId = config.BotClientId;
     }
 }
