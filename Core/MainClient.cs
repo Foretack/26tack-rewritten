@@ -1,4 +1,5 @@
-﻿using TwitchLib.Client;
+﻿using Tack.Models;
+using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
@@ -11,10 +12,11 @@ public static class MainClient
     #region Properties
     public static bool Connected { get; private set; } = false;
     public static TwitchClient Client { get; private set; } = new TwitchClient();
+    public static User Self { get; private set; }
     #endregion
 
     #region Initialization
-    public static void Initialize()
+    public static async Task Initialize()
     {
         var options = new ClientOptions();
         options.MessagesAllowedInPeriod = 150;
@@ -30,6 +32,14 @@ public static class MainClient
 
         var credentials = new ConnectionCredentials(AppConfigLoader.Config.BotUsername, AppConfigLoader.Config.BotAccessToken);
         Client.Initialize(credentials);
+
+        var userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+        while (!userResult.Success)
+        {
+            Log.Fatal("[{header}] Fetching user failed. Retrying...", nameof(MainClient));
+            await Task.Delay(1000);
+            userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+        }
 
         Connect();
     }

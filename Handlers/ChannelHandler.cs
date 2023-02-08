@@ -4,13 +4,14 @@ using Tack.Database;
 using Tack.Misc;
 using Tack.Models;
 using Tack.Utils;
+using TwitchLib.Api.Helix.Models.Chat;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
 using TwitchLib.Client.Events;
 
 namespace Tack.Handlers;
-internal static class ChannelHandler
+public static class ChannelHandler
 {
     #region Properties
     public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
@@ -69,16 +70,15 @@ internal static class ChannelHandler
     public static async Task<bool> JoinChannel(string channel, int priority = 0, bool logged = true)
     {
         if (FetchedChannels.Any(x => x.Username == channel)) return false;
-        var uf = new UserFactory();
         var c = new Channel(channel, priority, logged);
-        ExtendedChannel? ec = await uf.CreateChannelProfile(c);
-        if (ec is null) return false;
-        FetchedChannels.Add(ec);
+        var extendedChannel = await User.GetChannel(c);
+        if (!extendedChannel.Success) return false;
+        FetchedChannels.Add(extendedChannel.Value);
 
         if (priority >= 50) MainClient.Client.JoinChannel(channel);
 
         var db = new DbQueries();
-        bool s = await db.AddChannel(ec);
+        bool s = await db.AddChannel(extendedChannel.Value);
         return s;
     }
 
@@ -117,7 +117,7 @@ internal static class ChannelHandler
 
         if (pCount != cCount)
         {
-            MessageHandler.SendColoredMessage(AppConfigLoader.Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", ChatColor.YellowGreen);
+            await MessageHandler.SendColoredMessage(AppConfigLoader.Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", UserColors.YellowGreen);
         }
     }
 
@@ -167,7 +167,7 @@ internal static class StreamMonitor
     #region Properties
     public static Dictionary<string, Stream> StreamData { get; private set; } = new Dictionary<string, Stream>();
 
-    private static readonly LiveStreamMonitorService _monitoringService = new(TwitchAPIHandler.API, 30);
+    private static readonly LiveStreamMonitorService _monitoringService = new(TwitchAPIHandler.Instance.Api, 60);
     private static readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
     #endregion
 
@@ -208,18 +208,18 @@ internal static class StreamMonitor
     #endregion
 
     #region Monitor events
-    private static void StreamOffline(object? sender, OnStreamOfflineArgs e)
+    private static async void StreamOffline(object? sender, OnStreamOfflineArgs e)
     {
         Log.Information("[{header}] {channel} has gone offline!", nameof(StreamMonitor), e.Channel);
         TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
         StreamData[e.Channel] = new Stream(e.Channel, false, e.Stream.Title, e.Stream.GameName, DateTime.Now);
-        MessageHandler.SendColoredMessage(
+        await MessageHandler.SendColoredMessage(
             _relayChannel,
             $"{RandomReplies.StreamOfflineEmotes.Choice()} @{e.Channel} is now offline! -- {uptime.FormatTimeLeft()}",
-            ChatColor.GoldenRod);
+            UserColors.GoldenRod);
     }
 
-    private static void StreamUpdate(object? sender, OnStreamUpdateArgs e)
+    private static async void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
         Log.Debug("[{header}] {channel} tick", nameof(StreamMonitor), e.Channel);
         if (StreamData[e.Channel].Title != e.Stream.Title
@@ -227,21 +227,21 @@ internal static class StreamMonitor
         {
             TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
             StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
-            MessageHandler.SendColoredMessage(
+            await MessageHandler.SendColoredMessage(
                 _relayChannel,
                 $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
-                ChatColor.DodgerBlue);
+                UserColors.DodgerBlue);
         }
     }
 
-    private static void StreamOnline(object? sender, OnStreamOnlineArgs e)
+    private static async void StreamOnline(object? sender, OnStreamOnlineArgs e)
     {
         Log.Information("[{header}] {channel} has gone live!", nameof(StreamMonitor), e.Channel);
         StreamData[e.Channel] = new Stream(e.Channel, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt);
-        MessageHandler.SendColoredMessage(
+        await MessageHandler.SendColoredMessage(
             _relayChannel,
             $"{RandomReplies.StreamOnlineEmotes.Choice()} @{e.Channel} has gone live: {e.Stream.Title} - {e.Stream.GameName}",
-            ChatColor.SpringGreen);
+            UserColors.SpringGreen);
     }
 
     private static void ServiceStarted(object? sender, OnServiceStartedArgs e)

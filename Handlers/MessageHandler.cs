@@ -5,6 +5,7 @@ using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Utils;
+using TwitchLib.Api.Helix.Models.Chat;
 using TwitchLib.Client.Events;
 using TwitchLib.Communication.Events;
 
@@ -12,7 +13,7 @@ namespace Tack.Handlers;
 internal static class MessageHandler
 {
     #region Fields
-    private static ChatColor _currentColor = ChatColor.FANCY_NOT_SET_STATE_NAME;
+    private static UserColors _currentColor = UserColors.Blue;
     private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
@@ -63,11 +64,11 @@ internal static class MessageHandler
         MainClient.Client.SendMessage(channel, message);
         _lastSentMessage[channel] = message;
     }
-    public static void SendColoredMessage(string channel, string message, ChatColor color)
+    public static async Task SendColoredMessage(string channel, string message, UserColors color)
     {
         if (_currentColor != color)
         {
-            SendMessage(AppConfigLoader.Config.BotUsername, $"/color {color}");
+            await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             _currentColor = color;
         }
         SendMessage(channel, "/me " + message);
@@ -198,14 +199,4 @@ internal static class MessageHandler
         }
     }
     #endregion
-}
-
-internal enum ChatColor
-{
-    FANCY_NOT_SET_STATE_NAME,
-    Blue, BlueViolet, CadetBlue,
-    Chocolate, Coral, DodgerBlue,
-    Firebrick, GoldenRod, Green,
-    HotPink, OrangeRed, Red,
-    SeaGreen, SpringGreen, YellowGreen
 }
