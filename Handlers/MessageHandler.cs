@@ -68,6 +68,7 @@ internal static class MessageHandler
     {
         if (_currentColor != color)
         {
+            // TODO: enable this once it's fixed
             //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             _currentColor = color;
         }
