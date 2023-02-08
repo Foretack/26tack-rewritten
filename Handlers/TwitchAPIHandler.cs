@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Tack.Nonclass;
+﻿using Tack.Nonclass;
 using TwitchLib.Api;
 using TwitchLib.Api.Core;
 
@@ -11,7 +10,7 @@ internal sealed class TwitchAPIHandler
 
     private TwitchAPIHandler(IAppConfig config)
     {
-        Api = new TwitchAPI(new LoggerFactory().AddSerilog(Log.Logger), settings: new ApiSettings()
+        Api = new TwitchAPI(settings: new ApiSettings()
         {
             AccessToken = config.BotAccessToken,
             ClientId = config.BotClientId
