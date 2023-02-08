@@ -15,8 +15,5 @@ internal sealed class TwitchAPIHandler
             AccessToken = config.BotAccessToken,
             ClientId = config.BotClientId,
         });
-
-        Api.Helix.Settings.AccessToken = config.BotAccessToken;
-        Api.Helix.Settings.ClientId = config.BotClientId;
     }
 }
