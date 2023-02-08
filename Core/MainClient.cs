@@ -40,6 +40,7 @@ public static class MainClient
             await Task.Delay(1000);
             userResult = await User.Get(AppConfigLoader.Config.BotUsername);
         }
+        Self = userResult.Value;
 
         Connect();
     }
