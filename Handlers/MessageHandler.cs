@@ -68,7 +68,7 @@ internal static class MessageHandler
     {
         if (_currentColor != color)
         {
-            await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
+            //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             _currentColor = color;
         }
         SendMessage(channel, "/me " + message);
