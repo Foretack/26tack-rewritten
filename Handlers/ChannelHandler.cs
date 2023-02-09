@@ -231,16 +231,23 @@ internal static class StreamMonitor
     private static async void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
         Log.Debug("[{header}] {channel} tick", nameof(StreamMonitor), e.Channel);
-        if (StreamData[e.Channel].Title != e.Stream.Title
-        || StreamData[e.Channel].GameName != e.Stream.GameName)
+        try
         {
-            TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
-            UpdateDict(e.Channel, e.Stream, nameof(StreamUpdate));
+            if (StreamData[e.Channel].Title != e.Stream.Title
+            || StreamData[e.Channel].GameName != e.Stream.GameName)
+            {
+                TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
+                UpdateDict(e.Channel, e.Stream, nameof(StreamUpdate));
 
-            await MessageHandler.SendColoredMessage(
-                _relayChannel,
-                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
-                UserColors.DodgerBlue);
+                await MessageHandler.SendColoredMessage(
+                    _relayChannel,
+                    $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
+                    UserColors.DodgerBlue);
+            }
+        }
+        catch (KeyNotFoundException)
+        {
+            StreamData.Add(e.Channel, default!);
         }
     }
 
