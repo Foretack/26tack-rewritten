@@ -231,23 +231,20 @@ internal static class StreamMonitor
     private static async void StreamUpdate(object? sender, OnStreamUpdateArgs e)
     {
         Log.Debug("[{header}] {channel} tick", nameof(StreamMonitor), e.Channel);
-        try
+        if (!StreamData.ContainsKey(e.Channel))
         {
-            if (StreamData[e.Channel].Title != e.Stream.Title
-            || StreamData[e.Channel].GameName != e.Stream.GameName)
-            {
-                TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
-                UpdateDict(e.Channel, e.Stream, nameof(StreamUpdate));
-
-                await MessageHandler.SendColoredMessage(
-                    _relayChannel,
-                    $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
-                    UserColors.DodgerBlue);
-            }
+            StreamData.Add(e.Channel, new(e.Stream.UserName, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt));
         }
-        catch (KeyNotFoundException)
+        if (StreamData[e.Channel].Title != e.Stream.Title
+        || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
-            StreamData.Add(e.Channel, default!);
+            TimeSpan uptime = Time.Since(StreamData[e.Channel].Started);
+            UpdateDict(e.Channel, e.Stream, nameof(StreamUpdate));
+
+            await MessageHandler.SendColoredMessage(
+                _relayChannel,
+                $"{RandomReplies.StreamUpdateEmotes.Choice()} @{e.Channel} updated their stream: {e.Stream.Title} -- {e.Stream.GameName} -- {uptime.FormatTimeLeft()}",
+                UserColors.DodgerBlue);
         }
     }
 
@@ -268,13 +265,13 @@ internal static class StreamMonitor
         {
             case nameof(StreamOnline):
                 if (!StreamData.ContainsKey(channel))
-                    StreamData.Add(channel, new(stream.UserName, true, stream.Title, stream.GameName, DateTime.Now));
+                    StreamData.Add(channel, new(stream.UserName, true, stream.Title, stream.GameName, stream.StartedAt));
                 else
                 {
                     StreamData[channel].IsOnline = true;
                     StreamData[channel].Title = stream.Title;
                     StreamData[channel].GameName = stream.GameName;
-                    StreamData[channel].Started = DateTime.Now;
+                    StreamData[channel].Started = stream.StartedAt;
                 }
                 break;
 
