@@ -2,6 +2,7 @@
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
+using TwitchLib.Api.Helix.Models.Chat;
 
 namespace Tack.Commands.WarframeSet;
 internal sealed class Fissures : Command
@@ -33,7 +34,7 @@ internal sealed class Fissures : Command
         if (args.Length == 0)
         {
             fissuresString = ListAllFissures(fissures, true);
-            MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", ChatColor.Coral);
+            await MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", UserColors.Coral);
             return;
         }
         bool includeStorms = Options.ParseBool("storms", ctx.IrcMessage.Message) ?? true;
@@ -47,7 +48,7 @@ internal sealed class Fissures : Command
             "requiem" => ListFissureMissions(fissures, 5, includeStorms),
             _ => ListAllFissures(fissures, includeStorms)
         };
-        MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", ChatColor.Coral);
+        await MessageHandler.SendColoredMessage(channel, $"@{user}, {fissuresString}", UserColors.Coral);
     }
 
     private string ListAllFissures(Fissure[] fissures, bool includeStorms)

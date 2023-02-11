@@ -1,97 +1,62 @@
-﻿using Tack.Database;
-using Tack.Handlers;
-using Tl = TwitchLib.Api.Helix.Models.Users.GetUsers;
+﻿using Tack.Handlers;
+using TwitchLib.Api.Helix.Models.Users.GetUsers;
+using HelixUser = TwitchLib.Api.Helix.Models.Users.GetUsers.User;
 
 namespace Tack.Models;
-internal sealed class UserFactory
+public sealed class User
 {
-    public async Task<User?> CreateUserAsync(string username)
-    {
-        var userCache = await Redis.Cache.TryGetObjectAsync<User>($"twitch:users:{username}");
-        if (!userCache.keyExists)
-        {
-            var r = await TwitchAPIHandler.GetUsers(username);
-            if (r is null)
-            {
-                var r2 = await ExternalAPIHandler.GetIvrUser(username);
-                if (r2 is null) return default!;
-                userCache.value = new(r2.DisplayName, r2.Login, r2.Id.ToString(), r2.Logo, r2.CreatedAt ?? DateTime.MinValue);
-            }
-            else
-                userCache.value = new User(r.DisplayName, r.Login, r.Id, r.ProfileImageUrl, r.CreatedAt);
-        }
-        return userCache.value;
-    }
-    public async Task<User[]?> CreateUserAsync(params string[] usernames)
-    {
-        List<string> nonCachedUsernames = new();
-        List<User> users = new();
-        foreach (var username in usernames)
-        {
-            var userCache = await Redis.Cache.TryGetObjectAsync<User>($"twitch:users:{username}");
-            if (!userCache.keyExists)
-            {
-                nonCachedUsernames.Add(username);
-                continue;
-            }
-            users.Add(userCache.value);
-        }
-        if (nonCachedUsernames.Count > 0)
-        {
-            var r = await TwitchAPIHandler.GetUsers(nonCachedUsernames.ToArray());
-            if (r is null) return default!;
-            foreach (var user in r
-            .Where(x => x is not null)
-            .Select(x => new User(x.DisplayName, x.Login, x.Id, x.ProfileImageUrl, x.CreatedAt)))
-            {
-                await Redis.Cache.SetObjectAsync($"twitch:users:{user.Username}", user, TimeSpan.FromDays(1));
-                users.Add(user);
-            }
-        }
+    public string DisplayName { get; init; }
+    public string Username { get; init; }
+    public string Id { get; init; }
+    public string Type { get; init; }
+    public string BroadcasterType { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public string Description { get; init; }
+    public string Email { get; init; }
+    public string AvatarUrl { get; init; }
+    public string OfflineImageUrl { get; init; }
 
-        return users.ToArray();
-    }
-    public async Task<User?> CreateUserByIDAsync(string id)
+    public static async Task<Result<User>> Get(string username)
     {
-        Tl::User? call = await TwitchAPIHandler.GetUsersByID(id);
-        if (call is null) return null;
-        var u = new User(call.DisplayName, call.Login, call.Id, call.ProfileImageUrl, call.CreatedAt);
-        return u;
-    }
-    public async Task<User[]?> CreateUserByIDAsync(params string[] ids)
-    {
-        Tl::User[]? call = await TwitchAPIHandler.GetUsersByID(ids);
-        if (call is null || call.Length == 0) return null;
-        var users = new List<User>();
-        foreach (Tl::User u in call)
+        GetUsersResponse helixUser = await TwitchAPIHandler.Instance.Api.Helix.Users.GetUsersAsync(logins: new() { username });
+        var user = helixUser.Users.FirstOrDefault();
+
+        if (user is null)
         {
-            try
-            {
-                var user = new User(u.DisplayName, u.Login, u.Id, u.ProfileImageUrl, u.CreatedAt);
-                users.Add(user);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to enumerate over an array of users");
-            }
+            Log.Error("Failed to get user {user} from Helix", username);
+            return new Result<User>(default!, false, new ArgumentOutOfRangeException());
         }
-        return users.ToArray();
+        return new Result<User>(new(user), true, default!);
     }
-    public async Task<ExtendedChannel?> CreateChannelProfile(ChannelHandler.Channel extender)
+
+    public static async Task<Result<ExtendedChannel>> GetChannel(ChannelHandler.Channel @base)
     {
-        Tl::User? call = await TwitchAPIHandler.GetUsers(extender.Name);
-        return call is null
-            ? null
-            : new ExtendedChannel(call.DisplayName,
-                                   call.Login,
-                                   call.Id,
-                                   call.ProfileImageUrl,
-                                   call.CreatedAt,
-                                   extender.Priority,
-                                   extender.Logged);
+        var baseResult = await Get(@base.Name);
+        if (!baseResult.Success)
+        {
+            Log.Error("Failed to get user {user} from Helix", @base.Name);
+            return new Result<ExtendedChannel>(default!, false, new ArgumentNullException());
+        }
+        var value = baseResult.Value;
+
+
+        return new Result<ExtendedChannel>(new(value.DisplayName, value.Username, value.Id, value.AvatarUrl, value.CreatedAt, @base.Priority, @base.Logged), true, default!);
+    }
+
+    private User(HelixUser helixUser)
+    {
+        DisplayName = helixUser.DisplayName;
+        Username = helixUser.Login;
+        Id = helixUser.Id;
+        Type = helixUser.Type;
+        BroadcasterType = helixUser.BroadcasterType;
+        CreatedAt = helixUser.CreatedAt;
+        Description = helixUser.Description;
+        Email = helixUser.Email;
+        AvatarUrl = helixUser.ProfileImageUrl;
+        OfflineImageUrl = helixUser.OfflineImageUrl;
     }
 }
 
 public sealed record PartialUser(string Displayname, string Username, string ID);
-public sealed record User(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateCreated);
 public sealed record ExtendedChannel(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateJoined, int Priority, bool Logged);

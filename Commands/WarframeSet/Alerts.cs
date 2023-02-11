@@ -4,6 +4,7 @@ using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
+using TwitchLib.Api.Helix.Models.Chat;
 
 namespace Tack.Commands.WarframeSet;
 internal sealed class Alerts : Command
@@ -43,6 +44,6 @@ internal sealed class Alerts : Command
         _ = ab.Append($"{"Alert".PluralizeWith(alerts.Length)} ➜ ")
             .Append(string.Join(" ● ", rewards));
 
-        MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", ChatColor.Coral);
+        await MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", UserColors.Coral);
     }
 }

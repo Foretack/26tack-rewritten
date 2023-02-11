@@ -24,13 +24,13 @@ internal sealed class EditUser : Command
             return;
         }
 
-        var uf = new UserFactory();
-        User? target = await uf.CreateUserAsync(args[0]);
-        if (target is null)
+        var targetResult = await User.Get(args[0]);
+        if (!targetResult.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, That user's Twitch account was not found!");
             return;
         }
+        var target = targetResult.Value;
 
         int mode = commandName switch
         {
@@ -46,7 +46,7 @@ internal sealed class EditUser : Command
         if (mode == 0 && args[1] == "whitelist") mode = 1;
         if (mode == 0 && args[1] == "blacklist") mode = 2;
 
-        bool success = mode == 1 ? await WhitelistUser(target.Username) : await BlacklistUser(target.Username, target.ID);
+        bool success = mode == 1 ? await WhitelistUser(target.Username) : await BlacklistUser(target.Username, target.Id);
         MessageHandler.SendMessage(channel, success.ToString());
     }
 

@@ -51,7 +51,7 @@ public static class Program
         Task.FromResult(new ProgramSettings() { LogLevel = LogEventLevel.Information, EnabledModules = new() }));
         LogSwitch.MinimumLevel = Settings.LogLevel;
 
-        MainClient.Initialize();
+        await MainClient.Initialize();
         await AnonymousClient.Initialize();
         MessageHandler.Initialize();
         CommandHandler.Initialize();

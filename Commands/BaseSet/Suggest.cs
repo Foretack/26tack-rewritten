@@ -2,6 +2,7 @@
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
+using TwitchLib.Api.Helix.Models.Chat;
 
 namespace Tack.Commands.BaseSet;
 internal sealed class Suggest : Command
@@ -32,8 +33,8 @@ internal sealed class Suggest : Command
 
         if (success)
         {
-            MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
-                $"notified through a supibot reminder regarding it's status", ChatColor.SeaGreen);
+            await MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
+                $"notified through a supibot reminder regarding it's status", UserColors.SeaGreen);
             return;
         }
         MessageHandler.SendMessage(channel, $"@{user}, PoroSad There was an error processing your suggestion. Try again later?");

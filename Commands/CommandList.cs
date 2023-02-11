@@ -3,6 +3,7 @@ using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
+using TwitchLib.Api.Helix.Models.Chat;
 
 namespace Tack.Commands;
 internal static class CommandList
@@ -32,7 +33,7 @@ internal static class CommandList
             return;
         }
 
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             _ = sb.Append(handler.Name + " commands: ");
 
@@ -50,7 +51,7 @@ internal static class CommandList
 
             _ = sb.Append(list.AsString());
 
-            MessageHandler.SendColoredMessage(channel, sb.ToString(), ChatColor.Green);
+            await MessageHandler.SendColoredMessage(channel, sb.ToString(), UserColors.SeaGreen);
         });
     }
 }
