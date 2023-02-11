@@ -6,7 +6,7 @@ using Tack.Models;
 namespace Tack.Core;
 internal static class AnonymousClient
 {
-    public static string ShardStatus { get; private set; }
+    public static string ShardStatus { get; private set; } = string.Empty;
 
     private static readonly AnonymousChat _anonChat = new();
     private static readonly ShardUpdates _shardUpdates = new();

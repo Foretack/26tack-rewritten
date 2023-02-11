@@ -6,9 +6,9 @@ using StackExchange.Redis;
 namespace Tack.Database;
 internal sealed class Redis
 {
-    public static ICacheProviderAsync Cache { get; private set; }
-    public static ICollectionProvider Collections { get; private set; }
-    public static IPubSubProviderAsync PubSub { get; private set; }
+    public static ICacheProviderAsync Cache { get; private set; } = default!;
+    public static ICollectionProvider Collections { get; private set; } = default!;
+    public static IPubSubProviderAsync PubSub { get; private set; } = default!;
 
     private static bool _initialized;
 

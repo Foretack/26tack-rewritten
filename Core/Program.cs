@@ -15,7 +15,7 @@ namespace Tack.Core;
 public static class Program
 {
     #region Properties
-    public static ProgramSettings Settings { get; private set; }
+    public static ProgramSettings Settings { get; private set; } = default!;
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
 

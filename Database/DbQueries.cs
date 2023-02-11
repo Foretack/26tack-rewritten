@@ -138,7 +138,7 @@ internal sealed class DbQueries : DbConnection
             .Where("username", channel)
             .GetAsync());
 
-        dynamic row = query.FirstOrDefault();
+        dynamic? row = query.FirstOrDefault();
         if (row is null)
         {
             Log.Error("Could not get extended channel \"{channel}\"", channel);

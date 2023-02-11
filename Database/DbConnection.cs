@@ -17,9 +17,9 @@ internal abstract class DbConnection : IDisposable
     protected QueryFactory QueryFactory => _qf;
 
     private static bool _initialized;
-    private static NpgsqlConnection _connection;
-    private static PostgresCompiler _compiler;
-    private static QueryFactory _qf;
+    private static NpgsqlConnection _connection = default!;
+    private static PostgresCompiler _compiler = default!;
+    private static QueryFactory _qf = default!;
 
     protected DbConnection()
     {

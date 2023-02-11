@@ -14,7 +14,7 @@ internal sealed class DiscordSink : ILogEventSink
     private readonly LogEventLevel _restrictedToMinimumLevel;
     private readonly HttpClient _httpClient = new();
 
-    private string _title;
+    private string _title = string.Empty;
     private int _color;
 
     public DiscordSink(IFormatProvider formatProvider, string webhookUrl, LogEventLevel restrictedToMinimumLevel)

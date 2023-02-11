@@ -10,7 +10,7 @@ internal sealed class DiscordTrigger
     public string PrependText { get; init; }
     public bool UseRegex { get; init; }
     public bool HasGroupReplacements { get; init; }
-    public Regex ReplacementRegex { get; init; }
+    public Regex ReplacementRegex { get; init; } = default!;
     public Dictionary<int, string> RegexGroupReplacements { get; } = new();
 
     public DiscordTrigger(dynamic x)

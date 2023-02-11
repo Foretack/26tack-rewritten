@@ -12,7 +12,7 @@ public static class MainClient
     #region Properties
     public static bool Connected { get; private set; } = false;
     public static TwitchClient Client { get; private set; } = new TwitchClient();
-    public static User Self { get; private set; }
+    public static User Self { get; private set; } = default!;
     #endregion
 
     #region Initialization
