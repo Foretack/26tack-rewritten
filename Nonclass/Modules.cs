@@ -18,16 +18,13 @@ public abstract class ChatModule : IModule
     /// <summary>
     /// The name of the class that is derived from ChatModule
     /// </summary>
-    public string Name => this.GetType().Name;
+    public string Name => GetType().Name;
     public bool Enabled { get; protected set; } = true;
 
     protected Action<ChatModule> OnEnabled { get; set; } = _ => { };
     protected Action<ChatModule> OnDisabled { get; set; } = _ => { };
 
-    protected ChatModule()
-    {
-        Enable();
-    }
+    protected ChatModule() => Enable();
 
     private void OnTwitchMessage(object? sender, Core.OnMessageArgs e)
     {

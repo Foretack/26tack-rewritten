@@ -29,22 +29,25 @@ internal sealed class Mods : Command
 
         string modName = string.Join(' ', args.Where(x => !x.StartsWith("rank"))).ToLower();
 
-        var modCache = await Redis.Cache.TryGetObjectAsync<ModInfo>($"warframe:mod:{modName}");
-        if (!modCache.keyExists)
+        (bool keyExists, ModInfo value) = await Redis.Cache.TryGetObjectAsync<ModInfo>($"warframe:mod:{modName}");
+        if (!keyExists)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
+            Result<ModInfo> r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
+
             await Redis.Cache.SetObjectAsync($"warframe:mod:{modName}", r.Value, TimeSpan.FromHours(8));
-            modCache.value = r.Value;
+            value = r.Value;
         }
-        ModInfo mod = modCache.value;
+
+        ModInfo mod = value;
 
         int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.FusionLimit;
-        if (level > mod.FusionLimit) level = mod.FusionLimit;
+        if (level > mod.FusionLimit)
+            level = mod.FusionLimit;
         string modString =
             $"{mod.Type} \"{mod.Name}\" " +
             $"▣ [Rank:{level}/{mod.FusionLimit}] drain:{mod.BaseDrain + level} " +

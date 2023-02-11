@@ -32,7 +32,8 @@ internal sealed class DiscordSink : ILogEventSink
 
     private void SendMessage(LogEvent logEvent)
     {
-        if (!ShouldlogMessage(_restrictedToMinimumLevel, logEvent.Level)) return;
+        if (!ShouldlogMessage(_restrictedToMinimumLevel, logEvent.Level))
+            return;
 
         SpecifyEmbedLevel(logEvent.Level);
         if (logEvent.Exception is not null)
@@ -57,7 +58,7 @@ internal sealed class DiscordSink : ILogEventSink
                             new
                             {
                                 name = "StackTrace:",
-                                value = FormatMessage(logEvent.Exception.StackTrace ?? String.Empty, 1000)
+                                value = FormatMessage(logEvent.Exception.StackTrace ?? string.Empty, 1000)
                             }
                         }
                     }
@@ -119,9 +120,9 @@ internal sealed class DiscordSink : ILogEventSink
 
     private async Task SendWebhook()
     {
-        if (_logQueue.TryDequeue(out var content))
+        if (_logQueue.TryDequeue(out StringContent? content))
         {
-            await _httpClient.PostAsync(_webhookUrl, content);
+            _ = await _httpClient.PostAsync(_webhookUrl, content);
         }
     }
 
@@ -135,7 +136,10 @@ internal sealed class DiscordSink : ILogEventSink
         return message;
     }
 
-    private static bool ShouldlogMessage(LogEventLevel minimumLogEventLevel, LogEventLevel messageLogEventLevel) => messageLogEventLevel >= minimumLogEventLevel;
+    private static bool ShouldlogMessage(LogEventLevel minimumLogEventLevel, LogEventLevel messageLogEventLevel)
+    {
+        return messageLogEventLevel >= minimumLogEventLevel;
+    }
 }
 
 internal static class DiscordSinkExtensions

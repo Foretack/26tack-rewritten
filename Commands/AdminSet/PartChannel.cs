@@ -36,6 +36,7 @@ internal sealed class PartChannel : Command
             MessageHandler.SendMessage(channel, $"@{user}, Parted from {targetChannel}");
             return;
         }
+
         MessageHandler.SendMessage(channel, $"@{user}, There may have been errors parting \"{targetChannel}\"");
     }
 }

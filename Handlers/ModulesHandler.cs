@@ -27,10 +27,12 @@ internal static class ModulesHandler
 
     public static bool EnableModule(string name)
     {
-        if (!_modules.ContainsKey(name)) return false;
+        if (!_modules.ContainsKey(name))
+            return false;
 
-        var module = _modules[name];
-        if (module.Enabled) return true;
+        IModule module = _modules[name];
+        if (module.Enabled)
+            return true;
 
         module.Enable();
         return true;
@@ -38,10 +40,12 @@ internal static class ModulesHandler
 
     public static bool DisableModule(string name)
     {
-        if (!_modules.ContainsKey(name)) return false;
+        if (!_modules.ContainsKey(name))
+            return false;
 
-        var module = _modules[name];
-        if (!module.Enabled) return true;
+        IModule module = _modules[name];
+        if (!module.Enabled)
+            return true;
 
         _modules[name].Disable();
         return true;

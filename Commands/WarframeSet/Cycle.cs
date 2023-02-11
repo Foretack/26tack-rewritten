@@ -23,6 +23,7 @@ internal sealed class Cycle : Command
             await Other(ctx);
             return;
         }
+
         await SendCycleOf(ctx);
     }
 
@@ -32,19 +33,21 @@ internal sealed class Cycle : Command
         string channel = ctx.IrcMessage.Channel;
         string queryString = new T().QueryString;
 
-        var cycleCache = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
-        if (!cycleCache.keyExists)
+        (bool keyExists, T value) = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
+        if (!keyExists)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
+            Result<T> r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
+
             await Redis.Cache.SetObjectAsync($"warframe:cycles:{queryString}", r.Value, Time.Until(r.Value.Expiry));
-            cycleCache.value = r.Value;
+            value = r.Value;
         }
-        T cycle = cycleCache.value;
+
+        T cycle = value;
 
         if (Time.HasPassed(cycle.Expiry))
         {
@@ -67,6 +70,7 @@ internal sealed class Cycle : Command
             MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want {CycleTypes.AsString()}");
             return;
         }
+
         if (!CycleTypes.Contains(args[0].ToLower()))
         {
             MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");

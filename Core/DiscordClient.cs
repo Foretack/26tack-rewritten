@@ -12,14 +12,17 @@ internal static class DiscordClient
     {
         await Redis.PubSub.SubscribeAsync<DiscordMessage>("discord:messages", x =>
         {
-            if (x is null) return;
+            if (x is null)
+                return;
             _discordChat.Raise(x);
         }).ConfigureAwait(false);
 
         await Redis.PubSub.SubscribeAsync<DiscordPresence>("discord:presences", x =>
         {
-            if (x is null) return;
-            if (!x.Activities.Any(x => x is not null)) return;
+            if (x is null)
+                return;
+            if (!x.Activities.Any(x => x is not null))
+                return;
             _discordPresences.Raise(x);
         }).ConfigureAwait(false);
     }
@@ -45,10 +48,7 @@ public sealed class OnDiscordMsgArgs : EventArgs
 {
     public DiscordMessage DiscordMessage { get; private set; }
 
-    public OnDiscordMsgArgs(DiscordMessage discordMessage)
-    {
-        DiscordMessage = discordMessage;
-    }
+    public OnDiscordMsgArgs(DiscordMessage discordMessage) => DiscordMessage = discordMessage;
 }
 
 internal sealed class DiscordPresences
@@ -72,8 +72,5 @@ public sealed class OnDiscordPresenceArgs : EventArgs
 {
     public DiscordPresence DiscordPresence { get; private set; }
 
-    public OnDiscordPresenceArgs(DiscordPresence discordPresence)
-    {
-        DiscordPresence = discordPresence;
-    }
+    public OnDiscordPresenceArgs(DiscordPresence discordPresence) => DiscordPresence = discordPresence;
 }

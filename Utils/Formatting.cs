@@ -5,12 +5,14 @@ internal static class Formatting
 {
     public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, char value)
     {
-        if (condition) sb.Append(value);
+        if (condition)
+            _ = sb.Append(value);
         return sb;
     }
     public static StringBuilder AppendWhen(this StringBuilder sb, bool condition, string value)
     {
-        if (condition) sb.Append(value);
+        if (condition)
+            _ = sb.Append(value);
         return sb;
     }
 
@@ -19,8 +21,15 @@ internal static class Formatting
         return exception.Message;
     }
 
-    public static string Join(this IEnumerable<object> src, char seperator) => string.Join(seperator, src);
-    public static string Join(this IEnumerable<object> src, string separator) => string.Join(separator, src);
+    public static string Join(this IEnumerable<object> src, char seperator)
+    {
+        return string.Join(seperator, src);
+    }
+
+    public static string Join(this IEnumerable<object> src, string separator)
+    {
+        return string.Join(separator, src);
+    }
 
     public static string AsString<T>(this T[] arr)
     {
@@ -78,9 +87,11 @@ internal static class Formatting
         int dCount = str.Count(x => x == '#');
 
         // No descriminator
-        if (dCount == 0) return str;
+        if (dCount == 0)
+            return str;
         // Descriminator at the end, if the last 4 chars are numbers
-        if (int.TryParse(str[^4..], out _)) return str[..^3]; // Return the string before the last '#', not including it
+        if (int.TryParse(str[^4..], out _))
+            return str[..^3]; // Return the string before the last '#', not including it
 
         // If someone's name has a '#' and there isn't a descriminator for whatever reason
         return str;

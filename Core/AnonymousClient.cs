@@ -14,13 +14,15 @@ internal static class AnonymousClient
     {
         await Redis.PubSub.SubscribeAsync<TwitchMessage>("twitch:messages", x =>
         {
-            if (x is null) return;
+            if (x is null)
+                return;
             _anonChat.Raise(x);
         }).ConfigureAwait(false);
 
         await Redis.PubSub.SubscribeAsync<string>("shard:updates", x =>
         {
-            if (string.IsNullOrEmpty(x)) return;
+            if (string.IsNullOrEmpty(x))
+                return;
             _shardUpdates.Raise(x);
         }).ConfigureAwait(false);
 
@@ -43,16 +45,13 @@ public sealed class OnMessageArgs : EventArgs
 {
     public TwitchMessage ChatMessage { get; private set; }
 
-    public OnMessageArgs(TwitchMessage twitchMessage)
-    {
-        ChatMessage = twitchMessage;
-    }
+    public OnMessageArgs(TwitchMessage twitchMessage) => ChatMessage = twitchMessage;
 }
 
 internal sealed class ShardUpdates
 {
     public delegate void OnShardUpdateHandler(object? sender, OnShardUpdateArgs args);
-    public static event EventHandler<OnShardUpdateArgs> OnShardUpdate;
+    public static event EventHandler<OnShardUpdateArgs> OnShardUpdate = default!;
     public void Raise(string Updatemessage)
     {
         EventHandler<OnShardUpdateArgs> raiseEvent = OnShardUpdate;
@@ -67,8 +66,5 @@ public sealed class OnShardUpdateArgs : EventArgs
 {
     public string UpdateMessage { get; private set; }
 
-    public OnShardUpdateArgs(string updateMessage)
-    {
-        UpdateMessage = updateMessage;
-    }
+    public OnShardUpdateArgs(string updateMessage) => UpdateMessage = updateMessage;
 }

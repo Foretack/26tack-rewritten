@@ -30,6 +30,7 @@ internal sealed class JoinChannel : Command
             MessageHandler.SendMessage(channel, $"I'm already in that channel! (Aborted)");
             return;
         }
+
         int priority = Options.ParseInt("priority", ctx.IrcMessage.Message) ?? 0;
         bool logged = Options.ParseBool("logged", ctx.IrcMessage.Message) ?? true;
 
@@ -39,6 +40,7 @@ internal sealed class JoinChannel : Command
             MessageHandler.SendMessage(channel, $"Attempted to join {targetChannel}");
             return;
         }
+
         MessageHandler.SendMessage(channel, $"@{user}, There was an error trying to join that channel fdm");
     }
 }

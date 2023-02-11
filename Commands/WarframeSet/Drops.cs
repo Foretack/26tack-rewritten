@@ -49,7 +49,8 @@ internal sealed class Drops : Command
         {
             return itemDrops.OrderByDescending(x => x.Chance).ToArray();
         });
-        if (topDrops.Length > 3) topDrops = topDrops[..3];
+        if (topDrops.Length > 3)
+            topDrops = topDrops[..3];
 
         string[] dropsString = topDrops.Select(x => $"{x.Place} ➜ {x.Chance}%").ToArray();
         MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].Item}\": " +

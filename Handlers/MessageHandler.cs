@@ -61,6 +61,7 @@ internal static class MessageHandler
         {
             message += " 󠀀";
         }
+
         MainClient.Client.SendMessage(channel, message);
         _lastSentMessage[channel] = message;
     }
@@ -72,6 +73,7 @@ internal static class MessageHandler
             //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             _currentColor = color;
         }
+
         SendMessage(channel, "/me " + message);
     }
     private static void OnMessageSent(object? sender, OnMessageSentArgs e)
@@ -90,7 +92,7 @@ internal static class MessageHandler
     #region Receiving
     internal static void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
-        var message = args.DiscordMessage;
+        DiscordMessage message = args.DiscordMessage;
         Log.Verbose("[{header}] {username} {channel}: {content}",
             $"Discord:{message.GuildName}",
             message.Author.Username,
@@ -134,8 +136,9 @@ internal static class MessageHandler
         DiscordTrigger[] evs = _discordEvents.Where(x =>
             x.ChannelId == msg.ChannelId && (msg.Author.Username.Contains(x.NameContains) || x.NameContains == "_ANY_")
         ).ToArray();
-        if (evs.Length == 0) return;
-        foreach (var ev in evs)
+        if (evs.Length == 0)
+            return;
+        foreach (DiscordTrigger ev in evs)
         {
             bool hasEmbed = msg.Embeds?.Any() ?? false;
             Embed? embed = hasEmbed ? msg.Embeds![0] : null;
@@ -144,7 +147,7 @@ internal static class MessageHandler
             IEnumerable<string>? attachmentLinks = hasAttachments ? msg.Attachments?.Select(x => x.Url) : null;
 
             StringBuilder sb = new();
-            sb
+            _ = sb
                 .Append(msg.Content)
                 .Append(' ')
                 .AppendWhen(hasEmbed, $"[{embed?.Title}] ")
@@ -159,15 +162,18 @@ internal static class MessageHandler
                 {
                     for (int i = 0; i < match.Groups.Count; i++)
                     {
-                        if (!ev.RegexGroupReplacements.ContainsKey(i)) continue;
+                        if (!ev.RegexGroupReplacements.ContainsKey(i))
+                            continue;
                         m = m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
                     }
                 }
             }
 
             // Remove operation
-            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText != "_ALL_") m = m.Replace(ev.RemoveText, "");
-            else if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText == "_ALL_") m = string.Empty;
+            if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText != "_ALL_")
+                m = m.Replace(ev.RemoveText, "");
+            else if (!string.IsNullOrEmpty(ev.RemoveText) && ev.RemoveText == "_ALL_")
+                m = string.Empty;
 
             // Prepend operation
             m = $"{ev.PrependText} " + m;
@@ -185,9 +191,11 @@ internal static class MessageHandler
                 if (message.Length >= 475)
                 {
                     IEnumerable<char[]> chunks = message.Chunk(475);
-                    foreach (char[] chunk in chunks) messages.Enqueue(new string(chunk) + " [500 LIMIT]");
+                    foreach (char[] chunk in chunks)
+                        messages.Enqueue(new string(chunk) + " [500 LIMIT]");
                     continue;
                 }
+
                 messages.Enqueue(message);
             }
 

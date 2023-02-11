@@ -14,7 +14,8 @@ internal sealed class Redis
 
     public Redis(string host)
     {
-        if (_initialized) return;
+        if (_initialized)
+            return;
 
         var context = new RedisContext(ConnectionMultiplexer.Connect(host), new JsonSerializer());
         Cache = context.Cache;

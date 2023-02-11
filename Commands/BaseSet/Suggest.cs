@@ -37,6 +37,7 @@ internal sealed class Suggest : Command
                 $"notified through a supibot reminder regarding it's status", UserColors.SeaGreen);
             return;
         }
+
         MessageHandler.SendMessage(channel, $"@{user}, PoroSad There was an error processing your suggestion. Try again later?");
     }
 }

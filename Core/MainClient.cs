@@ -18,28 +18,33 @@ public static class MainClient
     #region Initialization
     public static async Task Initialize()
     {
-        var options = new ClientOptions();
-        options.MessagesAllowedInPeriod = 150;
-        options.ThrottlingPeriod = TimeSpan.FromSeconds(30);
+        var options = new ClientOptions
+        {
+            MessagesAllowedInPeriod = 150,
+            ThrottlingPeriod = TimeSpan.FromSeconds(30)
+        };
 
         var policy = new ReconnectionPolicy(10);
         policy.SetMaxAttempts(10);
         options.ReconnectionPolicy = policy;
 
         var webSocketClient = new WebSocketClient(options);
-        Client = new TwitchClient(webSocketClient);
-        Client.AutoReListenOnException = true;
+        Client = new TwitchClient(webSocketClient)
+        {
+            AutoReListenOnException = true
+        };
 
         var credentials = new ConnectionCredentials(AppConfigLoader.Config.BotUsername, AppConfigLoader.Config.BotAccessToken);
         Client.Initialize(credentials);
 
-        var userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+        Handlers.Result<User> userResult = await User.Get(AppConfigLoader.Config.BotUsername);
         while (!userResult.Success)
         {
             Log.Fatal("[{header}] Fetching user failed. Retrying...", nameof(MainClient));
             await Task.Delay(1000);
             userResult = await User.Get(AppConfigLoader.Config.BotUsername);
         }
+
         Self = userResult.Value;
 
         Connect();

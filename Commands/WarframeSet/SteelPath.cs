@@ -20,24 +20,26 @@ internal sealed class SteelPath : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        var rewardsCache = await Redis.Cache.TryGetObjectAsync<SteelPathRewards>("warframe:steelpathrewards");
-        if (!rewardsCache.keyExists)
+        (bool keyExists, SteelPathRewards value) = await Redis.Cache.TryGetObjectAsync<SteelPathRewards>("warframe:steelpathrewards");
+        if (!keyExists)
         {
-            var r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
+            Result<SteelPathRewards> r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
                 return;
             }
+
             await Redis.Cache.SetObjectAsync("warframe:steelpathrewards", r.Value, Time.Until(r.Value.Expiry));
-            rewardsCache.value = r.Value;
+            value = r.Value;
         }
-        SteelPathRewards rewards = rewardsCache.value;
+
+        SteelPathRewards rewards = value;
 
 
         if (Time.HasPassed(rewards.Expiry))
         {
-            await Redis.Cache.RemoveAsync("warframe:steelpathrewards");
+            _ = await Redis.Cache.RemoveAsync("warframe:steelpathrewards");
             MessageHandler.SendMessage(channel, $"@{user}, Data is outdated. Try again later?");
             return;
         }

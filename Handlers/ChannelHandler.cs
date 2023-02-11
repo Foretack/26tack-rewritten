@@ -75,7 +75,7 @@ public static class ChannelHandler
         if (FetchedChannels.Any(x => x.Username == channel))
             return false;
         var c = new Channel(channel, priority, logged);
-        var extendedChannel = await User.GetChannel(c);
+        Result<ExtendedChannel> extendedChannel = await User.GetChannel(c);
         if (!extendedChannel.Success)
             return false;
         FetchedChannels.Add(extendedChannel.Value);
@@ -120,6 +120,7 @@ public static class ChannelHandler
         {
             FetchedChannels = (await db.GetChannels()).ToList();
         }
+
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
@@ -235,6 +236,7 @@ internal static class StreamMonitor
         {
             StreamData.Add(e.Channel, new(e.Stream.UserName, true, e.Stream.Title, e.Stream.GameName, e.Stream.StartedAt));
         }
+
         if (StreamData[e.Channel].Title != e.Stream.Title
         || StreamData[e.Channel].GameName != e.Stream.GameName)
         {
@@ -265,7 +267,9 @@ internal static class StreamMonitor
         {
             case nameof(StreamOnline):
                 if (!StreamData.ContainsKey(channel))
+                {
                     StreamData.Add(channel, new(stream.UserName, true, stream.Title, stream.GameName, stream.StartedAt));
+                }
                 else
                 {
                     StreamData[channel].IsOnline = true;
@@ -273,6 +277,7 @@ internal static class StreamMonitor
                     StreamData[channel].GameName = stream.GameName;
                     StreamData[channel].Started = stream.StartedAt;
                 }
+
                 break;
 
             case nameof(StreamOffline):

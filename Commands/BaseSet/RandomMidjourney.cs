@@ -21,12 +21,12 @@ internal sealed class RandomMidjourney : Command
         string user = ctx.IrcMessage.DisplayName;
 
         using var db = new DbQueries();
-        var query = await db.Enqueue(q => q.SelectRaw(
+        IEnumerable<dynamic> query = await db.Enqueue(q => q.SelectRaw(
             $"* FROM midjourney_images " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM midjourney_images)) " +
             $"LIMIT 1").GetAsync());
 
-        var row = query.FirstOrDefault();
+        dynamic? row = query.FirstOrDefault();
         if (row is null)
         {
             MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
@@ -37,7 +37,10 @@ internal sealed class RandomMidjourney : Command
         requests.Timeout = TimeSpan.FromSeconds(10);
 
         byte[] bytes;
-        try { bytes = await requests.GetByteArrayAsync(row.link); }
+        try
+        {
+            bytes = await requests.GetByteArrayAsync(row.link);
+        }
         catch
         {
             _ = await db.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());

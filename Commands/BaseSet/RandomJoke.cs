@@ -19,14 +19,15 @@ internal sealed class RandomJoke : Command
         string user = ctx.IrcMessage.DisplayName;
         string channel = ctx.IrcMessage.Channel;
 
-        var result = await ExternalAPIHandler.GetInto<JokeApiResponse>("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
+        Result<JokeApiResponse> result = await ExternalAPIHandler.GetInto<JokeApiResponse>("https://v2.jokeapi.dev/joke/Any?blacklistFlags=religious,racist&type=single");
 
         if (!result.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, there was an error retrieving a random joke :( -> {result.Exception.Message}");
             return;
         }
-        var joke = result.Value;
+
+        JokeApiResponse joke = result.Value;
         MessageHandler.SendMessage(channel, $"@{user}, [{joke.Category}] {joke.Joke.Replace('\n', ' ')} {_appendedEndings.Choice()}");
     }
 }
