@@ -15,6 +15,7 @@ internal static class MessageHandler
     #region Fields
     private static UserColors _currentColor = UserColors.Blue;
     private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
+    private static readonly HttpClient _requests = TwitchAPIHandler.Instance.CreateClient;
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
@@ -71,6 +72,13 @@ internal static class MessageHandler
         {
             // TODO: enable this once it's fixed
             //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
+            HttpResponseMessage response = await _requests.PutAsync(
+                $"https://api.twitch.tv/helix/chat/color?user_id={MainClient.Self.Id}&color={color.Value}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                Log.Warning($"Failed to change user color: {(int)response.StatusCode} {response.StatusCode}");
+            }
+
             _currentColor = color;
         }
 
