@@ -6,7 +6,7 @@ namespace Tack.Models;
 public sealed class ProgramSettings
 {
     public LogEventLevel LogLevel { get; set; }
-    public Dictionary<string, bool> EnabledModules { get; init; }
+    public Dictionary<string, bool> EnabledModules { get; init; } = default!;
 
     public bool this[string moduleName]
     {
