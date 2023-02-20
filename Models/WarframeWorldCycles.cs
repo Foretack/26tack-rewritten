@@ -2,6 +2,7 @@
 using Tack.Nonclass;
 
 namespace Tack.Models;
+#pragma warning disable CS8618
 public sealed class CetusCycle : IWorldCycle
 {
     [JsonPropertyName("expiry")]
@@ -36,3 +37,4 @@ public sealed class ZarimanCycle : IWorldCycle
     public string State { get; set; }
     public string QueryString { get; } = "zarimanCycle";
 }
+#pragma warning restore CS8618

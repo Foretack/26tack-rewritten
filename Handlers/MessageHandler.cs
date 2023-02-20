@@ -166,7 +166,7 @@ internal static class MessageHandler
 
             if (ev.UseRegex && ev.HasGroupReplacements)
             {
-                foreach (Match match in ev.ReplacementRegex.Matches(m))
+                foreach (Match match in ev.ReplacementRegex.Matches(m).Cast<Match>())
                 {
                     for (int i = 0; i < match.Groups.Count; i++)
                     {
@@ -210,7 +210,7 @@ internal static class MessageHandler
             // Send messages every 2.5 seconds
             while (messages.Count > 0)
             {
-                SendMessage(ev.OutChannel, messages.Dequeue());
+                await SendColoredMessage(ev.OutChannel, messages.Dequeue(), UserColors.BlueVoilet);
                 await Task.Delay(2500);
             }
         }
