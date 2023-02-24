@@ -15,7 +15,9 @@ MentionsRegex:
 
 LoggingWebhookUrl:
 ImageHostLink:
-ImageHostAuth: 
+ImageHostAuth:
+BlocksLink:
+BlocksAuth:
 
 # Discord channels
 Mentions:

@@ -22,5 +22,6 @@ internal sealed class AdminHandler : ChatCommandHandler
         AddCommand(new Update());
         AddCommand(new EditUser());
         AddCommand(new ModuleControl());
+        AddCommand(new TempBlock());
     }
 }
