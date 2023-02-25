@@ -59,7 +59,7 @@ internal sealed class LinkCollection : ChatModule
     private async Task Commit()
     {
         _toggle = !_toggle;
-        Log.Debug("[{@header}] Commiting link list...", Name);
+        Log.Debug("[{@header}] Committing link list...", Name);
         using var db = new DbQueries();
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
         if (!list.Any() || list.Count == 0)
