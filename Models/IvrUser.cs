@@ -37,7 +37,7 @@ public record IvrUser(
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("bio")] string Bio,
     //[property: JsonPropertyName("follows")] int Follows,
-    [property: JsonPropertyName("followers")] int Followers,
+    //[property: JsonPropertyName("followers")] int Followers,
     [property: JsonPropertyName("profileViewCount")] object ProfileViewCount,
     [property: JsonPropertyName("panelCount")] int PanelCount,
     [property: JsonPropertyName("chatColor")] string ChatColor,
