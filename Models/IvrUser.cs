@@ -1,6 +1,6 @@
-﻿// Root myDeserializedClass = JsonSerializer.Deserialize<List<Root>>(myJsonResponse);
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
+namespace Tack.Models;
 public record ChatSettings(
     [property: JsonPropertyName("chatDelayMs")] int ChatDelayMs,
     [property: JsonPropertyName("followersOnlyDurationMinutes")] object FollowersOnlyDurationMinutes,
@@ -36,7 +36,7 @@ public record IvrUser(
     [property: JsonPropertyName("login")] string Login,
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("bio")] string Bio,
-    [property: JsonPropertyName("follows")] int Follows,
+    //[property: JsonPropertyName("follows")] int Follows,
     [property: JsonPropertyName("followers")] int Followers,
     [property: JsonPropertyName("profileViewCount")] object ProfileViewCount,
     [property: JsonPropertyName("panelCount")] int PanelCount,
