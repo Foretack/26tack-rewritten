@@ -48,7 +48,7 @@ internal sealed class FeedsReader : IModule
             if (item.Title == latest[sub.Key])
                 continue;
 
-            Log.Information("💡 New item from {sub}: {title} -- {link}", sub, item.Title, item.Link);
+            Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
             latest[sub.Key] = item.Title;
             await Redis.Cache.SetObjectAsync("rss:latest", latest);
 
