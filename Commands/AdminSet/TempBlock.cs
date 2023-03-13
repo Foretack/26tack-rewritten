@@ -54,6 +54,6 @@ internal sealed class TempBlock : Command
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"Blocked {args[0]}  until {DateTime.Now.AddHours(i):G}");
+        MessageHandler.SendMessage(channel, $"Blocked {args[0]}  until {DateTime.Now.AddHours(i):ss:mm:HH dd.MM.yyyy}");
     }
 }
