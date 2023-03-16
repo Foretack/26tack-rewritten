@@ -25,7 +25,7 @@ internal sealed class FeedsReader : IModule
             return;
 
         Dictionary<string, RSSFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RSSFeedSubscription>>("rss:subscriptions");
-        Dictionary<string, string> latest = await Redis.Cache.FetchObjectAsync<Dictionary<string, string>>("rss:latest",
+        Dictionary<string, string> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
             () => Task.FromResult(new Dictionary<string, string>()));
 
         foreach (KeyValuePair<string, RSSFeedSubscription> sub in subs)
@@ -37,8 +37,12 @@ internal sealed class FeedsReader : IModule
             }
 
             Feed? feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
-            if (feedReadResult is null)
+            if (feedReadResult is null
+            || (feedReadResult.LastUpdatedDate is not null 
+                && (DateTime.Now - feedReadResult.LastUpdatedDate).Value.TotalHours > 1))
+            {
                 continue;
+            }
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
 
