@@ -16,7 +16,7 @@ internal sealed class FeedsReader : IModule
     {
         if (enabled)
             Enable();
-        Time.DoEvery(TimeSpan.FromMinutes(5), ReadFeeds);
+        Time.DoEvery(TimeSpan.FromMinutes(1), ReadFeeds);
     }
 
     private async Task ReadFeeds()
@@ -25,21 +25,19 @@ internal sealed class FeedsReader : IModule
             return;
 
         Dictionary<string, RSSFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RSSFeedSubscription>>("rss:subscriptions");
-        Dictionary<string, string> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, string>()));
+        Dictionary<string, List<string>> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
+            () => Task.FromResult(new Dictionary<string, List<string>>()));
 
         foreach (KeyValuePair<string, RSSFeedSubscription> sub in subs)
         {
             if (!latest.ContainsKey(sub.Key))
             {
-                latest.Add(sub.Key, string.Empty);
+                latest.Add(sub.Key, new());
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
             }
 
             Feed? feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
-            if (feedReadResult is null
-            || (feedReadResult.LastUpdatedDate is not null 
-                && (DateTime.Now - feedReadResult.LastUpdatedDate).Value.TotalHours > 1))
+            if (feedReadResult is null)
             {
                 continue;
             }
@@ -49,11 +47,14 @@ internal sealed class FeedsReader : IModule
             FeedItem? item = feedReadResult.Items.FirstOrDefault();
             if (item is null)
                 continue;
-            if (item.Title == latest[sub.Key])
+            if (latest[sub.Key].Contains(item.Title))
                 continue;
 
             Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
-            latest[sub.Key] = item.Title;
+
+            if (latest[sub.Key].Count >= 10)
+                latest[sub.Key].Clear();
+            latest[sub.Key].Add(item.Title);
             await Redis.Cache.SetObjectAsync("rss:latest", latest);
 
             foreach (string channel in sub.Value.Channels)
