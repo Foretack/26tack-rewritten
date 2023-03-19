@@ -16,7 +16,7 @@ internal sealed class FeedsReader : IModule
     {
         if (enabled)
             Enable();
-        Time.DoEvery(TimeSpan.FromMinutes(1), ReadFeeds);
+        Time.DoEvery(TimeSpan.FromMinutes(2.5), ReadFeeds);
     }
 
     private async Task ReadFeeds()
