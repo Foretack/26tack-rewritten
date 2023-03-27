@@ -11,6 +11,7 @@ public interface IModule
     public bool Enabled { get; }
     public void Enable();
     public void Disable();
+    public void UpdateSettings();
 }
 
 public abstract class ChatModule : IModule
@@ -51,7 +52,7 @@ public abstract class ChatModule : IModule
         Log.Debug("Disabled module: {name}", Name);
     }
 
-    private void UpdateSettings()
+    public void UpdateSettings()
     {
         Program.Settings.EnabledModules[Name] = Enabled;
     }

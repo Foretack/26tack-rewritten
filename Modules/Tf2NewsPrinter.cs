@@ -68,7 +68,7 @@ internal sealed class Tf2NewsPrinter : IModule
         Log.Debug($"{nameof(Tf2NewsPrinter)} Module disabled");
     }
 
-    private void UpdateSettings()
+    public void UpdateSettings()
     {
         Program.Settings.EnabledModules[Name] = Enabled;
     }

@@ -91,7 +91,7 @@ internal sealed class BaroChecker : IModule
         Log.Debug("Disabled {name}", Name);
     }
 
-    private void UpdateSettings()
+    public void UpdateSettings()
     {
         Program.Settings.EnabledModules[Name] = Enabled;
     }
