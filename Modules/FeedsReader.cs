@@ -52,9 +52,9 @@ internal sealed class FeedsReader : IModule
 
             Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
 
-            if (latest[sub.Key].Count >= 100)
+            if (latest[sub.Key].Count >= 50)
                 latest[sub.Key].Clear();
-            latest[sub.Key].Add(item.Link);
+            latest[sub.Key].Add($"{item.Title} ({item.Link})");
             await Redis.Cache.SetObjectAsync("rss:latest", latest);
 
             foreach (string channel in sub.Value.Channels)
