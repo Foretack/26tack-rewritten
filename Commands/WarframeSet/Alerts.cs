@@ -25,7 +25,7 @@ internal sealed class Alerts : Command
         (bool keyExists, Alert[] value) = await Redis.Cache.TryGetObjectAsync<Alert[]>("warframe:alerts");
         if (!keyExists)
         {
-            Result<Alert[]> r = await ExternalAPIHandler.WarframeStatusApi<Alert[]>("alerts");
+            Result<Alert[]> r = await ExternalApiHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");

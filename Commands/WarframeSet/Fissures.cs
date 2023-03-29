@@ -21,7 +21,7 @@ internal sealed class Fissures : Command
 
         string fissuresString;
 
-        Result<Fissure[]> r = await ExternalAPIHandler.WarframeStatusApi<Fissure[]>("fissures");
+        Result<Fissure[]> r = await ExternalApiHandler.WarframeStatusApi<Fissure[]>("fissures");
         if (!r.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");

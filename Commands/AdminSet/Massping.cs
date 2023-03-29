@@ -43,7 +43,7 @@ internal sealed class Massping : Command
         (bool keyExists, ChatterList value) = await Redis.Cache.TryGetObjectAsync<ChatterList>($"twitch:users:{targetChannel}:chatters");
         if (!keyExists)
         {
-            Result<ChatterList> res = await ExternalAPIHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
+            Result<ChatterList> res = await ExternalApiHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
             if (!res.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {res.Exception.Message}");

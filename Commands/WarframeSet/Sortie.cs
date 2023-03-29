@@ -23,7 +23,7 @@ internal sealed class Sortie : Command
         (bool keyExists, CurrentSortie value) = await Redis.Cache.TryGetObjectAsync<CurrentSortie>("warframe:sortiedata");
         if (!keyExists)
         {
-            Result<CurrentSortie> r = await ExternalAPIHandler.WarframeStatusApi<CurrentSortie>("sortie");
+            Result<CurrentSortie> r = await ExternalApiHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");

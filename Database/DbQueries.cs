@@ -160,7 +160,7 @@ internal sealed class DbQueries : DbConnection
 
     public async Task<int> UpdateUsers(int[] ids)
     {
-        IvrUser[] users = await ExternalAPIHandler.GetIvrUsersById(ids);
+        IvrUser[] users = await ExternalApiHandler.GetIvrUsersById(ids);
         Log.Debug("Fetched {c} users from Ivr", users.Length);
 
         int updated = 0;
@@ -172,6 +172,7 @@ internal sealed class DbQueries : DbConnection
             }
 
             int u = await Enqueue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}", 2500);
+            updated += u;
             Log.Verbose("User updated: {u}#{i}", user.Login, user.Id);
             await Task.Delay(250);
         }

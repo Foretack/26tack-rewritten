@@ -4,7 +4,7 @@ using CachingFramework.Redis.Serializers;
 using StackExchange.Redis;
 
 namespace Tack.Database;
-internal sealed class Redis
+internal static class Redis
 {
     public static ICacheProviderAsync Cache { get; private set; } = default!;
     public static ICollectionProvider Collections { get; private set; } = default!;
@@ -12,7 +12,7 @@ internal sealed class Redis
 
     private static bool _initialized;
 
-    public Redis(string host)
+    public static void Init(string host)
     {
         if (_initialized)
             return;

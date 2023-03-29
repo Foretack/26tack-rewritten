@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Data;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -6,7 +7,7 @@ using Tack.Database;
 using Tack.Models;
 
 namespace Tack.Handlers;
-internal static class ExternalAPIHandler
+internal static class ExternalApiHandler
 {
     private static readonly JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
@@ -42,9 +43,8 @@ internal static class ExternalAPIHandler
             Timeout = TimeSpan.FromSeconds(2)
         };
 
-        IvrUser[]? users = await requests.GetFromJsonAsync<IvrUser[]>($"https://api.ivr.fi/v2/twitch/user?login={username}");
-        if (users is null)
-            throw new Exception("Users is null");
+        IvrUser[]? users = await requests.GetFromJsonAsync<IvrUser[]>($"https://api.ivr.fi/v2/twitch/user?login={username}")
+            ?? throw new NoNullAllowedException("Users is null");
 
         return users.First();
     }
@@ -62,9 +62,8 @@ internal static class ExternalAPIHandler
 
         Log.Debug("GET {StatusCode} {url}", get.StatusCode, url);
 
-        IvrUser[]? users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions);
-        if (users is null)
-            throw new Exception("Users is null");
+        IvrUser[]? users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions)
+            ?? throw new NoNullAllowedException("Users is null");
 
         return users;
     }

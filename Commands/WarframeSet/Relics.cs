@@ -43,7 +43,7 @@ internal sealed class Relics : Command
         (bool keyExists, RelicData value) = await Redis.Cache.TryGetObjectAsync<RelicData>("warframe:relicdata");
         if (!keyExists)
         {
-            RelicData? r = await ExternalAPIHandler.GetRelicData();
+            RelicData? r = await ExternalApiHandler.GetRelicData();
             if (r is null)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, Error getting relic information :(");
@@ -72,11 +72,12 @@ internal sealed class Relics : Command
             return wantedRelics;
         });
 
-        return wantedRelics.Length == 0
-            ? "No Relics containing that item were found."
-            : wantedRelics.Length >= 15
-            ? "Too many Relics contain that item! (message too big)"
-            : $"Relics containing \"{itemName}\": {wantedRelics.AsString()} 🥜";
+        if (wantedRelics.Length == 0)
+            return "No Relics containing that item were found.";
+        else if (wantedRelics.Length >= 15)
+            return "Too many Relics contain that item! (message too big)";
+
+        return $"Relics containing \"{itemName}\": {wantedRelics.AsString()} 🥜";
     }
     private async Task<string> GetRelicItems(string relicName, RelicData relicData)
     {

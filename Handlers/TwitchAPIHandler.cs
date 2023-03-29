@@ -3,9 +3,9 @@ using TwitchLib.Api;
 using TwitchLib.Api.Core;
 
 namespace Tack.Handlers;
-internal sealed class TwitchAPIHandler
+internal sealed class TwitchApiHandler
 {
-    public static TwitchAPIHandler Instance { get; } = new(AppConfigLoader.Config);
+    public static TwitchApiHandler Instance { get; } = new(AppConfigLoader.Config);
     public TwitchAPI Api { get; init; }
     public HttpClient CreateClient => new()
     {
@@ -16,7 +16,7 @@ internal sealed class TwitchAPIHandler
         }
     };
 
-    private TwitchAPIHandler(IAppConfig config)
+    private TwitchApiHandler(IAppConfig config)
     {
         Api = new TwitchAPI(settings: new ApiSettings()
         {

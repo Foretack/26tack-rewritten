@@ -14,28 +14,22 @@ internal abstract class DbConnection : IDisposable
         $"Database={AppConfigLoader.Config.DbName}";
     private static readonly SemaphoreSlim _operationLock = new(1);
 
-    protected QueryFactory QueryFactory => _qf;
-
-    private static bool _initialized;
-    private static NpgsqlConnection _connection = default!;
-    private static PostgresCompiler _compiler = default!;
-    private static QueryFactory _qf = default!;
+    protected QueryFactory QueryFactory { get; }
 
     protected DbConnection()
     {
-        if (!_initialized)
+        if (QueryFactory is null)
         {
-            _connection = new(ConnectionString);
-            _compiler = new();
-            _connection.Open();
-            _qf = new QueryFactory(_connection, _compiler)
+            var conn = new NpgsqlConnection(ConnectionString);
+            conn.Open();
+            QueryFactory = new QueryFactory(conn, new PostgresCompiler())
             {
                 Logger = x => Log.Verbose("Query: {q}", x.RawSql)
             };
             Log.Information("Initialized database");
         }
 
-        _initialized = true;
+        _ = QueryFactory ?? throw new NotImplementedException("This is impossible");
     }
 
     public async Task<TResult> Enqueue<TResult>(string table, Func<SqlKata.Query, TResult> query, int retryDelayMs = 1000,
@@ -130,7 +124,7 @@ internal abstract class DbConnection : IDisposable
 
     protected SqlKata.Query this[string table] => QueryFactory.Query(table);
 
-    public ConnectionState ConnectionState => _qf.Connection.State;
+    public ConnectionState ConnectionState => QueryFactory.Connection.State;
     protected virtual void Dispose(bool disposing)
     {
     }

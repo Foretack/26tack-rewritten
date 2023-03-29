@@ -24,11 +24,11 @@ internal sealed class FeedsReader : IModule
         if (!Enabled)
             return;
 
-        Dictionary<string, RSSFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RSSFeedSubscription>>("rss:subscriptions");
+        Dictionary<string, RssFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
         Dictionary<string, List<string>> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
             () => Task.FromResult(new Dictionary<string, List<string>>()));
 
-        foreach (KeyValuePair<string, RSSFeedSubscription> sub in subs)
+        foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
             if (!latest.ContainsKey(sub.Key))
             {

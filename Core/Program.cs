@@ -42,7 +42,7 @@ public static class Program
 
         StartupTime = DateTime.Now;
 
-        _ = new Redis($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
+        Redis.Init($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
 
         Settings = await Redis.Cache.FetchObjectAsync<ProgramSettings>("bot:settings", () =>
         Task.FromResult(new ProgramSettings() { LogLevel = LogEventLevel.Information, EnabledModules = new() }));

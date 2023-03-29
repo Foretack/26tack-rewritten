@@ -15,7 +15,7 @@ internal static class MessageHandler
     #region Fields
     private static UserColors _currentColor = UserColors.Blue;
     private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
-    private static readonly HttpClient _requests = TwitchAPIHandler.Instance.CreateClient;
+    private static readonly HttpClient _requests = TwitchApiHandler.Instance.CreateClient;
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     #endregion
 
@@ -166,14 +166,13 @@ internal static class MessageHandler
 
             if (ev.UseRegex && ev.HasGroupReplacements)
             {
-                foreach (Match match in ev.ReplacementRegex.Matches(m).Cast<Match>())
+                int i = 0;
+                foreach (GroupCollection groups in ev.ReplacementRegex.Matches(m).Cast<Match>().Select(m => m.Groups))
                 {
-                    for (int i = 0; i < match.Groups.Count; i++)
-                    {
-                        if (!ev.RegexGroupReplacements.ContainsKey(i))
-                            continue;
-                        m = m.Replace(match.Groups[i].Value, ev.RegexGroupReplacements[i]);
-                    }
+                    if (!ev.RegexGroupReplacements.ContainsKey(i))
+                        continue;
+                    m = m.Replace(groups[i].Value, ev.RegexGroupReplacements[i]);
+                    i++;
                 }
             }
 

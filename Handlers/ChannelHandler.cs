@@ -57,7 +57,6 @@ public static class ChannelHandler
                 await Task.Delay(1000);
             }
         });
-        c = default!;
         _isInProgress = false;
         StreamMonitor.Start();
         Time.DoEvery(TimeSpan.FromHours(1), async () =>
@@ -176,7 +175,7 @@ internal static class StreamMonitor
     #region Properties
     public static Dictionary<string, TwitchStream> StreamData { get; private set; } = new();
 
-    private static readonly LiveStreamMonitorService _monitoringService = new(TwitchAPIHandler.Instance.Api, 60);
+    private static readonly LiveStreamMonitorService _monitoringService = new(TwitchApiHandler.Instance.Api, 60);
     private static readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
     #endregion
 

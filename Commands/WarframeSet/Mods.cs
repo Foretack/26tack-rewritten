@@ -32,7 +32,7 @@ internal sealed class Mods : Command
         (bool keyExists, ModInfo value) = await Redis.Cache.TryGetObjectAsync<ModInfo>($"warframe:mod:{modName}");
         if (!keyExists)
         {
-            Result<ModInfo> r = await ExternalAPIHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
+            Result<ModInfo> r = await ExternalApiHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");

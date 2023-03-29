@@ -21,7 +21,7 @@ internal sealed class Invasions : Command
         (bool keyExists, InvasionNode[] value) = await Redis.Cache.TryGetObjectAsync<InvasionNode[]>("warframe:invasions");
         if (!keyExists)
         {
-            Result<InvasionNode[]> r = await ExternalAPIHandler.WarframeStatusApi<InvasionNode[]>("invasions");
+            Result<InvasionNode[]> r = await ExternalApiHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");

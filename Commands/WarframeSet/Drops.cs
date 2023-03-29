@@ -31,7 +31,7 @@ internal sealed class Drops : Command
         }
 
         string item = string.Join(' ', ctx.Args);
-        Result<ItemDropData[]> r = await ExternalAPIHandler.WarframeStatusApi<ItemDropData[]>($"drops/search/{item}", string.Empty, string.Empty);
+        Result<ItemDropData[]> r = await ExternalApiHandler.WarframeStatusApi<ItemDropData[]>($"drops/search/{item}", string.Empty, string.Empty);
         if (!r.Success)
         {
             MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");

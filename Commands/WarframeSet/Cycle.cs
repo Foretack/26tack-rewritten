@@ -36,7 +36,7 @@ internal sealed class Cycle : Command
         (bool keyExists, T value) = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
         if (!keyExists)
         {
-            Result<T> r = await ExternalAPIHandler.WarframeStatusApi<T>(queryString);
+            Result<T> r = await ExternalApiHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");

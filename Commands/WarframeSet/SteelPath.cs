@@ -23,7 +23,7 @@ internal sealed class SteelPath : Command
         (bool keyExists, SteelPathRewards value) = await Redis.Cache.TryGetObjectAsync<SteelPathRewards>("warframe:steelpathrewards");
         if (!keyExists)
         {
-            Result<SteelPathRewards> r = await ExternalAPIHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
+            Result<SteelPathRewards> r = await ExternalApiHandler.WarframeStatusApi<SteelPathRewards>("steelPath");
             if (!r.Success)
             {
                 MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");

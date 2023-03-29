@@ -27,7 +27,7 @@ internal sealed class BaroChecker : IModule
         if (_scheduled)
             return;
 
-        VoidTrader? baro = (await ExternalAPIHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
+        VoidTrader? baro = (await ExternalApiHandler.WarframeStatusApi<VoidTrader>("voidTrader")).Value;
         if (baro is null)
             return;
 
