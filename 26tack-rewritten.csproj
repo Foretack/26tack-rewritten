@@ -28,10 +28,10 @@
 
   <ItemGroup>
     <Reference Include="MiniTwitch.Common">
-      <HintPath>..\MiniTwitch\MiniTwitch.Irc\bin\Release\net6.0\publish\MiniTwitch.Common.dll</HintPath>
+      <HintPath>MiniTwitch.Common.dll</HintPath>
     </Reference>
     <Reference Include="MiniTwitch.Irc">
-      <HintPath>..\MiniTwitch\MiniTwitch.Irc\bin\Release\net6.0\publish\MiniTwitch.Irc.dll</HintPath>
+      <HintPath>MiniTwitch.Irc.dll</HintPath>
     </Reference>
   </ItemGroup>
 
