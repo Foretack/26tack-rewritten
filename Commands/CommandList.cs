@@ -19,8 +19,8 @@ internal static class CommandList
 
     public static async Task Run(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         var perms = (PermissionLevels)ctx.Permission.Level;
 
         var sb = new StringBuilder($"@{user} ");
@@ -28,7 +28,7 @@ internal static class CommandList
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
         if (!s || handler is null)
         {
-            MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
+            await MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
             Log.Error("commands command failed to get the handler for a prefix somehow pajaS");
             return;
         }

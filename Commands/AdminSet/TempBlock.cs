@@ -22,8 +22,8 @@ internal sealed class TempBlock : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string channel = ctx.IrcMessage.Channel;
-        string user = ctx.IrcMessage.DisplayName;
+        string channel = ctx.Message.Channel.Name;
+        string user = ctx.Message.Author.DisplayName;
         string[] args = ctx.Args;
 
         if (args.Length < 2)
@@ -31,29 +31,29 @@ internal sealed class TempBlock : Command
 
         if (!int.TryParse(args[1], out int i))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Args[1] could not be converted to int");
+            await MessageHandler.SendMessage(channel, $"@{user}, Args[1] could not be converted to int");
             return;
         }
 
         Result<User> getTarget = await User.Get(args[0]);
         if (!getTarget.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, User could not be retrieved through Helix");
+            await MessageHandler.SendMessage(channel, $"@{user}, User could not be retrieved through Helix");
             return;
         }
 
         HttpResponseMessage response = await _requests.PutAsync($"{_reqUrl}/add?targetId={getTarget.Value.Id}&hours={args[1]}", null);
         if (response.StatusCode == HttpStatusCode.Conflict)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, User already blocked");
+            await MessageHandler.SendMessage(channel, $"@{user}, User already blocked");
             return;
         }
         else if (!response.IsSuccessStatusCode)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, {response.StatusCode}");
+            await MessageHandler.SendMessage(channel, $"@{user}, {response.StatusCode}");
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"Blocked {args[0]}  until {DateTime.Now.AddHours(i):HH:mm:ss dd.MM.yyyy}");
+        await MessageHandler.SendMessage(channel, $"Blocked {args[0]}  until {DateTime.Now.AddHours(i):HH:mm:ss dd.MM.yyyy}");
     }
 }

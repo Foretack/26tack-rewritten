@@ -1,5 +1,4 @@
-﻿using Dasync.Collections;
-using SqlKata.Execution;
+﻿using SqlKata.Execution;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Utils;
@@ -28,7 +27,7 @@ internal sealed class DbQueries : DbConnection
         {
             display_name = channel.Displayname,
             username = channel.Username,
-            id = int.Parse(channel.ID),
+            id = channel.Id,
             avatar_url = channel.AvatarUrl,
             priority = channel.Priority,
             is_logged = channel.Logged
@@ -48,7 +47,7 @@ internal sealed class DbQueries : DbConnection
             x => new ExtendedChannel(
                 x.display_name,
                 x.username,
-                ((int)x.id).ToString(),
+                (long)x.id,
                 x.avatar_url,
                 x.date_joined,
                 x.priority,
@@ -94,19 +93,19 @@ internal sealed class DbQueries : DbConnection
         int inserted = await Enqueue("suggestions", q => q.InsertAsync(new
         {
             username = user.Username,
-            user_id = int.Parse(user.ID),
+            user_id = user.Id,
             suggestion_text = suggestionText
         }));
 
         return inserted > 0;
     }
 
-    public async Task<bool> BlacklistUser(string username, string id)
+    public async Task<bool> BlacklistUser(string username, long id)
     {
         int inserted = await Enqueue("blacklisted_users", q => q.InsertAsync(new
         {
             username,
-            id = int.Parse(id)
+            id
         }));
 
         return inserted > 0;
@@ -148,7 +147,7 @@ internal sealed class DbQueries : DbConnection
         var extd = new ExtendedChannel(
             row.display_name,
             row.username,
-            ((int)row.id).ToString(),
+            (long)row.id,
             row.avatar_url,
             row.date_joined,
             row.priority,

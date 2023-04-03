@@ -17,14 +17,14 @@ internal sealed class Massping : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
         var sb = new StringBuilder();
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, channel unspecified");
+            await MessageHandler.SendMessage(channel, $"@{user}, channel unspecified");
             return;
         }
 
@@ -33,7 +33,7 @@ internal sealed class Massping : Command
 
         if (channel != AppConfigLoader.Config.RelayChannel || targetChannel == AppConfigLoader.Config.RelayChannel)
         {
-            MessageHandler.SendMessage(channel, "Can't do that in this channel!");
+            await MessageHandler.SendMessage(channel, "Can't do that in this channel!");
             return;
         }
 
@@ -46,7 +46,7 @@ internal sealed class Massping : Command
             Result<ChatterList> res = await ExternalApiHandler.GetInto<ChatterList>($"https://tmi.twitch.tv/group/user/{targetChannel}/chatters");
             if (!res.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {res.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {res.Exception.Message}");
                 return;
             }
 
@@ -59,12 +59,12 @@ internal sealed class Massping : Command
         if (mods)
         {
             AppendMods(chatterList.Chatters.Moderators, ref sb);
-            MessageHandler.SendMessage(channel, sb.ToString());
+            await MessageHandler.SendMessage(channel, sb.ToString());
             return;
         }
 
         AppendViewers(chatterList.Chatters.Viewers, ref sb);
-        MessageHandler.SendMessage(channel, sb.ToString());
+        await MessageHandler.SendMessage(channel, sb.ToString());
     }
 
     private void AppendMods(IReadOnlyList<string> modList, ref StringBuilder sb)

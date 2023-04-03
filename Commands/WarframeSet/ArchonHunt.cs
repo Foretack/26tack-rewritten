@@ -14,8 +14,8 @@ internal sealed class ArchonHunt : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
 
         (bool keyExists, ArchonData value) = await Redis.Cache.TryGetObjectAsync<ArchonData>("warframe:archonhunt");
         if (!keyExists)
@@ -23,7 +23,7 @@ internal sealed class ArchonHunt : Command
             Result<ArchonData> r = await ExternalApiHandler.WarframeStatusApi<ArchonData>("archonHunt", timeout: 10);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
 
@@ -36,7 +36,7 @@ internal sealed class ArchonHunt : Command
         if (Time.HasPassed(archonData.Expiry))
         {
             _ = await Redis.Cache.RemoveAsync("warframe:archonhunt");
-            MessageHandler.SendMessage(channel, $"@{user}, Archon hunt information seems to be outdated, try again in later.");
+            await MessageHandler.SendMessage(channel, $"@{user}, Archon hunt information seems to be outdated, try again in later.");
             return;
         }
 
@@ -53,6 +53,6 @@ internal sealed class ArchonHunt : Command
             + ']'
             + $" Expires in: {Time.UntilString(archonData.Expiry)}";
 
-        MessageHandler.SendMessage(channel, $"@{user}, {archonMessage}");
+        await MessageHandler.SendMessage(channel, $"@{user}, {archonMessage}");
     }
 }

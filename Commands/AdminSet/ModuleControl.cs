@@ -11,15 +11,15 @@ internal sealed class ModuleControl : Command
         permission: PermissionLevels.Whitelisted
     );
 
-    public override Task Execute(CommandContext ctx)
+    public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.Username;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.Name;
+        string channel = ctx.Message.Channel.Name;
 
         if (ctx.Args.Length < 2)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Usage: <ModuleName> <enable/disable>");
-            return Task.CompletedTask;
+            await MessageHandler.SendMessage(channel, $"@{user}, Usage: <ModuleName> <enable/disable>");
+            return;
         }
 
         string moduleName = ctx.Args[0];
@@ -27,19 +27,19 @@ internal sealed class ModuleControl : Command
 
         if (action is not "enable" and not "disable")
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Unrecognized action: {action}");
-            return Task.CompletedTask;
+            await MessageHandler.SendMessage(channel, $"@{user}, Unrecognized action: {action}");
+            return;
         }
 
         if (action == "enable")
         {
             bool enabled = ModulesHandler.EnableModule(moduleName);
-            MessageHandler.SendMessage(channel, $"{(enabled ? "Enabled" : "Error enabling")} {moduleName}");
-            return Task.CompletedTask;
+            await MessageHandler.SendMessage(channel, $"{(enabled ? "Enabled" : "Error enabling")} {moduleName}");
+            return;
         }
 
         bool disabled = ModulesHandler.DisableModule(moduleName);
-        MessageHandler.SendMessage(channel, $"{(disabled ? "Disabled" : "Error disabling")} {moduleName}");
-        return Task.CompletedTask;
+        await MessageHandler.SendMessage(channel, $"{(disabled ? "Disabled" : "Error disabling")} {moduleName}");
+        return;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dasync.Collections;
+﻿using MiniTwitch.Irc.Interfaces;
+using MiniTwitch.Irc.Models;
 using Tack.Core;
 using Tack.Database;
 using Tack.Misc;
@@ -19,6 +20,8 @@ public static class ChannelHandler
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
     public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
 
+    private static readonly AnonymousClient _anon = new SingleOf<AnonymousClient>();
+    private static readonly MainClient _main = new SingleOf<MainClient>();
     private static readonly List<ExtendedChannel> _joinFailureChannels = new();
     private static bool _isInProgress = false;
     #endregion
@@ -40,23 +43,24 @@ public static class ChannelHandler
         RegisterEvents(isReconnect);
 
         await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
-
-        IAsyncEnumerable<ExtendedChannel> c = new AsyncEnumerable<ExtendedChannel>(async y =>
+        foreach (ExtendedChannel channel in FetchedChannels)
         {
-            for (int i = 0; i < FetchedChannels.Count; i++)
-                await y.ReturnAsync(FetchedChannels[i]);
-            y.Break();
-        });
-
-        await c.ForEachAsync(async x =>
-        {
-            if (x.Priority >= 50)
+            if (channel.Priority >= 50)
             {
-                MainClient.Client.JoinChannel(x.Username);
-                Log.Debug("[Main] Queued join: {username}", x.Username);
-                await Task.Delay(1000);
+                if (await _main.Client.JoinChannel(channel.Username))
+                    Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel.Username);
+                else
+                    Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel.Username);
+
+                continue;
             }
-        });
+
+            if (await _anon.Client.JoinChannel(channel.Username))
+                Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel.Username);
+            else
+                Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel.Username);
+        }
+
         _isInProgress = false;
         StreamMonitor.Start();
         Time.DoEvery(TimeSpan.FromHours(1), async () =>
@@ -80,7 +84,19 @@ public static class ChannelHandler
         FetchedChannels.Add(extendedChannel.Value);
 
         if (priority >= 50)
-            MainClient.Client.JoinChannel(channel);
+        {
+            if (await _main.Client.JoinChannel(channel))
+                Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel);
+            else
+                Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel);
+        }
+        else
+        {
+            if (await _anon.Client.JoinChannel(channel))
+                Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel);
+            else
+                Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel);
+        }
 
         var db = new DbQueries();
         bool s = await db.AddChannel(extendedChannel.Value);
@@ -90,26 +106,33 @@ public static class ChannelHandler
     /// <returns>True if successful; Otherwise false</returns>
     public static async Task<bool> PartChannel(string channel)
     {
-        bool fetched = FetchedChannels.Any(x => x.Username == channel);
-
-        ExtendedChannel? target = FetchedChannels.FirstOrDefault(x => x.Username == channel);
-        if (target is null)
+        ExtendedChannel? fetched = FetchedChannels.FirstOrDefault(x => x.Username == channel);
+        if (fetched is null)
             return false;
 
         try
         {
             var db = new DbQueries();
-            _ = await db.RemoveChannel(target);
-            _ = MainJoinedChannels.Remove(target);
-            _ = MainJoinedChannelNames.Remove(channel);
-            MainClient.Client.LeaveChannel(channel);
+            if (fetched.Priority >= 50)
+            {
+
+                _ = MainJoinedChannels.Remove(fetched);
+                _ = MainJoinedChannelNames.Remove(channel);
+                await _main.Client.PartChannel(channel);
+            }
+            else
+            {
+                _ = _anon.Client.PartChannel(channel);
+            }
+
+            _ = await db.RemoveChannel(fetched);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Errors occured whilst trying to part {channel} :", channel);
         }
 
-        return fetched;
+        return true;
     }
 
     public static async Task ReloadFetchedChannels()
@@ -133,9 +156,8 @@ public static class ChannelHandler
         if (isReconnect)
             return;
 
-        MainClient.Client.OnJoinedChannel += MainOnJoinedChannel;
-        MainClient.Client.OnLeftChannel += MainOnLeftChannel;
-        MainClient.Client.OnFailureToReceiveJoinConfirmation += MainOnFailedJoin;
+        _main.Client.OnChannelJoin += MainOnJoinedChannel;
+        _main.Client.OnChannelPart += MainOnLeftChannel;
     }
     #endregion
 
@@ -150,20 +172,23 @@ public static class ChannelHandler
         _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
     }
 
-    private static void MainOnLeftChannel(object? sender, OnLeftChannelArgs e)
+    private static ValueTask MainOnLeftChannel(IPartedChannel channel)
     {
         Log.Information("[Main] Left channel {channel}",
-            e.Channel);
-        _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Username == e.Channel));
-        _ = MainJoinedChannelNames.Remove(e.Channel);
+            channel.Name);
+        _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Username == channel.Name));
+        _ = MainJoinedChannelNames.Remove(channel.Name);
+        return ValueTask.CompletedTask;
     }
 
-    private static void MainOnJoinedChannel(object? sender, OnJoinedChannelArgs e)
+    private static ValueTask MainOnJoinedChannel(IrcChannel channel)
     {
         Log.Information("[Main] Joined channel {channel}",
-            e.Channel);
-        MainJoinedChannels.Add(FetchedChannels.First(x => x.Username == e.Channel));
-        MainJoinedChannelNames.Add(e.Channel);
+            channel.Name);
+
+        MainJoinedChannels.Add(FetchedChannels.First(x => x.Username == channel.Name));
+        MainJoinedChannelNames.Add(channel.Name);
+        return ValueTask.CompletedTask;
     }
     #endregion
 

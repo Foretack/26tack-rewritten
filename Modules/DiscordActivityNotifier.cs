@@ -18,7 +18,7 @@ internal class DiscordActivityNotifier : IModule
             Disable();
     }
 
-    private void OnUpdate(object? sender, OnDiscordPresenceArgs e)
+    private async void OnUpdate(object? sender, OnDiscordPresenceArgs e)
     {
         DiscordPresence presence = e.DiscordPresence;
         if (presence.Author.IsBot || presence.Activities.Count == 0)
@@ -34,12 +34,11 @@ internal class DiscordActivityNotifier : IModule
                 string lenString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
                 if (!ActOnCooldown() && activity.Details != CurrentSong?.Details)
                 {
-                    MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
+                    await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
                         $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
                 }
 
                 CurrentSong = activity;
-                continue;
             }
         }
     }

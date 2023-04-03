@@ -19,12 +19,12 @@ internal sealed class RandomLink : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.Username;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.Name;
+        string channel = ctx.Message.Channel.Name;
 
-        string? contains = Options.ParseString("contains", ctx.IrcMessage.Message);
-        string? targetUser = Options.ParseString("user", ctx.IrcMessage.Message)?.ToLower();
-        string? targetChannel = Options.ParseString("channel", ctx.IrcMessage.Message)?.ToLower();
+        string? contains = Options.ParseString("contains", ctx.Message.Content);
+        string? targetUser = Options.ParseString("user", ctx.Message.Content)?.ToLower();
+        string? targetChannel = Options.ParseString("channel", ctx.Message.Content)?.ToLower();
 
         (string Username, string Channel, string Link, DateTime TimePosted) randomlink;
         using (var db = new DbQueries())
@@ -63,19 +63,20 @@ internal sealed class RandomLink : Command
             dynamic? row = query.FirstOrDefault();
             if (row is null)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");
+                await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");
                 return;
             }
 
             randomlink = ((string)row.username, (string)row.channel, (string)row.link_text, (DateTime)row.time_posted);
         }
 
-        MessageHandler.SendMessage(channel, $"@{randomlink.Username} " +
-            $"linked: {randomlink.Link} in #{randomlink.Channel} " +
-            $"({FormatTimePosted(randomlink.TimePosted)})");
+        await MessageHandler.SendMessage(channel,
+            $"@{randomlink.Username} "
+            + $"linked: {randomlink.Link} in #{randomlink.Channel} "
+            + $"({FormatTimePosted(randomlink.TimePosted)})");
     }
 
-    private string FormatTimePosted(DateTime time)
+    private static string FormatTimePosted(DateTime time)
     {
         return Time.SinceString(time) + " ago";
     }

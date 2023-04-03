@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using MiniTwitch.Irc.Models;
 using Tack.Core;
 using Tack.Models;
 using Tack.Nonclass;
@@ -15,11 +16,11 @@ internal sealed class MentionsRelay : ChatModule
     }
 
     private static readonly Regex _mention = new(AppConfigLoader.Config.MentionsRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
-    protected override async ValueTask OnMessage(TwitchMessage ircMessage)
+    protected override async ValueTask OnMessage(Privmsg message)
     {
-        if (!Permission.IsBlacklisted(ircMessage.Username) && _mention.IsMatch(ircMessage.Message))
+        if (!Permission.IsBlacklisted(message.Author.Name) && _mention.IsMatch(message.Content))
         {
-            string msg = $"`[{DateTime.Now:F}] #{ircMessage.Channel} {ircMessage.Username}:` {ircMessage.Message}";
+            string msg = $"`[{DateTime.Now:F}] #{message.Channel} {message.Author.Name}:` {message.Content}";
             await DiscordChat.SendMessage(AppConfigLoader.Config.Mentions, msg);
         }
     }

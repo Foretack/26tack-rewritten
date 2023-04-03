@@ -18,55 +18,52 @@ internal static class CommandHelp
 
     public static async Task Run(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         string prefix = ctx.CommandName;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, you need to specify which command dummy ({prefix}commands for a list)");
+            await MessageHandler.SendMessage(channel, $"@{user}, you need to specify which command dummy ({prefix}commands for a list)");
             return;
         }
 
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
         if (!s || handler is null)
         {
-            MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
+            await MessageHandler.SendMessage(channel, $"Something went wrong internally. Try again later?");
             Log.Error("help command failed to get the handler for a prefix somehow pajaS");
             return;
         }
 
-        await Task.Run(() =>
+        Command? command = null;
+
+        try
         {
-            Command? command = null;
+            command = handler.Commands.First(x => x.Key.Contains(args[0])).Value;
+        }
+        catch (InvalidOperationException)
+        {
+            await MessageHandler.SendMessage(channel, $"@{user}, No command with that name or aliases was found. Use {prefix}commands to see commands FeelsDankMan");
+            return;
+        }
 
-            try
-            {
-                command = handler.Commands.First(x => x.Key.Contains(args[0])).Value;
-            }
-            catch (InvalidOperationException)
-            {
-                MessageHandler.SendMessage(channel, $"@{user}, No command with that name or aliases was found. Use {prefix}commands to see commands FeelsDankMan");
-                return;
-            }
+        CommandInfo cmdinfo = command.Info;
+        var sb = new StringBuilder($"@{user}, ");
 
-            CommandInfo cmdinfo = command.Info;
-            var sb = new StringBuilder($"@{user}, ");
+        _ = sb.Append($"Command: {prefix}{cmdinfo.Name}")
+        .Append(" -- ")
+        .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
+        .Append(" -- ")
+        .Append($"Permission: {cmdinfo.Permission}")
+        .Append(" ➜ ")
+        .Append(cmdinfo.Description)
+        .Append(" ➜ ")
+        .Append($"{cmdinfo.UserCooldown}s user cooldown, ")
+        .Append($"{cmdinfo.ChannelCooldown}s channel cooldown.");
 
-            _ = sb.Append($"Command: {prefix}{cmdinfo.Name}")
-            .Append(" -- ")
-            .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
-            .Append(" -- ")
-            .Append($"Permission: {cmdinfo.Permission}")
-            .Append(" ➜ ")
-            .Append(cmdinfo.Description)
-            .Append(" ➜ ")
-            .Append($"{cmdinfo.UserCooldown}s user cooldown, ")
-            .Append($"{cmdinfo.ChannelCooldown}s channel cooldown.");
-
-            MessageHandler.SendMessage(channel, sb.ToString());
-        });
+        await MessageHandler.SendMessage(channel, sb.ToString());
     }
 }

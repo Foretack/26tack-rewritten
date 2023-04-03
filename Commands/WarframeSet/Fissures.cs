@@ -15,8 +15,8 @@ internal sealed class Fissures : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         string fissuresString;
@@ -24,7 +24,7 @@ internal sealed class Fissures : Command
         Result<Fissure[]> r = await ExternalApiHandler.WarframeStatusApi<Fissure[]>("fissures");
         if (!r.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
+            await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Http error! {r.Exception.Message}");
             return;
         }
 
@@ -38,7 +38,7 @@ internal sealed class Fissures : Command
             return;
         }
 
-        bool includeStorms = Options.ParseBool("storms", ctx.IrcMessage.Message) ?? true;
+        bool includeStorms = Options.ParseBool("storms", ctx.Message.Content) ?? true;
 
         fissuresString = args[0].ToLower() switch
         {

@@ -17,28 +17,28 @@ internal sealed class Market : Command
 
     public override async Task<bool> Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, you need to specify the item... FeelsDankMan");
+            await MessageHandler.SendMessage(channel, $"@{user}, you need to specify the item... FeelsDankMan");
             return false;
         }
 
         string option1 = "activeOnly";
-        bool activeOnly = Options.ParseBool(option1, ctx.IrcMessage.Message) ?? true;
+        bool activeOnly = Options.ParseBool(option1, ctx.Message.Content) ?? true;
         string desiredItem = string.Join('_', args.Where(x => !x.StartsWith(option1))).ToLower();
         Result<WarframeMarketItems> res = await ExternalApiHandler.GetInto<WarframeMarketItems>($"https://api.warframe.market/v1/items/{desiredItem}/orders?platform=pc");
         if (!res.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :( -> {res.Exception.Message}");
+            await MessageHandler.SendMessage(channel, $"@{user}, An error occured whilst trying to get data for your item :( -> {res.Exception.Message}");
             return false;
         }
 
         WarframeMarketItems listings = res.Value;
-        await Task.Run(() =>
+        await Task.Run(async () =>
         {
             Order[] orders = listings.Payload.Orders
             .Where(x => !activeOnly || x.User.Status != "offline")
@@ -101,7 +101,7 @@ internal sealed class Market : Command
                 ? string.Empty
                 : $" (▲{mostPayingBuyer}P · ▼{leastPayingBuyer}P)");
 
-            MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");
+            await MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");
         });
         return true;
     }

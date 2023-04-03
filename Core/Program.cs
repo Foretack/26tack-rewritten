@@ -25,7 +25,7 @@ public static class Program
     #region Main
     public static async Task Main()
     {
-        LogSwitch.MinimumLevel = OperatingSystem.IsWindows() ? Serilog.Events.LogEventLevel.Verbose : Serilog.Events.LogEventLevel.Information;
+        LogSwitch.MinimumLevel = LogEventLevel.Information;
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
@@ -44,25 +44,26 @@ public static class Program
 
         Redis.Init($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
 
-        Settings = await Redis.Cache.FetchObjectAsync<ProgramSettings>("bot:settings", () =>
+        Settings = await Redis.Cache.FetchObjectAsync("bot:settings", () =>
         Task.FromResult(new ProgramSettings() { LogLevel = LogEventLevel.Information, EnabledModules = new() }));
         LogSwitch.MinimumLevel = Settings.LogLevel;
 
-        await MainClient.Initialize();
-        await AnonymousClient.Initialize();
-        MessageHandler.Initialize();
-        CommandHandler.Initialize();
-        ModulesHandler.Initialize();
-        await DiscordClient.Initialize();
+        SingleOf.Set<MainClient>(new());
+        SingleOf.Set<AnonymousClient>(new());
+        AnonymousClient anonClient = new SingleOf<AnonymousClient>();
+        MainClient mainClient = new SingleOf<MainClient>();
+        if (await anonClient.Client.ConnectAsync())
+            Log.Information("[{h}] Anonymous client connected", nameof(Program));
 
-        int seconds = 0;
-        while (!MainClient.Connected)
-        {
-            await Task.Delay(1000);
-            seconds++;
-            if (seconds >= 10)
-                RestartProcess("startup timed out");
-        }
+        if (await mainClient.Client.ConnectAsync())
+            Log.Information("[{h}] Main client connected", nameof(Program));
+
+        await mainClient.SetSelf();
+
+        SingleOf.Set<MessageHandler>(new());
+        SingleOf.Set<CommandHandler>(new());
+        SingleOf.Set<ModulesHandler>(new());
+        await DiscordClient.Initialize();
 
         Log.Information("All clients are connected");
         await ChannelHandler.Connect(false);
@@ -75,7 +76,7 @@ public static class Program
             if (string.IsNullOrEmpty(input))
                 continue;
 
-            if (Enum.TryParse<LogEventLevel>(input, out LogEventLevel level))
+            if (Enum.TryParse(input, out LogEventLevel level))
             {
                 LogSwitch.MinimumLevel = level;
                 Console.WriteLine($"Switching logging level to: {level}");
@@ -85,7 +86,6 @@ public static class Program
     #endregion
 
     #region Process methods
-    // TODO: Don't rely on restarts
     public static void RestartProcess(string triggerSource)
     {
         Log.Fatal("The program is being restarted by {source} ...", triggerSource);

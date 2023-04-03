@@ -29,8 +29,8 @@ internal sealed class Cycle : Command
 
     private async ValueTask SendCycle<T>(CommandContext ctx) where T : IWorldCycle, new()
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string queryString = new T().QueryString;
 
         (bool keyExists, T value) = await Redis.Cache.TryGetObjectAsync<T>($"warframe:cycles:{queryString}");
@@ -39,7 +39,7 @@ internal sealed class Cycle : Command
             Result<T> r = await ExternalApiHandler.WarframeStatusApi<T>(queryString);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
 
@@ -52,28 +52,28 @@ internal sealed class Cycle : Command
         if (Time.HasPassed(cycle.Expiry))
         {
             _ = await Redis.Cache.RemoveAsync($"warframe:cycles:{queryString}");
-            MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
+            await MessageHandler.SendMessage(channel, $"@{user}, Cycle data is outdated. Try again later?");
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {Time.UntilString(cycle.Expiry)}");
+        await MessageHandler.SendMessage(channel, $"@{user}, {cycle.State} | time left: {Time.UntilString(cycle.Expiry)}");
     }
 
     private async ValueTask Other(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want {CycleTypes.AsString()}");
+            await MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan specify which cycle you want {CycleTypes.AsString()}");
             return;
         }
 
         if (!CycleTypes.Contains(args[0].ToLower()))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");
+            await MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan idk what \"{args[0]}\" is");
             return;
         }
 

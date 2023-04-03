@@ -36,11 +36,11 @@ internal sealed class BaroChecker : IModule
         {
             if (Time.HasPassed(baro.Activation))
                 return;
-            Time.Schedule(() =>
+            Time.Schedule(async () =>
             {
-                ArrivedEv(baro);
+                await ArrivedEv(baro);
                 _scheduled = false;
-            }, baro.Activation);
+            }, Time.Until(baro.Activation));
             _scheduled = true;
             Log.Debug("Scheduled baro arrival: {time}", Time.UntilString(baro.Activation));
         }
@@ -49,32 +49,32 @@ internal sealed class BaroChecker : IModule
         {
             if (Time.HasPassed(baro.Expiry))
                 return;
-            Time.Schedule(() =>
+            Time.Schedule(async () =>
             {
-                DepartedEv(baro);
+                await DepartedEv();
                 _scheduled = false;
-            }, baro.Expiry);
+            }, Time.Until(baro.Expiry));
             _scheduled = true;
             Log.Debug("Scheduled baro departure: {time}", Time.UntilString(baro.Expiry));
         }
     }
 
-    private void ArrivedEv(VoidTrader baro)
+    private async Task ArrivedEv(VoidTrader baro)
     {
         _active = true;
         if (!Enabled)
             return;
-        MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
-        MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+        await MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+        await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
     }
 
-    private void DepartedEv(VoidTrader baro)
+    private async Task DepartedEv()
     {
         _active = false;
         if (!Enabled)
             return;
-        MessageHandler.SendMessage("pajlada", "Void trader Baro Ki’Teer has departed! 💠");
-        MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
+        await MessageHandler.SendMessage("pajlada", "Void trader Baro Ki’Teer has departed! 💠");
+        await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
     }
 
     public void Enable()

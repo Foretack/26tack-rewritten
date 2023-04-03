@@ -41,11 +41,11 @@ internal sealed class Tf2NewsPrinter : IModule
             if (line.Length < _arrowLength + 4)
                 continue;
             if (line[..4] == "    " && _arrow.IsMatch(line[4..(_arrowLength + 4)]))
-                MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
+                await MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
             else if (_arrow.IsMatch(line[.._arrowLength]))
-                MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
+                await MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
             else if (line.StartsWith("https://www.teamfortress.com"))
-                MessageHandler.SendMessage(_relayChannel, line);
+                await MessageHandler.SendMessage(_relayChannel, line);
             else
                 continue;
             await Task.Delay(500);

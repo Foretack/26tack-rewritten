@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
+using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
 using Tack.Database;
 using Tack.Handlers;
-using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -29,18 +29,18 @@ internal sealed class LinkCollection : ChatModule
     private static readonly IEnumerable<string> _columns = new[] { "username", "channel", "link_text" };
     private bool _toggle = false;
 
-    protected override ValueTask OnMessage(TwitchMessage ircMessage)
+    protected override ValueTask OnMessage(Privmsg message)
     {
-        if (ircMessage.Message.Length < 10
-        || ircMessage.Username == AppConfigLoader.Config.BotUsername
-        || ircMessage.Username.Contains("bot")
-        || _bots.Contains(ircMessage.Username)
-        || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
+        if (message.Content.Length < 10
+        || message.Author.Name == AppConfigLoader.Config.BotUsername
+        || message.Author.Name.Contains("bot")
+        || _bots.Contains(message.Author.Name)
+        || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == message.Channel.Name))
         {
             return default;
         }
 
-        string? link = _regex.Match(ircMessage.Message).Value;
+        string? link = _regex.Match(message.Content).Value;
         if (link is null
         || link.Length < 10
         || link.Length > 400
@@ -50,7 +50,7 @@ internal sealed class LinkCollection : ChatModule
         }
 
         List<LinkData> list = _commitLists[_toggle ? 0 : 1];
-        list.Add((ircMessage.Username, ircMessage.Channel, link));
+        list.Add((message.Author.Name, message.Channel.Name, link));
         Log.Verbose("[{@header}] Link added: {link} ({total})", Name, link, list.Count);
 
         return default;

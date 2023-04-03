@@ -1,7 +1,7 @@
 ﻿using System.Text;
+using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
 using Tack.Database;
-using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -19,12 +19,12 @@ internal sealed class UserCollection : ChatModule
             Disable();
     }
 
-    protected override ValueTask OnMessage(TwitchMessage ircMessage)
+    protected override ValueTask OnMessage(Privmsg message)
     {
-        if (!_users.IsFull && !_users.Any(x => x.Username == ircMessage.Username))
+        if (!_users.IsFull && !_users.Any(x => x.Username == message.Author.Name))
         {
-            _users.Push(new(ircMessage.Username, ircMessage.UserId));
-            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, ircMessage.Username, _users.Count, 500);
+            _users.Push(new(message.Author.Name, message.Author.Id));
+            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, 500);
         }
 
         return default;
@@ -63,5 +63,5 @@ internal sealed class UserCollection : ChatModule
         _ = await db.UpdateUsers(castedRows);
     }
 
-    private record struct TwitchUser(string Username, string Id);
+    private record struct TwitchUser(string Username, long Id);
 }

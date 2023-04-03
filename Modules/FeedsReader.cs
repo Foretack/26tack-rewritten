@@ -59,7 +59,7 @@ internal sealed class FeedsReader : IModule
 
             foreach (string channel in sub.Value.Channels)
             {
-                MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+                await MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
             }
         }
     }

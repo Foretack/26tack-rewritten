@@ -106,15 +106,6 @@ internal static class Formatting
             .Replace("||", string.Empty);
     }
 
-    public static string ShortenSource(this string str)
-    {
-        return str.StartsWith("channel:")
-            ? "#" + str.Split(':')[1]
-            : str.StartsWith("discord_channel:")
-            ? "###" + str.Split(':')[1]
-            : str.StartsWith("internal:") ? "<I>" + str.Split(':')[1] : "@" + str.Split(':')[1];
-    }
-
     public static string PluralizeWith(this string str, int num)
     {
         return num == 1 ? $"{num} {str}" : $"{num} {str}s";

@@ -13,20 +13,20 @@ internal sealed class Drops : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, You have to specify an item xd!");
+            await MessageHandler.SendMessage(channel, $"@{user}, You have to specify an item xd!");
             return;
         }
         // The api doesn't return the drop locations for relics, but rather their contents for some reason.
         string[] forbidden = { "lith", "meso", "neo", "axi", "requiem" };
         if (forbidden.Contains(args[0].ToLower()))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Relic drop locations are not supported.");
+            await MessageHandler.SendMessage(channel, $"@{user}, Relic drop locations are not supported.");
             return;
         }
 
@@ -34,14 +34,14 @@ internal sealed class Drops : Command
         Result<ItemDropData[]> r = await ExternalApiHandler.WarframeStatusApi<ItemDropData[]>($"drops/search/{item}", string.Empty, string.Empty);
         if (!r.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
+            await MessageHandler.SendMessage(channel, $"@{user}, An error occured with your request :( ({r.Exception.Message})");
             return;
         }
 
         ItemDropData[] itemDrops = r.Value;
         if (itemDrops.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, No drop locations for that item were found. Unlucky!");
+            await MessageHandler.SendMessage(channel, $"@{user}, No drop locations for that item were found. Unlucky!");
             return;
         }
 
@@ -53,7 +53,6 @@ internal sealed class Drops : Command
             topDrops = topDrops[..3];
 
         string[] dropsString = topDrops.Select(x => $"{x.Place} ➜ {x.Chance}%").ToArray();
-        MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].Item}\": " +
-            string.Join(" ◯ ", dropsString));
+        await MessageHandler.SendMessage(channel, $"@{user}, Top drop locations for \"{topDrops[0].Item}\": " + string.Join(" ◯ ", dropsString));
     }
 }

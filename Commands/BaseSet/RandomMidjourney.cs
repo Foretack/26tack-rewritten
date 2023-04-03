@@ -17,8 +17,8 @@ internal sealed class RandomMidjourney : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string channel = ctx.IrcMessage.Channel;
-        string user = ctx.IrcMessage.DisplayName;
+        string channel = ctx.Message.Channel.Name;
+        string user = ctx.Message.Author.DisplayName;
 
         using var db = new DbQueries();
         IEnumerable<dynamic> query = await db.Enqueue(q => q.SelectRaw(
@@ -29,7 +29,7 @@ internal sealed class RandomMidjourney : Command
         dynamic? row = query.FirstOrDefault();
         if (row is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
+            await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
             return;
         }
 
@@ -44,7 +44,7 @@ internal sealed class RandomMidjourney : Command
         catch
         {
             _ = await db.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
-            MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
+            await MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
             return;
         }
 
@@ -58,11 +58,11 @@ internal sealed class RandomMidjourney : Command
         string responseString = await response.Content.ReadAsStringAsync();
         if (!responseString.Contains(AppConfigLoader.Config.ImageHostLink[..5]))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
+            await MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
             return;
         }
 
         string? ps = row.prompt as string;
-        MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^1] : ps)}\" {responseString}");
+        await MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^1] : ps)}\" {responseString}");
     }
 }
