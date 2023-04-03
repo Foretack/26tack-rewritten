@@ -13,7 +13,7 @@ namespace Tack.Handlers;
 public sealed class MessageHandler
 {
     #region Fields
-    private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
+    private static DiscordTrigger[] _discordEvents = new SingleOf<DbQueries>().Value.GetDiscordTriggers().GetAwaiter().GetResult();
     private static readonly IrcClient _anonClient = new SingleOf<AnonymousClient>().Value.Client;
     private static readonly IrcClient _mainClient = new SingleOf<MainClient>().Value.Client;
     private static readonly HttpClient _requests = TwitchApiHandler.Instance.CreateClient;

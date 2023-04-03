@@ -56,14 +56,14 @@ internal sealed class EditUser : Command
 
     private async Task<bool> BlacklistUser(string username, long id)
     {
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         bool s = await db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
         return s;
     }
     private async Task<bool> WhitelistUser(string username)
     {
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         bool s = await db.WhitelistUser(username);
         Permission.WhitelistUser(username);
         return s;

@@ -18,7 +18,7 @@ internal sealed class Update : Command
         string user = ctx.Message.Author.DisplayName;
         string channel = ctx.Message.Channel.Name;
 
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         _ = await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
 
         string? pullResult = await Program.GitPull();

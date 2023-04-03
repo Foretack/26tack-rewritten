@@ -3,6 +3,7 @@ using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
 using Tack.Database;
 using Tack.Handlers;
+using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -60,7 +61,7 @@ internal sealed class LinkCollection : ChatModule
     {
         _toggle = !_toggle;
         Log.Debug("[{@header}] Committing link list...", Name);
-        using var db = new DbQueries();
+        using DbQueries db = new SingleOf<DbQueries>();
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
         if (!list.Any() || list.Count == 0)
             return;

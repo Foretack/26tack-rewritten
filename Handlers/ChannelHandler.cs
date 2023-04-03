@@ -18,7 +18,7 @@ public static class ChannelHandler
     #region Properties
     public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
-    public static List<ExtendedChannel> FetchedChannels { get; private set; } = DbQueries.NewInstance().GetChannels().Result.ToList();
+    public static List<ExtendedChannel> FetchedChannels { get; private set; } = new SingleOf<DbQueries>().Value.GetChannels().Result.ToList();
 
     private static readonly AnonymousClient _anon = new SingleOf<AnonymousClient>();
     private static readonly MainClient _main = new SingleOf<MainClient>();
@@ -98,7 +98,7 @@ public static class ChannelHandler
                 Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel);
         }
 
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         bool s = await db.AddChannel(extendedChannel.Value);
         return s;
     }

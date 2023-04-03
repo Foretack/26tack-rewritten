@@ -27,7 +27,7 @@ internal sealed class Suggest : Command
             return;
         }
 
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         var partialUser = new PartialUser(user, rawname, id);
         bool success = await db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
 

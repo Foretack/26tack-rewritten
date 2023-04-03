@@ -2,6 +2,7 @@
 using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
 using Tack.Database;
+using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
 
@@ -35,7 +36,7 @@ internal sealed class UserCollection : ChatModule
         if (!_users.IsFull)
             return;
         Log.Debug("[{@header}] Committing user list...", Name);
-        var db = new DbQueries();
+        DbQueries db = new SingleOf<DbQueries>();
         StringBuilder sb = new();
 
         foreach (TwitchUser user in _users)

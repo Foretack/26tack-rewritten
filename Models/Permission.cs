@@ -16,8 +16,8 @@ public sealed class Permission
     private readonly bool _isVIP;
     private readonly bool _isSubscriber;
 
-    private static readonly List<string> _blacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
-    private static readonly List<string> _whitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
+    private static readonly List<string> _blacklistedUsers = new SingleOf<DbQueries>().Value.GetBlacklistedUsers().Result.ToList();
+    private static readonly List<string> _whitelistedUsers = new SingleOf<DbQueries>().Value.GetWhitelistedUsers().Result.ToList();
 
     public Permission(Privmsg ircMessage)
     {

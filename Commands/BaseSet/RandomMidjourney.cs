@@ -20,7 +20,7 @@ internal sealed class RandomMidjourney : Command
         string channel = ctx.Message.Channel.Name;
         string user = ctx.Message.Author.DisplayName;
 
-        using var db = new DbQueries();
+        using DbQueries db = new SingleOf<DbQueries>();
         IEnumerable<dynamic> query = await db.Enqueue(q => q.SelectRaw(
             $"* FROM midjourney_images " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM midjourney_images)) " +

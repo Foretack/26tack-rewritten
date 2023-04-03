@@ -33,7 +33,8 @@ public static class Program
             .WriteTo.Discord(AppConfigLoader.Config.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .CreateLogger();
 
-        var db = new DbQueries();
+        SingleOf.Set<DbQueries>(new());
+        DbQueries db = new SingleOf<DbQueries>();
         while (db.ConnectionState != System.Data.ConnectionState.Open)
         {
             Log.Warning("Bad database state: " + db.ConnectionState.ToString());
@@ -90,7 +91,6 @@ public static class Program
     {
         Log.Fatal("The program is being restarted by {source} ...", triggerSource);
 
-        _ = new DbQueries();
         _ = Process.Start($"./{_assemblyName}", Environment.GetCommandLineArgs());
         Environment.Exit(0);
     }

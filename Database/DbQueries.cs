@@ -6,11 +6,6 @@ using Tack.Utils;
 namespace Tack.Database;
 internal sealed class DbQueries : DbConnection
 {
-    public static DbQueries NewInstance()
-    {
-        return new DbQueries();
-    }
-
     public async Task<bool> LogException(Exception exception)
     {
         int inserted = await Enqueue("errors", q => q.InsertAsync(new

@@ -27,7 +27,7 @@ internal sealed class RandomLink : Command
         string? targetChannel = Options.ParseString("channel", ctx.Message.Content)?.ToLower();
 
         (string Username, string Channel, string Link, DateTime TimePosted) randomlink;
-        using (var db = new DbQueries())
+        using (DbQueries db = new SingleOf<DbQueries>())
         {
             var queryString = new StringBuilder();
 
