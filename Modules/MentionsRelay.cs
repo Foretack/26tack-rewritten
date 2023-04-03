@@ -20,7 +20,7 @@ internal sealed class MentionsRelay : ChatModule
     {
         if (!Permission.IsBlacklisted(message.Author.Name) && _mention.IsMatch(message.Content))
         {
-            string msg = $"`[{DateTime.Now:F}] #{message.Channel} {message.Author.Name}:` {message.Content}";
+            string msg = $"`[{DateTime.Now:F}] #{message.Channel.Name} {message.Author.Name}:` {message.Content}";
             await DiscordChat.SendMessage(AppConfigLoader.Config.Mentions, msg);
         }
     }
