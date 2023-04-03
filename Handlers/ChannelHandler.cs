@@ -112,7 +112,7 @@ public static class ChannelHandler
 
         try
         {
-            var db = new DbQueries();
+            DbQueries db = new SingleOf<DbQueries>();
             if (fetched.Priority >= 50)
             {
 
@@ -138,7 +138,7 @@ public static class ChannelHandler
     public static async Task ReloadFetchedChannels()
     {
         int pCount = FetchedChannels.Count;
-        using (var db = new DbQueries())
+        using (DbQueries db = new SingleOf<DbQueries>())
         {
             FetchedChannels = (await db.GetChannels()).ToList();
         }
