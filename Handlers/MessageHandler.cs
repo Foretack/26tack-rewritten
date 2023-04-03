@@ -39,7 +39,7 @@ public sealed class MessageHandler
 
     public static async Task ReloadDiscordTriggers()
     {
-        using var db = new DbQueries();
+        using DbQueries db = new SingleOf<DbQueries>();
         _discordEvents = await db.GetDiscordTriggers();
     }
     #endregion
