@@ -45,7 +45,7 @@ public static class ChannelHandler
         await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
         foreach (ExtendedChannel channel in FetchedChannels)
         {
-            await Task.Delay(100);
+            await Task.Delay(600);
             if (channel.Priority >= 50)
             {
                 if (!await _main.Client.JoinChannel(channel.Username))
