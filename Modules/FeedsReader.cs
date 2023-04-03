@@ -44,22 +44,23 @@ internal sealed class FeedsReader : IModule
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
 
-            FeedItem? item = feedReadResult.Items.FirstOrDefault();
-            if (item is null)
-                continue;
-            if (latest[sub.Key].Contains(item.Link))
-                continue;
-
-            Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
-
-            if (latest[sub.Key].Count >= 50)
-                latest[sub.Key].Clear();
-            latest[sub.Key].Add($"{item.Title} ({item.Link})");
-            await Redis.Cache.SetObjectAsync("rss:latest", latest);
-
-            foreach (string channel in sub.Value.Channels)
+            var items = feedReadResult.Items;
+            foreach (var item in items)
             {
-                await MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+                if (item is null)
+                    continue;
+                if (latest[sub.Key].Contains($"{item.Title} ({item.Link})"))
+                    continue;
+
+                Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
+
+                latest[sub.Key].Add($"{item.Title} ({item.Link})");
+                await Redis.Cache.SetObjectAsync("rss:latest", latest);
+
+                foreach (string channel in sub.Value.Channels)
+                {
+                    await MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+                }
             }
         }
     }
