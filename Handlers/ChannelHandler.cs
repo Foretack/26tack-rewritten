@@ -45,19 +45,16 @@ public static class ChannelHandler
         await Redis.Cache.SetObjectAsync("twitch:channels", FetchedChannels);
         foreach (ExtendedChannel channel in FetchedChannels)
         {
+            await Task.Delay(100);
             if (channel.Priority >= 50)
             {
-                if (await _main.Client.JoinChannel(channel.Username))
-                    Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel.Username);
-                else
+                if (!await _main.Client.JoinChannel(channel.Username))
                     Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel.Username);
 
                 continue;
             }
 
-            if (await _anon.Client.JoinChannel(channel.Username))
-                Log.Information("[{h}] Joined {c}", nameof(ChannelHandler), channel.Username);
-            else
+            if (!await _anon.Client.JoinChannel(channel.Username))
                 Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel.Username);
         }
 
