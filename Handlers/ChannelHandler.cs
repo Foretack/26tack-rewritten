@@ -157,20 +157,8 @@ public static class ChannelHandler
     #endregion
 
     #region Client events
-
-    private static void MainOnFailedJoin(object? sender, OnFailureToReceiveJoinConfirmationArgs e)
-    {
-        Log.Warning("[Main] Failed to join {channel}: {details}",
-            e.Exception.Channel,
-            e.Exception.Details);
-        _joinFailureChannels.Add(FetchedChannels.First(x => x.Username == e.Exception.Channel));
-        _ = MainJoinedChannelNames.Remove(e.Exception.Channel);
-    }
-
     private static ValueTask MainOnLeftChannel(IPartedChannel channel)
     {
-        Log.Information("[Main] Left channel {channel}",
-            channel.Name);
         _ = MainJoinedChannels.Remove(FetchedChannels.First(x => x.Username == channel.Name));
         _ = MainJoinedChannelNames.Remove(channel.Name);
         return ValueTask.CompletedTask;
@@ -178,9 +166,6 @@ public static class ChannelHandler
 
     private static ValueTask MainOnJoinedChannel(IrcChannel channel)
     {
-        Log.Information("[Main] Joined channel {channel}",
-            channel.Name);
-
         MainJoinedChannels.Add(FetchedChannels.First(x => x.Username == channel.Name));
         MainJoinedChannelNames.Add(channel.Name);
         return ValueTask.CompletedTask;
