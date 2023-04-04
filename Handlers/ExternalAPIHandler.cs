@@ -87,7 +87,7 @@ internal static class ExternalApiHandler
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to fetch relic data");
-            DbQueries db = new SingleOf<DbQueries>();
+            DbQueries db = SingleOf<DbQueries>.Obj;
             _ = await db.LogException(ex);
             return null;
         }
