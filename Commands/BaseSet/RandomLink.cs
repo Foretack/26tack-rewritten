@@ -66,7 +66,7 @@ internal sealed class RandomLink : Command
         }
 
         randomlink = ((string)row.username, (string)row.channel, (string)row.link_text, (DateTime)row.time_posted);
-        
+
 
         await MessageHandler.SendMessage(channel,
             $"@{randomlink.Username} "

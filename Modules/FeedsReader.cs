@@ -1,4 +1,6 @@
-﻿using CodeHollow.FeedReader;
+﻿using System.Xml;
+using CodeHollow.FeedReader;
+using CodeHollow.FeedReader.Parser;
 using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
@@ -36,9 +38,16 @@ internal sealed class FeedsReader : IModule
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
             }
 
-            Feed? feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
-            if (feedReadResult is null)
+            Feed? feedReadResult;
+            try
             {
+                feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
+                if (feedReadResult is null)
+                    continue;
+            }
+            catch (Exception ex) when (ex is XmlException or FeedTypeNotSupportedException)
+            {
+                Log.Debug(ex, "[{h}] Reading feed [{f}] threw a silent exception: ", nameof(FeedsReader), sub.Key);
                 continue;
             }
 
