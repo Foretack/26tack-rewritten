@@ -41,6 +41,12 @@ internal sealed class LinkCollection : ChatModule
             return default;
         }
 
+        if (message.Author.Name.Length > 25)
+        {
+            Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(LinkCollection), message.Author.Name);
+            return default;
+        }
+
         string? link = _regex.Match(message.Content).Value;
         if (link is { Length: < 10 or > 400 } || !link.StartsWith('h'))
             return default;

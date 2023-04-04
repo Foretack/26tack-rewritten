@@ -24,6 +24,12 @@ internal sealed class UserCollection : ChatModule
     {
         if (!_users.IsFull && !_users.Any(x => x.Username == message.Author.Name))
         {
+            if (message.Author.Name.Length > 25)
+            {
+                Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(UserCollection), message.Author.Name);
+                return default;
+            }
+
             _users.Push(new(message.Author.Name, message.Author.Id));
             Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, 500);
         }
@@ -40,9 +46,7 @@ internal sealed class UserCollection : ChatModule
         StringBuilder sb = new();
 
         foreach (TwitchUser user in _users)
-        {
             _ = sb.Append($"('{user.Username}', {user.Id}), ");
-        }
 
         sb[^2] = ' ';
         _users.Clear();
