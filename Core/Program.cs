@@ -34,7 +34,7 @@ public static class Program
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
-        DbQueries db = new SingleOf<DbQueries>();
+        DbQueries db = SingleOf<DbQueries>.Obj;
         while (db.ConnectionState != System.Data.ConnectionState.Open)
         {
             Log.Warning("Bad database state: " + db.ConnectionState.ToString());
@@ -51,8 +51,8 @@ public static class Program
 
         SingleOf.Set<MainClient>(new());
         SingleOf.Set<AnonymousClient>(new());
-        AnonymousClient anonClient = new SingleOf<AnonymousClient>();
-        MainClient mainClient = new SingleOf<MainClient>();
+        AnonymousClient anonClient = SingleOf<AnonymousClient>.Obj;
+        MainClient mainClient = SingleOf<MainClient>.Obj;
         if (await anonClient.Client.ConnectAsync())
             Log.Information("[{h}] Anonymous client connected", nameof(Program));
 

@@ -20,7 +20,7 @@ internal sealed class Debug : Command
         string user = ctx.Message.Author.DisplayName;
         string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
-        DbQueries db = new SingleOf<DbQueries>();
+        DbQueries db = SingleOf<DbQueries>.Obj;
 
         if (args.Length == 0)
             return;

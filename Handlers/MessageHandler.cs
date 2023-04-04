@@ -13,9 +13,9 @@ namespace Tack.Handlers;
 public sealed class MessageHandler
 {
     #region Fields
-    private static DiscordTrigger[] _discordEvents = new SingleOf<DbQueries>().Value.GetDiscordTriggers().GetAwaiter().GetResult();
-    private static readonly IrcClient _anonClient = new SingleOf<AnonymousClient>().Value.Client;
-    private static readonly IrcClient _mainClient = new SingleOf<MainClient>().Value.Client;
+    private static DiscordTrigger[] _discordEvents = SingleOf<DbQueries>.Obj.GetDiscordTriggers().GetAwaiter().GetResult();
+    private static readonly IrcClient _anonClient = SingleOf<AnonymousClient>.Obj.Client;
+    private static readonly IrcClient _mainClient = SingleOf<MainClient>.Obj.Client;
     private static readonly HttpClient _requests = TwitchApiHandler.Instance.CreateClient;
     private static readonly Dictionary<string, string> _lastSentMessage = new();
     private static UserColors _currentColor = UserColors.Blue;
@@ -39,8 +39,7 @@ public sealed class MessageHandler
 
     public static async Task ReloadDiscordTriggers()
     {
-        using DbQueries db = new SingleOf<DbQueries>();
-        _discordEvents = await db.GetDiscordTriggers();
+        _discordEvents = await SingleOf<DbQueries>.Obj.GetDiscordTriggers();
     }
     #endregion
 
@@ -67,7 +66,7 @@ public sealed class MessageHandler
             // TODO: enable this once it's fixed
             //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             HttpResponseMessage response = await _requests.PutAsync(
-                $"https://api.twitch.tv/helix/chat/color?user_id={new SingleOf<MainClient>().Value.Self.Id}&color={color.Value}", null);
+                $"https://api.twitch.tv/helix/chat/color?user_id={SingleOf<MainClient>.Obj.Self.Id}&color={color.Value}", null);
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning($"Failed to change user color: {(int)response.StatusCode} {response.StatusCode}");

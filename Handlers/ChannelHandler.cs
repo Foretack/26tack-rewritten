@@ -18,10 +18,10 @@ public static class ChannelHandler
     #region Properties
     public static List<ExtendedChannel> MainJoinedChannels { get; } = new List<ExtendedChannel>();
     public static List<string> MainJoinedChannelNames { get; } = new List<string>();
-    public static List<ExtendedChannel> FetchedChannels { get; private set; } = new SingleOf<DbQueries>().Value.GetChannels().Result.ToList();
+    public static List<ExtendedChannel> FetchedChannels { get; private set; } = SingleOf<DbQueries>.Obj.GetChannels().Result.ToList();
 
-    private static readonly AnonymousClient _anon = new SingleOf<AnonymousClient>();
-    private static readonly MainClient _main = new SingleOf<MainClient>();
+    private static readonly AnonymousClient _anon = SingleOf<AnonymousClient>.Obj;
+    private static readonly MainClient _main = SingleOf<MainClient>.Obj;
     private static readonly List<ExtendedChannel> _joinFailureChannels = new();
     private static bool _isInProgress = false;
     #endregion
@@ -98,7 +98,7 @@ public static class ChannelHandler
                 Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel);
         }
 
-        DbQueries db = new SingleOf<DbQueries>();
+        DbQueries db = SingleOf<DbQueries>.Obj;
         bool s = await db.AddChannel(extendedChannel.Value);
         return s;
     }
@@ -112,7 +112,7 @@ public static class ChannelHandler
 
         try
         {
-            DbQueries db = new SingleOf<DbQueries>();
+            DbQueries db = SingleOf<DbQueries>.Obj;
             if (fetched.Priority >= 50)
             {
 
@@ -138,17 +138,12 @@ public static class ChannelHandler
     public static async Task ReloadFetchedChannels()
     {
         int pCount = FetchedChannels.Count;
-        using (DbQueries db = new SingleOf<DbQueries>())
-        {
-            FetchedChannels = (await db.GetChannels()).ToList();
-        }
+        FetchedChannels = (await SingleOf<DbQueries>.Obj.GetChannels()).ToList();
 
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
-        {
             await MessageHandler.SendColoredMessage(AppConfigLoader.Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", UserColors.YellowGreen);
-        }
     }
 
     private static void RegisterEvents(bool isReconnect)

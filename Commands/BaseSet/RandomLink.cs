@@ -27,48 +27,46 @@ internal sealed class RandomLink : Command
         string? targetChannel = Options.ParseString("channel", ctx.Message.Content)?.ToLower();
 
         (string Username, string Channel, string Link, DateTime TimePosted) randomlink;
-        using (DbQueries db = new SingleOf<DbQueries>())
+        var queryString = new StringBuilder();
+
+        string?[] options = new[]
         {
-            var queryString = new StringBuilder();
-
-            string?[] options = new[]
-            {
-                contains is null ? null : $"link_text LIKE '%{contains}%'",
-                targetUser is null ? null : $"username LIKE '%{targetUser}%'",
-                targetChannel is null ? null : $"channel LIKE '%{targetChannel}%'"
-            };
-            var queryConditions = new StringBuilder();
-            string?[] selectedOptions = options.Where(x => x is not null).ToArray();
-            if (selectedOptions.Length > 0)
-            {
-                _ = queryConditions
-                    .Append("WHERE ")
-                    .Append(
-                    string.Join(" AND ", selectedOptions));
-            }
-
-            _ = queryString.Append(queryConditions)
-                .Append(" OFFSET floor")
-                .Append('(')
-                .Append("random()")
-                .Append('*')
-                .Append($"(SELECT COUNT(*) FROM collected_links {queryConditions})")
-                .Append(')')
-                .Append("LIMIT 1");
-
-            IEnumerable<dynamic> query = await db.Enqueue(q => q
-            .SelectRaw($"* FROM collected_links {queryString}")
-            .GetAsync());
-
-            dynamic? row = query.FirstOrDefault();
-            if (row is null)
-            {
-                await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");
-                return;
-            }
-
-            randomlink = ((string)row.username, (string)row.channel, (string)row.link_text, (DateTime)row.time_posted);
+            contains is null ? null : $"link_text LIKE '%{contains}%'",
+            targetUser is null ? null : $"username LIKE '%{targetUser}%'",
+            targetChannel is null ? null : $"channel LIKE '%{targetChannel}%'"
+        };
+        var queryConditions = new StringBuilder();
+        string?[] selectedOptions = options.Where(x => x is not null).ToArray();
+        if (selectedOptions.Length > 0)
+        {
+            _ = queryConditions
+                .Append("WHERE ")
+                .Append(
+                string.Join(" AND ", selectedOptions));
         }
+
+        _ = queryString.Append(queryConditions)
+            .Append(" OFFSET floor")
+            .Append('(')
+            .Append("random()")
+            .Append('*')
+            .Append($"(SELECT COUNT(*) FROM collected_links {queryConditions})")
+            .Append(')')
+            .Append("LIMIT 1");
+
+        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.Enqueue(q => q
+        .SelectRaw($"* FROM collected_links {queryString}")
+        .GetAsync());
+
+        dynamic? row = query.FirstOrDefault();
+        if (row is null)
+        {
+            await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random link PoroSad");
+            return;
+        }
+
+        randomlink = ((string)row.username, (string)row.channel, (string)row.link_text, (DateTime)row.time_posted);
+        
 
         await MessageHandler.SendMessage(channel,
             $"@{randomlink.Username} "

@@ -42,13 +42,8 @@ internal sealed class LinkCollection : ChatModule
         }
 
         string? link = _regex.Match(message.Content).Value;
-        if (link is null
-        || link.Length < 10
-        || link.Length > 400
-        || !link.StartsWith('h'))
-        {
+        if (link is { Length: < 10 or > 400 } || !link.StartsWith('h'))
             return default;
-        }
 
         List<LinkData> list = _commitLists[_toggle ? 0 : 1];
         list.Add((message.Author.Name, message.Channel.Name, link));
@@ -61,14 +56,13 @@ internal sealed class LinkCollection : ChatModule
     {
         _toggle = !_toggle;
         Log.Debug("[{@header}] Committing link list...", Name);
-        using DbQueries db = new SingleOf<DbQueries>();
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
-        if (!list.Any() || list.Count == 0)
+        if (!list.Any())
             return;
         IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
         try
         {
-            _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
+            _ = await SingleOf<DbQueries>.Obj.Enqueue("collected_links", q => q.InsertAsync(_columns, data));
             Log.Debug("{l} links added", list.Count);
             list.Clear();
         }

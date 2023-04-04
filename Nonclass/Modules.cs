@@ -31,8 +31,8 @@ public abstract class ChatModule : IModule
     public void Enable()
     {
         Enabled = true;
-        new SingleOf<MainClient>().Value.Client.OnMessage += OnMessage;
-        new SingleOf<AnonymousClient>().Value.Client.OnMessage += OnMessage;
+        SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
         OnEnabled.Invoke(this);
         UpdateSettings();
         Log.Debug("Enabled module: {name}", Name);
@@ -41,8 +41,8 @@ public abstract class ChatModule : IModule
     public void Disable()
     {
         Enabled = false;
-        new SingleOf<MainClient>().Value.Client.OnMessage -= OnMessage;
-        new SingleOf<AnonymousClient>().Value.Client.OnMessage -= OnMessage;
+        SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
         OnDisabled.Invoke(this);
         UpdateSettings();
         Log.Debug("Disabled module: {name}", Name);

@@ -165,7 +165,7 @@ internal sealed class DbQueries : DbConnection
                 updated += await Enqueue($"UPDATE twitch_users SET banned = true WHERE id = {user.Id}");
             }
 
-            int u = await Enqueue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}", 2500);
+            int u = await Enqueue($"UPDATE twitch_users SET account = ROW('{user.DisplayName}', '{user.Login}', {user.Id}, '{user.Logo}', DATE '{user.CreatedAt ?? DateTime.MinValue}', CURRENT_DATE), inserted = true WHERE id = {user.Id}");
             updated += u;
             Log.Verbose("User updated: {u}#{i}", user.Login, user.Id);
             await Task.Delay(250);
@@ -174,6 +174,4 @@ internal sealed class DbQueries : DbConnection
         Log.Debug("Finished updating users; {c} total updates", updated);
         return updated;
     }
-
-    ~DbQueries() => Dispose();
 }

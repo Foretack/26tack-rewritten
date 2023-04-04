@@ -36,7 +36,7 @@ internal sealed class UserCollection : ChatModule
         if (!_users.IsFull)
             return;
         Log.Debug("[{@header}] Committing user list...", Name);
-        DbQueries db = new SingleOf<DbQueries>();
+        DbQueries db = SingleOf<DbQueries>.Obj;
         StringBuilder sb = new();
 
         foreach (TwitchUser user in _users)
@@ -49,7 +49,7 @@ internal sealed class UserCollection : ChatModule
 
         int inserted = await db.Enqueue($"INSERT INTO twitch_users (username, id) " +
             $"VALUES {sb} " +
-            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;", 10000);
+            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
         Log.Debug("{c} users inserted", inserted);
 
         await Task.Delay(TimeSpan.FromSeconds(5));

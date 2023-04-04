@@ -27,12 +27,8 @@ internal static class SingleOf
     }
 }
 
-internal sealed class SingleOf<T>
+internal static class SingleOf<T>
     where T : notnull
 {
-    public T Value { get; private set; } = SingleOf.HasType<T>() ? SingleOf.Get<T>() : throw new NullReferenceException($"No reference of {typeof(T)} exists");
-
-    public SingleOf() { }
-
-    public static implicit operator T(SingleOf<T> single) => single.Value;
+    public static T Obj { get; private set; } = SingleOf.HasType<T>() ? SingleOf.Get<T>() : throw new NullReferenceException($"No reference of {typeof(T)} exists");
 }

@@ -20,8 +20,7 @@ internal sealed class RandomMidjourney : Command
         string channel = ctx.Message.Channel.Name;
         string user = ctx.Message.Author.DisplayName;
 
-        using DbQueries db = new SingleOf<DbQueries>();
-        IEnumerable<dynamic> query = await db.Enqueue(q => q.SelectRaw(
+        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.Enqueue(q => q.SelectRaw(
             $"* FROM midjourney_images " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM midjourney_images)) " +
             $"LIMIT 1").GetAsync());
@@ -43,7 +42,7 @@ internal sealed class RandomMidjourney : Command
         }
         catch
         {
-            _ = await db.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
+            _ = await SingleOf<DbQueries>.Obj.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
             await MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
             return;
         }
