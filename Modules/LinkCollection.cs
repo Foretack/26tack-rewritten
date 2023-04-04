@@ -48,7 +48,7 @@ internal sealed class LinkCollection : ChatModule
         }
 
         string? link = _regex.Match(message.Content).Value;
-        if (link is { Length: < 10 or > 400 } || !link.StartsWith('h'))
+        if (link is { Length: < 10 or > 400 } || link[0] != 'h')
             return default;
 
         List<LinkData> list = _commitLists[_toggle ? 0 : 1];
