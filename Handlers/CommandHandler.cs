@@ -33,10 +33,7 @@ internal sealed class CommandHandler
     {
         string cmdName = ctx.CommandName;
         string prefix = Prefixes.First(x => ctx.Message.Content.StartsWith(x));
-
-        if (!Handlers.TryGetValue(prefix, out ChatCommandHandler? handler))
-            return ValueTask.CompletedTask;
-        if (handler is null)
+        if (!Handlers.TryGetValue(prefix, out ChatCommandHandler? handler) || handler is null)
             return ValueTask.CompletedTask;
 
         if (CommandList.Info.Aliases.Contains(cmdName))

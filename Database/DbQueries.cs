@@ -49,7 +49,7 @@ internal sealed class DbQueries : DbConnection
                 x.is_logged
                 )
             ).ToArray();
-        if (channels is null || channels.Length == 0)
+        if (channels is not { Length: > 0 })
         {
             Log.Fatal("Failed to fetch channel list");
             throw new MissingFieldException("Channel list could not be loaded");

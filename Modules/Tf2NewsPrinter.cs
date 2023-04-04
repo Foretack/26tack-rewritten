@@ -22,11 +22,9 @@ internal sealed class Tf2NewsPrinter : IModule
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
     {
         Models.DiscordMessage? message = e.DiscordMessage;
-        if (message is null
-        || message.ChannelId == 0
-        || message.Author.Username is null
+        if (message is not { ChannelId: > 0 }
         || message.ChannelId != 864407160422662184
-        || message.Author.Username != "TF2 Community #updates"
+        || message.Author.Username is not "TF2 Community #updates"
         || (!message.Content.Contains("Team Fortress 2 Update Released")
         && !_arrow.IsMatch(message.Content)))
         {
