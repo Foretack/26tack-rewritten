@@ -5,7 +5,7 @@ using Tack.Models;
 using Tack.Nonclass;
 
 namespace Tack.Handlers;
-internal sealed class CommandHandler
+internal sealed class CommandHandler : Singleton
 {
     #region Properties
     public static Dictionary<string, ChatCommandHandler> Handlers { get; } = new Dictionary<string, ChatCommandHandler>();

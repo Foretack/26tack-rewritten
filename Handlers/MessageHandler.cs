@@ -10,7 +10,7 @@ using Tack.Utils;
 using TwitchLib.Api.Helix.Models.Chat;
 
 namespace Tack.Handlers;
-public sealed class MessageHandler
+public sealed class MessageHandler : Singleton
 {
     #region Fields
     private static DiscordTrigger[] _discordEvents = SingleOf<DbQueries>.Obj.GetDiscordTriggers().GetAwaiter().GetResult();

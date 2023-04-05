@@ -13,7 +13,7 @@ public interface IModule
     public void UpdateSettings();
 }
 
-public abstract class ChatModule : IModule
+public abstract class ChatModule : Singleton, IModule
 {
     /// <summary>
     /// The name of the class that is derived from ChatModule

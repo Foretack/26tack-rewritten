@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using MiniTwitch.Irc;
 using MiniTwitch.Irc.Enums;
+using Tack.Models;
 
 namespace Tack.Core;
-internal sealed class AnonymousClient
+internal sealed class AnonymousClient : Singleton
 {
     public IrcClient Client { get; }
 

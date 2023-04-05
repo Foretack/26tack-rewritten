@@ -1,9 +1,10 @@
 ﻿using Tack.Core;
+using Tack.Models;
 using Tack.Modules;
 using Tack.Nonclass;
 
 namespace Tack.Handlers;
-internal sealed class ModulesHandler
+internal sealed class ModulesHandler : Singleton
 {
     private static readonly Dictionary<string, IModule> _modules = new();
 

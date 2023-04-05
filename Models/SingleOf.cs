@@ -13,7 +13,7 @@ internal static class SingleOf
     }
 
     public static void Set<T>(T value)
-        where T : notnull
+        where T : notnull, Singleton
     {
         if (_singles.ContainsKey(typeof(T)))
             return;
@@ -28,7 +28,7 @@ internal static class SingleOf
 }
 
 internal static class SingleOf<T>
-    where T : notnull
+    where T : notnull, Singleton
 {
     public static T Obj { get; private set; } = SingleOf.HasType<T>() ? SingleOf.Get<T>() : throw new NullReferenceException($"No reference of {typeof(T)} exists");
 }

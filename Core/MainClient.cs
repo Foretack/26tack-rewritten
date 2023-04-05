@@ -5,7 +5,7 @@ using Tack.Models;
 
 namespace Tack.Core;
 
-internal sealed class MainClient
+internal sealed class MainClient : Singleton
 {
     public IrcClient Client { get; }
     public User Self { get; private set; } = default!;

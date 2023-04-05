@@ -4,10 +4,11 @@ using System.Runtime.CompilerServices;
 using Npgsql;
 using SqlKata.Compilers;
 using SqlKata.Execution;
+using Tack.Models;
 using Tack.Utils;
 
 namespace Tack.Database;
-internal abstract class DbConnection
+internal abstract class DbConnection : Singleton
 {
     private static readonly string ConnectionString =
         $"Host={AppConfigLoader.Config.DbHost};" +
