@@ -32,7 +32,7 @@ internal abstract class DbConnection : Singleton
             conn.Open();
             QueryFactory = new QueryFactory(conn, new PostgresCompiler())
             {
-                Logger = x => Log.Verbose("Query: {q}", x.RawSql)
+                Logger = x => Log.Verbose("Query: {q}", x.Sql)
             };
             Log.Information("Initialized database");
             Time.DoEvery(TimeSpan.FromSeconds(15), Commit);
