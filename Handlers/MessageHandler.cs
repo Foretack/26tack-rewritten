@@ -44,7 +44,7 @@ public sealed class MessageHandler
     #endregion
 
     #region Sending
-    public static async ValueTask SendMessage(string channel, string message)
+    public static async ValueTask SendMessage(string channel, string message, bool colored = false)
     {
         message = message.Length >= 500 ? message[..495] + "..." : message;
         if (!_lastSentMessage.ContainsKey(channel))
@@ -56,7 +56,7 @@ public sealed class MessageHandler
             message += " 󠀀";
         }
 
-        await _mainClient.SendMessage(channel, message);
+        await _mainClient.SendMessage(channel, message, colored);
         _lastSentMessage[channel] = message;
     }
     public static async Task SendColoredMessage(string channel, string message, UserColors color)
@@ -75,7 +75,7 @@ public sealed class MessageHandler
             _currentColor = color;
         }
 
-        await SendMessage(channel, "/me " + message);
+        await SendMessage(channel, message, true);
     }
     #endregion
 

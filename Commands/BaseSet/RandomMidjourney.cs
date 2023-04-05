@@ -44,7 +44,7 @@ internal sealed class RandomMidjourney : Command
         }
         catch
         {
-            _ = await SingleOf<DbQueries>.Obj.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
+            SingleOf<DbQueries>.Obj.Enqueue(async q => await q.Query("midjourney_images").Where("link", "=", $"{row.link}").DeleteAsync());
             await MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
             return;
         }

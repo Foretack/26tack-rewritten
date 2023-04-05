@@ -46,17 +46,8 @@ internal abstract class DbConnection
     {
         Log.Verbose("[{h}] Enqueued query at: {p}:{l} [{c}]", nameof(DbConnection), path, lineNumber, s_queryQueue.Count);
         s_queryQueue.Enqueue(task);
-    }
-
-    public async Task<TResult> Enqueue<TResult>(string table, Func<SqlKata.Query, TResult> query,
-    [CallerFilePath] string path = default!,
-    [CallerLineNumber] int lineNumber = default)
-    {
-        await s_operationLock.WaitAsync().ConfigureAwait(false);
-        Log.Verbose("[{h}] Running query at: {p}:{l}", nameof(DbConnection), path, lineNumber);
-        TResult result = query.Invoke(QueryFactory.Query(table));
-        _ = s_operationLock.Release();
-        return result;
+        if (s_queryQueue.Count > 100)
+            Log.Warning("[{h}] Query queue is getting big! ({c})", nameof(DbConnection), s_queryQueue.Count);
     }
 
     public async Task<TResult> ValueStatement<TResult>(Func<QueryFactory, Task<TResult>> query,
@@ -75,8 +66,10 @@ internal abstract class DbConnection
                 throw new TimeoutException("Operation took too long");
             }
         }
-
-        return await query(QueryFactory);
+        s_opInProgress = true;
+        TResult result = await query(QueryFactory);
+        s_opInProgress = false;
+        return result;
     }
 
     protected SqlKata.Query this[string table] => QueryFactory.Query(table);
@@ -87,8 +80,9 @@ internal abstract class DbConnection
             && s_queryQueue.TryDequeue(out Func<QueryFactory, Task>? f)
             && f is not null)
         {
+            Log.Verbose("[{h}] Running query {i}", nameof(DbConnection), s_queryQueue.Count + 1);
             s_opInProgress = true;
-            await f(QueryFactory);
+            await f(QueryFactory).ConfigureAwait(false);
             s_opInProgress = false;
         }
     }
