@@ -20,12 +20,14 @@ internal sealed class RandomMidjourney : Command
         string channel = ctx.Message.Channel.Name;
         string user = ctx.Message.Author.DisplayName;
 
-        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.Enqueue(q => q.SelectRaw(
-            $"* FROM midjourney_images " +
+        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.ValueStatement(async qf =>
+        {
+            return await qf.Query().SelectRaw($"* FROM midjourney_images " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM midjourney_images)) " +
-            $"LIMIT 1").GetAsync());
+            $"LIMIT 1").GetAsync();
+        });
 
-        dynamic? row = query.FirstOrDefault();
+        dynamic ? row = query.FirstOrDefault();
         if (row is null)
         {
             await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");

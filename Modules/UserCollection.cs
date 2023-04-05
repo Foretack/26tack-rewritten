@@ -51,22 +51,29 @@ internal sealed class UserCollection : ChatModule
         sb[^2] = ' ';
         _users.Clear();
 
-        int inserted = await db.Enqueue($"INSERT INTO twitch_users (username, id) " +
-            $"VALUES {sb} " +
-            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
-        Log.Debug("{c} users inserted", inserted);
+        db.Enqueue(async qf =>
+        {
+            int inserted = await qf.StatementAsync(
+                $"INSERT INTO twitch_users (username, id) " 
+                + $"VALUES {sb} " 
+                + $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
+            Log.Debug("{c} users inserted", inserted);
+        });
 
         await Task.Delay(TimeSpan.FromSeconds(5));
-        await UpdateRandomUsers();
+        UpdateRandomUsers();
     }
 
-    private static async Task UpdateRandomUsers()
+    private static void UpdateRandomUsers()
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        IEnumerable<dynamic> rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
-        int[] castedRows = rows.Select(x => (int)x.id).ToArray();
-
-        _ = await db.UpdateUsers(castedRows);
+        db.Enqueue(async qf =>
+        {
+            IEnumerable<dynamic> rows = await qf.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45")
+                .GetAsync();
+            int[] uids = rows.Select(x => (int)x.Id).ToArray();
+            await db.UpdateUsers(uids);
+        });
     }
 
     private record struct TwitchUser(string Username, long Id);

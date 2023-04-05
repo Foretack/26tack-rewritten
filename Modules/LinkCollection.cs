@@ -14,7 +14,7 @@ internal sealed class LinkCollection : ChatModule
     {
         if (!enabled)
             Disable();
-        Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
+        Time.DoEvery(TimeSpan.FromMinutes(5), Commit);
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,10})+(/([-a-zA-Z0-9@:%._\+~#=/?&]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
@@ -58,19 +58,23 @@ internal sealed class LinkCollection : ChatModule
         return default;
     }
 
-    private async Task Commit()
+    private void Commit()
     {
         _toggle = !_toggle;
         Log.Debug("[{@header}] Committing link list...", Name);
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
-        if (!list.Any())
+        if (list.Count < 100)
             return;
+
         IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
         try
         {
-            _ = await SingleOf<DbQueries>.Obj.Enqueue("collected_links", q => q.InsertAsync(_columns, data));
-            Log.Debug("{l} links added", list.Count);
-            list.Clear();
+            SingleOf<DbQueries>.Obj.Enqueue(async qf =>
+            {
+                int inserted = await qf.Query("collected_links").InsertAsync(_columns, data);
+                Log.Debug("{l} links added", inserted);
+                list.Clear();
+            });
         }
         catch (Exception ex)
         {

@@ -50,22 +50,24 @@ internal sealed class EditUser : Command
         if (mode == 0 && args[1] == "blacklist")
             mode = 2;
 
-        bool success = mode == 1 ? await WhitelistUser(target.Username) : await BlacklistUser(target.Username, target.Id);
-        await MessageHandler.SendMessage(channel, success.ToString());
+        if (mode == 1)
+            await WhitelistUser(target.Username);
+        else
+            await BlacklistUser(target.Username, target.Id);
+
+        await MessageHandler.SendMessage(channel, "k");
     }
 
-    private async Task<bool> BlacklistUser(string username, long id)
+    private async Task BlacklistUser(string username, long id)
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        bool s = await db.BlacklistUser(username, id);
+        await db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
-        return s;
     }
-    private async Task<bool> WhitelistUser(string username)
+    private async Task WhitelistUser(string username)
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        bool s = await db.WhitelistUser(username);
+        await db.WhitelistUser(username);
         Permission.WhitelistUser(username);
-        return s;
     }
 }

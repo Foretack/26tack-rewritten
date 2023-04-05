@@ -54,9 +54,11 @@ internal sealed class RandomLink : Command
             .Append(')')
             .Append("LIMIT 1");
 
-        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.Enqueue(q => q
-        .SelectRaw($"* FROM collected_links {queryString}")
-        .GetAsync());
+        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.ValueStatement(async qf =>
+        {
+            return await qf.Query().SelectRaw($"* FROM collected_links {queryString}")
+                .GetAsync();
+        });
 
         dynamic? row = query.FirstOrDefault();
         if (row is null)

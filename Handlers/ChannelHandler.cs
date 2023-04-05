@@ -125,7 +125,7 @@ public static class ChannelHandler
                 _ = _anon.Client.PartChannel(channel);
             }
 
-            _ = await db.RemoveChannel(fetched);
+            db.RemoveChannel(fetched);
         }
         catch (Exception ex)
         {

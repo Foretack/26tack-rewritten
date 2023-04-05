@@ -29,15 +29,9 @@ internal sealed class Suggest : Command
 
         DbQueries db = SingleOf<DbQueries>.Obj;
         var partialUser = new PartialUser(user, rawname, id);
-        bool success = await db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
+        db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
 
-        if (success)
-        {
-            await MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
+        await MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
                 $"notified through a supibot reminder regarding it's status", UserColors.SeaGreen);
-            return;
-        }
-
-        await MessageHandler.SendMessage(channel, $"@{user}, PoroSad There was an error processing your suggestion. Try again later?");
     }
 }
