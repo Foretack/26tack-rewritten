@@ -57,11 +57,12 @@ internal sealed class UserCollection : ChatModule
         Log.Debug("{c} users inserted", inserted);
 
         await Task.Delay(TimeSpan.FromSeconds(5));
-        await UpdateRandomUsers(db);
+        await UpdateRandomUsers();
     }
 
-    private static async Task UpdateRandomUsers(DbQueries db)
+    private static async Task UpdateRandomUsers()
     {
+        DbQueries db = SingleOf<DbQueries>.Obj;
         IEnumerable<dynamic> rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
         int[] castedRows = rows.Select(x => (int)x.id).ToArray();
 
