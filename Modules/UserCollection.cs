@@ -54,8 +54,8 @@ internal sealed class UserCollection : ChatModule
         db.Enqueue(async qf =>
         {
             int inserted = await qf.StatementAsync(
-                $"INSERT INTO twitch_users (username, id) " 
-                + $"VALUES {sb} " 
+                $"INSERT INTO twitch_users (username, id) "
+                + $"VALUES {sb} "
                 + $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
             Log.Debug("{c} users inserted", inserted);
         });
@@ -71,8 +71,15 @@ internal sealed class UserCollection : ChatModule
         {
             IEnumerable<dynamic> rows = await qf.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45")
                 .GetAsync();
-            int[] uids = rows.Where(x => x is not null).Select(x => (int)x.Id).ToArray();
-            await db.UpdateUsers(uids);
+            List<int> uids = new();
+
+            foreach (dynamic row in rows)
+            {
+                if (row is int id)
+                    uids.Add(id);
+            }
+
+            await db.UpdateUsers(uids.ToArray());
         });
     }
 
