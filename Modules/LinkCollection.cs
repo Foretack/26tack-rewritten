@@ -61,11 +61,8 @@ internal sealed class LinkCollection : ChatModule
     private void Commit()
     {
         _toggle = !_toggle;
-        Log.Debug("[{@header}] Committing link list...", Name);
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
-        if (list.Count < 100)
-            return;
-
+        Log.Debug("[{@header}] Committing link list...", Name);
         IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
         try
         {
