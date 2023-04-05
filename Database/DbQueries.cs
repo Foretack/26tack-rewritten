@@ -98,7 +98,7 @@ internal sealed class DbQueries : DbConnection
         }));
     }
 
-    public async Task BlacklistUser(string username, long id)
+    public void BlacklistUser(string username, long id)
     {
         Enqueue(async q => await q.Query("blacklisted_users").InsertAsync(new
         {
@@ -107,7 +107,7 @@ internal sealed class DbQueries : DbConnection
         }));
     }
 
-    public async Task WhitelistUser(string username)
+    public void WhitelistUser(string username)
     {
         Enqueue(async q => await q.Query("whitelisted_users").InsertAsync(new
         {

@@ -51,23 +51,23 @@ internal sealed class EditUser : Command
             mode = 2;
 
         if (mode == 1)
-            await WhitelistUser(target.Username);
+            WhitelistUser(target.Username);
         else
-            await BlacklistUser(target.Username, target.Id);
+            BlacklistUser(target.Username, target.Id);
 
         await MessageHandler.SendMessage(channel, "k");
     }
 
-    private async Task BlacklistUser(string username, long id)
+    private static void BlacklistUser(string username, long id)
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        await db.BlacklistUser(username, id);
+        db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
     }
-    private async Task WhitelistUser(string username)
+    private static void WhitelistUser(string username)
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        await db.WhitelistUser(username);
+        db.WhitelistUser(username);
         Permission.WhitelistUser(username);
     }
 }

@@ -1,4 +1,5 @@
-﻿using MiniTwitch.Irc.Interfaces;
+﻿using AsyncAwaitBestPractices;
+using MiniTwitch.Irc.Interfaces;
 using MiniTwitch.Irc.Models;
 using Tack.Core;
 using Tack.Database;
@@ -298,7 +299,7 @@ internal static class StreamMonitor
     private static void ServiceStarted(object? sender, OnServiceStartedArgs e)
     {
 #if !DEBUG
-        MessageHandler.SendMessage(_relayChannel, $"OBSOLETE Hello");
+        MessageHandler.SendMessage(_relayChannel, $"OBSOLETE Hello").SafeFireAndForget();
 #endif
     }
     #endregion
