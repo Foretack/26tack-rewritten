@@ -83,8 +83,14 @@ internal abstract class DbConnection : Singleton
         {
             Log.Verbose("[{h}] Running query {i}", nameof(DbConnection), s_queryQueue.Count + 1);
             s_opInProgress = true;
-            await f(QueryFactory).ConfigureAwait(false);
-            s_opInProgress = false;
+            try
+            {
+                await f(QueryFactory).ConfigureAwait(false);
+            } 
+            finally
+            {
+                s_opInProgress = false;
+            }
         }
     }
 }
