@@ -54,7 +54,7 @@ internal static class ExternalApiHandler
         TimeSpan timeout = TimeSpan.FromSeconds(ids.Length * 2);
         if (timeout.TotalMilliseconds <= 0)
         {
-            Log.Error("[{h}.{m}()] Timeout cannot be less than or equal to 0. Id count: {c}", nameof(ExternalApiHandler), nameof(GetIvrUsersById), ids.Count);
+            Log.Error("[{h}.{m}()] Timeout cannot be less than or equal to 0. Id count: {c}", nameof(ExternalApiHandler), nameof(GetIvrUsersById), ids.Length);
             return Array.Empty<IvrUser>();
         }
 

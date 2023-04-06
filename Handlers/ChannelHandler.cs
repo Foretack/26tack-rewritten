@@ -10,7 +10,6 @@ using TwitchLib.Api.Helix.Models.Chat;
 using TwitchLib.Api.Services;
 using TwitchLib.Api.Services.Events;
 using TwitchLib.Api.Services.Events.LiveStreamMonitor;
-using TwitchLib.Client.Events;
 using TwitchLibStream = TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream;
 
 namespace Tack.Handlers;
