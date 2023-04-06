@@ -35,7 +35,7 @@ internal abstract class DbConnection : Singleton
                 Logger = x => Log.Verbose("Query: {q}", x.Sql)
             };
             Log.Information("Initialized database");
-            Time.DoEvery(TimeSpan.FromSeconds(15), Commit);
+            Time.DoEvery(TimeSpan.FromSeconds(5), Commit);
         }
 
         _ = QueryFactory ?? throw new NotImplementedException("This is impossible");
