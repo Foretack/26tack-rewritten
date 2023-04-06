@@ -61,7 +61,7 @@ internal sealed class UserCollection : ChatModule
         });
 
         await Task.Delay(TimeSpan.FromSeconds(5));
-        UpdateRandomUsers();
+        await UpdateRandomUsers();
     }
 
     private static async Task UpdateRandomUsers()
