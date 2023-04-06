@@ -51,9 +51,16 @@ internal static class ExternalApiHandler
 
     public static async Task<IvrUser[]> GetIvrUsersById(int[] ids)
     {
+        TimeSpan timeout = TimeSpan.FromSeconds(ids.Length * 2);
+        if (timeout.TotalMilliseconds <= 0)
+        {
+            Log.Error("[{h}.{m}()] Timeout cannot be less than or equal to 0. Id count: {c}", nameof(ExternalApiHandler), nameof(GetIvrUsersById), ids.Count);
+            return Array.Empty<IvrUser>();
+        }
+
         var requests = new HttpClient
         {
-            Timeout = TimeSpan.FromSeconds(ids.Length * 2)
+            Timeout = timeout
         };
         requests.DefaultRequestHeaders.Add("User-Agent", "occluder");
 
