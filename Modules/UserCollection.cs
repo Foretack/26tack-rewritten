@@ -71,7 +71,7 @@ internal sealed class UserCollection : ChatModule
         {
             IEnumerable<dynamic> rows = await qf.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45")
                 .GetAsync();
-            return rows.OfType<int>().ToArray();
+            return rows.Select(x => x.id).OfType<int>().ToArray();
         });
         await db.UpdateUsers(uids);
     }
