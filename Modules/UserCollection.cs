@@ -64,17 +64,16 @@ internal sealed class UserCollection : ChatModule
         UpdateRandomUsers();
     }
 
-    private static void UpdateRandomUsers()
+    private static async Task UpdateRandomUsers()
     {
         DbQueries db = SingleOf<DbQueries>.Obj;
-        db.Enqueue(async qf =>
+        int[] uids = await db.ValueStatement(async qf =>
         {
             IEnumerable<dynamic> rows = await qf.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45")
                 .GetAsync();
-
-            int[] uids = rows.OfType<int>().ToArray();
-            await db.UpdateUsers(uids);
+            return rows.OfType<int>().ToArray();
         });
+        await db.UpdateUsers(uids);
     }
 
     private record struct TwitchUser(string Username, long Id);
