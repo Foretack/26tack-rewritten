@@ -58,8 +58,8 @@ public static class ChannelHandler
                 Log.Warning("[{h}] Failed to join {c}", nameof(ChannelHandler), channel.Username);
         }
 
-        Log.Information("[{h}] {t} Joined: {c}", nameof(ChannelHandler), nameof(AnonymousClient), _anon.Client.JoinedChannels.Select(x => x.Name));
-        Log.Information("[{h}] {t} Joined: {c}", nameof(ChannelHandler), nameof(MainClient), _main.Client.JoinedChannels.Select(x => x.Name));
+        Log.Information("[{h}] {t} Joined: `{c}`", nameof(ChannelHandler), nameof(AnonymousClient), _anon.Client.JoinedChannels.Select(x => x.Name));
+        Log.Information("[{h}] {t} Joined: `{c}`", nameof(ChannelHandler), nameof(MainClient), _main.Client.JoinedChannels.Select(x => x.Name));
 
         _isInProgress = false;
         StreamMonitor.Start();
