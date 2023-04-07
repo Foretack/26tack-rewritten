@@ -62,22 +62,20 @@ internal sealed class LinkCollection : ChatModule
     {
         _toggle = !_toggle;
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
+        if (list is { Count: < 10 })
+        {
+            Log.Debug("[{header}] Link list has less than 10 items. Skipping...", Name);
+            return;
+        }
+
         Log.Debug("[{@header}] Committing link list...", Name);
         IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
-        try
+        SingleOf<DbQueries>.Obj.Enqueue(async qf =>
         {
-            SingleOf<DbQueries>.Obj.Enqueue(async qf =>
-            {
-                int inserted = await qf.Query("collected_links").InsertAsync(_columns, data);
-                Log.Debug("{l} links added", inserted);
-                list.Clear();
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to commit link list to DB");
-            Log.Error("List size: {size}", list.Count);
-        }
+            int inserted = await qf.Query("collected_links").InsertAsync(_columns, data);
+            Log.Debug("{l} links added", inserted);
+            list.Clear();
+        });
     }
 
     private record struct LinkData(string Username, string Channel, string Link)
