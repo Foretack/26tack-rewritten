@@ -2,6 +2,8 @@
 using MiniTwitch.Irc;
 using MiniTwitch.Irc.Enums;
 using Tack.Models;
+using MiniTwitch.Irc.Models;
+using MiniTwitch.Irc.Interfaces;
 
 namespace Tack.Core;
 
@@ -9,6 +11,8 @@ internal sealed class MainClient : Singleton
 {
     public IrcClient Client { get; }
     public User Self { get; private set; } = default!;
+
+    private readonly Dictionary<string, IUserstateSelf> _states = new();
 
     public MainClient()
     {
@@ -22,6 +26,7 @@ internal sealed class MainClient : Singleton
                                             | SkipCommand.CLEARMSG
                                             | SkipCommand.WHISPER;
         });
+        Client.OnUserstate += OnUserstate;
     }
 
     public async Task SetSelf()
@@ -35,5 +40,19 @@ internal sealed class MainClient : Singleton
         }
 
         Self = userResult.Value;
+    }
+
+    public bool ModeratesChannel(string channel)
+    {
+        if (!_states.ContainsKey(channel))
+            return false;
+
+        return _states[channel].IsMod;
+    }
+
+    private ValueTask OnUserstate(Userstate ustate)
+    {
+        _states[ustate.Channel.Name] = ustate.Self;
+        return ValueTask.CompletedTask;
     }
 }
