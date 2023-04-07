@@ -86,16 +86,6 @@ public static class Program
     }
     #endregion
 
-    #region Process methods
-    public static void RestartProcess(string triggerSource)
-    {
-        Log.Fatal("The program is being restarted by {source} ...", triggerSource);
-
-        _ = Process.Start($"./{_assemblyName}", Environment.GetCommandLineArgs());
-        Environment.Exit(0);
-    }
-    #endregion
-
     public static async Task<string?> GitPull()
     {
         try
