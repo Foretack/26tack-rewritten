@@ -9,7 +9,7 @@ public abstract class Singleton
     {
         Type type = GetType();
         if (_initialized.Contains(type))
-            throw new ConstraintException($"Cannot create another copy of Singleton class: {type.Name}");
+            throw new ConstraintException($"Cannot create another copy of Singleton class \"{type.Name}\"");
 
         _initialized.Add(type);
     }

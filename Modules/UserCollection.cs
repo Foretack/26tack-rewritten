@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
+using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Nonclass;
@@ -32,8 +33,12 @@ internal sealed class UserCollection : ChatModule
 
             _users.Push(new(message.Author.Name, message.Author.Id));
             Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, 500);
+            return default;
         }
 
+        SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
+        Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, OnMessage);
         return default;
     }
 
@@ -41,16 +46,18 @@ internal sealed class UserCollection : ChatModule
     {
         if (!_users.IsFull)
             return;
+
         Log.Debug("[{@header}] Committing user list...", Name);
         DbQueries db = SingleOf<DbQueries>.Obj;
         StringBuilder sb = new();
-
         foreach (TwitchUser user in _users)
             _ = sb.Append($"('{user.Username}', {user.Id}), ");
 
         sb[^2] = ' ';
         _users.Clear();
-
+        SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
+        Log.Debug("[{h}] Resubscribed to {ev}", OnMessage);
         db.Enqueue(async qf =>
         {
             int inserted = await qf.StatementAsync(
