@@ -10,7 +10,9 @@ using Tack.Utils;
 namespace Tack.Modules;
 internal sealed class UserCollection : ChatModule
 {
-    private readonly FixedStack<TwitchUser> _users = new(500);
+    private const int MAX_STACK_SIZE = 2500;
+
+    private readonly FixedStack<TwitchUser> _users = new(MAX_STACK_SIZE);
 
     public UserCollection(bool enabled)
     {
@@ -32,7 +34,7 @@ internal sealed class UserCollection : ChatModule
             }
 
             _users.Push(new(message.Author.Name, message.Author.Id));
-            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, 500);
+            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, MAX_STACK_SIZE);
             return default;
         }
 
