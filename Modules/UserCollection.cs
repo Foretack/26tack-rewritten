@@ -10,9 +10,10 @@ using Tack.Utils;
 namespace Tack.Modules;
 internal sealed class UserCollection : ChatModule
 {
-    private const int MAX_STACK_SIZE = 2500;
+    private const int MAX_ARR_SIZE = 2500;
 
-    private readonly FixedStack<TwitchUser> _users = new(MAX_STACK_SIZE);
+    private readonly TwitchUser[] _users = new TwitchUser[MAX_ARR_SIZE];
+    private int _index = 0;
 
     public UserCollection(bool enabled)
     {
@@ -25,7 +26,7 @@ internal sealed class UserCollection : ChatModule
 
     protected override ValueTask OnMessage(Privmsg message)
     {
-        if (!_users.IsFull && !_users.Any(x => x.Username == message.Author.Name))
+        if (_index + 1 != MAX_ARR_SIZE && !_users.Any(x => x.Username == message.Author.Name))
         {
             if (message.Author.Name.Length > 25)
             {
@@ -33,8 +34,8 @@ internal sealed class UserCollection : ChatModule
                 return default;
             }
 
-            _users.Push(new(message.Author.Name, message.Author.Id));
-            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _users.Count, MAX_STACK_SIZE);
+            _users[_index++] = new(message.Author.Name, message.Author.Id);
+            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _index + 1, MAX_ARR_SIZE);
             return default;
         }
 
@@ -46,7 +47,7 @@ internal sealed class UserCollection : ChatModule
 
     private async Task Commit()
     {
-        if (!_users.IsFull)
+        if (_index + 1 != MAX_ARR_SIZE)
             return;
 
         Log.Debug("[{@header}] Committing user list...", Name);
@@ -56,7 +57,7 @@ internal sealed class UserCollection : ChatModule
             _ = sb.Append($"('{user.Username}', {user.Id}), ");
 
         sb[^2] = ' ';
-        _users.Clear();
+        _index = 0;
         SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
         SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
         Log.Debug("[{h}] Resubscribed to {ev}", OnMessage);
