@@ -26,22 +26,28 @@ internal sealed class UserCollection : ChatModule
 
     protected override ValueTask OnMessage(Privmsg message)
     {
-        if (_index + 1 != MAX_ARR_SIZE && !_users.Any(x => x.Username == message.Author.Name))
+        if (_index + 1 != MAX_ARR_SIZE)
         {
-            if (message.Author.Name.Length > 25)
+            if (!_users.Any(x => x.Username == message.Author.Name))
             {
-                Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(UserCollection), message.Author.Name);
-                return default;
+                if (message.Author.Name.Length > 25)
+                {
+                    Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(UserCollection), message.Author.Name);
+                    return default;
+                }
+
+                _users[_index++] = new(message.Author.Name, message.Author.Id);
+                Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _index + 1, MAX_ARR_SIZE);
+                return default; 
             }
-
-            _users[_index++] = new(message.Author.Name, message.Author.Id);
-            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _index + 1, MAX_ARR_SIZE);
-            return default;
         }
+        else
+        {
+            SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
+            SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
+            Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, OnMessage);
+        } 
 
-        SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
-        SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
-        Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, OnMessage);
         return default;
     }
 
