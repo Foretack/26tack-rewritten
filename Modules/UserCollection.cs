@@ -45,7 +45,7 @@ internal sealed class UserCollection : ChatModule
         {
             SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
             SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
-            Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, OnMessage);
+            Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, nameof(OnMessage));
         } 
 
         return default;
@@ -66,7 +66,7 @@ internal sealed class UserCollection : ChatModule
         _index = 0;
         SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
         SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
-        Log.Debug("[{h}] Resubscribed to {ev}", OnMessage);
+        Log.Debug("[{h}] Resubscribed to {ev}", nameof(OnMessage));
         db.Enqueue(async qf =>
         {
             int inserted = await qf.StatementAsync(
