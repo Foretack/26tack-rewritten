@@ -83,11 +83,6 @@ public sealed class MessageHandler : Singleton
     internal void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
         DiscordMessage message = args.DiscordMessage;
-        Log.Verbose("[{header}] {username} {channel}: {content}",
-            $"Discord:{message.GuildName}",
-            message.Author.Username,
-            message.ChannelName,
-            message.Content);
         HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, "Error processing Discord message: "));
     }
     #endregion
