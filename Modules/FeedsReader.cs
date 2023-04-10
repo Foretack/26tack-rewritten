@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Text;
+using System.Xml;
 using CodeHollow.FeedReader;
 using CodeHollow.FeedReader.Parser;
 using Tack.Core;
@@ -65,10 +66,16 @@ internal sealed class FeedsReader : IModule
 
                 latest[sub.Key].Add($"{item.Title} ({item.Link})");
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
-
+                StringBuilder sb = new(sub.Value.PrependText);
+                _ = sb.Append(' ')
+                    .Append(item.Title)
+                    .Append(' ')
+                    .Append("--")
+                    .Append(' ')
+                    .AppendWhen(sub.Value.IncludeLink, item.Link);
                 foreach (string channel in sub.Value.Channels)
                 {
-                    await MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+                    await MessageHandler.SendMessage(channel, sb.ToString());
                 }
             }
         }
