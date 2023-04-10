@@ -66,7 +66,7 @@ internal sealed class UserCollection : ChatModule
         _index = 0;
         SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
         SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
-        Log.Debug("[{h}] Resubscribed to {ev}", nameof(OnMessage));
+        Log.Debug("[{h}] Resubscribed to {ev}", Name, nameof(OnMessage));
         db.Enqueue(async qf =>
         {
             int inserted = await qf.StatementAsync(
