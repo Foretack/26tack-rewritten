@@ -14,10 +14,6 @@ internal sealed class AnonymousClient : Singleton
         {
             options.Anonymous = true;
             options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
-            options.SkipCommandProcessing = SkipCommand.USERNOTICE
-                                            | SkipCommand.CLEARCHAT
-                                            | SkipCommand.CLEARMSG
-                                            | SkipCommand.WHISPER;
         });
     }
 }

@@ -21,10 +21,6 @@ internal sealed class MainClient : Singleton
             options.Username = AppConfigLoader.Config.BotUsername;
             options.OAuth = AppConfigLoader.Config.BotAccessToken;
             options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
-            options.SkipCommandProcessing = SkipCommand.USERNOTICE
-                                            | SkipCommand.CLEARCHAT
-                                            | SkipCommand.CLEARMSG
-                                            | SkipCommand.WHISPER;
         });
         Client.OnUserstate += OnUserstate;
     }
