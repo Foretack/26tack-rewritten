@@ -24,6 +24,9 @@ internal sealed class Ping : Command
         await MessageHandler.SendMessage(channel,
             $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} "
             + $"● {latency.TotalMilliseconds}ms "
-            + $"● Uptime: {uptime}");
+            + $"● Uptime: {uptime}"
+            + $"● M:{SingleOf<MainClient>.Obj.Client.JoinedChannels.Count}," +
+                $"A:{SingleOf<AnonymousClient>.Obj.Client.JoinedChannels.Count}," +
+                $"UP:{new DateTimeOffset(Program.StartupTime).ToUnixTimeMilliseconds}");
     }
 }

@@ -54,8 +54,8 @@ internal sealed class FeedsReader : IModule
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
 
-            var items = feedReadResult.Items;
-            foreach (var item in items)
+            IList<FeedItem> items = feedReadResult.Items;
+            foreach (FeedItem? item in items)
             {
                 if (item is null)
                     continue;
