@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
@@ -51,19 +52,20 @@ internal static class CommandHelp
         }
 
         CommandInfo cmdinfo = command.Info;
-        var sb = new StringBuilder($"@{user}, ");
+        StringOperator op = new();
 
-        _ = sb.Append($"Command: {prefix}{cmdinfo.Name}")
-        .Append(" -- ")
-        .Append($"Aliases: {cmdinfo.Aliases.AsString()}")
-        .Append(" -- ")
-        .Append($"Permission: {cmdinfo.Permission}")
-        .Append(" ➜ ")
-        .Append(cmdinfo.Description)
-        .Append(" ➜ ")
-        .Append($"{cmdinfo.UserCooldown}s user cooldown, ")
-        .Append($"{cmdinfo.ChannelCooldown}s channel cooldown.");
+        _ = op % $"@{user}, "
+            % $"Command: {prefix}{cmdinfo.Name}"
+            % " -- "
+            % $"Aliases: {cmdinfo.Aliases.AsString()}"
+            % " -- "
+            % $"Permission: {cmdinfo.Permission}"
+            % " ➜ "
+            % cmdinfo.Description
+            % " ➜ "
+            % $"{cmdinfo.UserCooldown}s user cooldown, "
+            % $"{cmdinfo.ChannelCooldown}s channel cooldown.";
 
-        await MessageHandler.SendMessage(channel, sb.ToString());
+        await MessageHandler.SendMessage(channel, op.ToString());
     }
 }

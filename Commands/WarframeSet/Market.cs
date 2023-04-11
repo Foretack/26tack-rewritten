@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
@@ -84,24 +85,17 @@ internal sealed class Market : Command
             sellerAveragePrice = (float)Math.Round((float)sellersTotalPrice / sellersTotalQuantity, 2);
             buyerAveragePrice = (float)Math.Round((float)buyersTotalPrice / buyersTotalQuantity, 2);
 
-            var sb = new StringBuilder();
-            _ = sb.Append($"{totalOrders} ")
-            .Append(activeOnly ? "Active" : "Total")
-            .Append(" orders")
-            .Append(sellersCount == 0
-                ? string.Empty
-                : $" ◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P")
-            .Append(sellersCount == 1
-                ? string.Empty
-                : $" (▼{cheapestSeller}P · ▲{mostExpensiveSeller}P)")
-            .Append(buyersCount == 0
-                ? string.Empty
-                : $" ◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P")
-            .Append(buyersCount == 1
-                ? string.Empty
-                : $" (▲{mostPayingBuyer}P · ▼{leastPayingBuyer}P)");
+            var op = new StringOperator();
+            _ = op
+            % $"{totalOrders} "
+            % (activeOnly ^ "Active".Op()) % (!activeOnly ^ "Total".Op())
+            % " orders"
+            % ((sellersCount > 1) ^ $" ◆ {sellersCount} Sellers: Avg. {sellerAveragePrice}P".Op())
+            % ((sellersCount == 1) ^ $" (▼{cheapestSeller}P · ▲{mostExpensiveSeller}P)".Op())
+            % ((buyersCount > 1) ^ $" ◆ {buyersCount} Buyers: Avg. {buyerAveragePrice}P".Op())
+            % ((buyersCount == 1) ^ $" (▲{mostPayingBuyer}P · ▼{leastPayingBuyer}P)".Op());
 
-            await MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {sb}");
+            await MessageHandler.SendMessage(channel, $"@{user}, Item: {desiredItem} => {op}");
         });
         return true;
     }

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using Tack.Database;
@@ -70,14 +71,15 @@ internal sealed class Profile : Command
         string secondary = (await ExternalApiHandler.FindFromUniqueName("Secondary", profile.LoadOuts.NORMAL.Secondary.UniqueName)).Value ?? "{unknown}";
         string melee = (await ExternalApiHandler.FindFromUniqueName("Melee", profile.LoadOuts.NORMAL.Melee.UniqueName)).Value ?? "{unknown}";
 
-        var message = new StringBuilder($"@{user}, ");
+        var message = new StringOperator();
         _ = message
-            .Append($"\"{name}\" ")
-            .Append($"MasteryRank: {mr}, ")
-            .Append("Equipped: [")
-            .Append($"{warframe}, {primary}, {secondary}, {melee}")
-            .Append($"] ")
-            .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated.FormatTimeLeft()} ago)" : string.Empty);
+            % $"@{user}, "
+            % $"\"{name}\" "
+            % $"MasteryRank: {mr}, "
+            % "Equipped: ["
+            % $"{warframe}, {primary}, {secondary}, {melee}"
+            % $"] "
+            % ((lastUpdated.TotalSeconds > 59) ^ $"(last updated {lastUpdated.FormatTimeLeft()} ago)".Op());
 
         await MessageHandler.SendMessage(channel, message.ToString());
     }

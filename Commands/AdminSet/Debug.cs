@@ -17,7 +17,6 @@ internal sealed class Debug : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.Message.Author.DisplayName;
         string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
         DbQueries db = SingleOf<DbQueries>.Obj;
