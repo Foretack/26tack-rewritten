@@ -23,7 +23,7 @@ internal static class CommandList
         string channel = ctx.Message.Channel.Name;
         var perms = (PermissionLevels)ctx.Permission.Level;
 
-        StringOperator op = new();
+        var sb = new StringBuilder($"@{user} ");
         string prefix = ctx.CommandName;
         bool s = CommandHandler.Handlers.TryGetValue(prefix, out ChatCommandHandler? handler);
         if (!s || handler is null)
@@ -35,9 +35,7 @@ internal static class CommandList
 
         await Task.Run(async () =>
         {
-            _ = op
-            % $"@{user} "
-            % " commands: ";
+            _ = sb.Append(handler.Name + " commands: ");
 
             IEnumerable<string> commandNames = handler.Commands
             .Select(x => prefix + x.Value.Info.Name)
@@ -51,9 +49,9 @@ internal static class CommandList
             .Select(y => y.Key + "commands").AsEnumerable();
             list.AddRange(otherSets);
 
-            _ = op % list.AsString();
+            _ = sb.Append(list.AsString());
 
-            await MessageHandler.SendColoredMessage(channel, op.ToString(), UserColors.SeaGreen);
+            await MessageHandler.SendColoredMessage(channel, sb.ToString(), UserColors.SeaGreen);
         });
     }
 }

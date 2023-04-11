@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using Tack.Database;
 using Tack.Handlers;
 using Tack.Models;
@@ -21,7 +20,7 @@ internal sealed class Alerts : Command
     {
         string user = ctx.Message.Author.DisplayName;
         string channel = ctx.Message.Channel.Name;
-        StringOperator ab = new();
+        var ab = new StringBuilder();
 
         (bool keyExists, Alert[] value) = await Redis.Cache.TryGetObjectAsync<Alert[]>("warframe:alerts");
         if (!keyExists)
@@ -38,12 +37,15 @@ internal sealed class Alerts : Command
         }
 
         Alert[] alerts = value;
+
         string[] rewards = alerts
             .Where(x => x.Active)
             .Select(x => $"{x.Mission.Faction} / {x.Mission.Type} [{x.Mission.Reward.AsString}] ")
             .ToArray();
 
-        _ = ab % $"{"Alert".PluralizeWith(alerts.Length)} ➜ " % string.Join(" ● ", rewards);
+        _ = ab.Append($"{"Alert".PluralizeWith(alerts.Length)} ➜ ")
+            .Append(string.Join(" ● ", rewards));
+
         await MessageHandler.SendColoredMessage(channel, $"@{user}, {ab}", UserColors.Coral);
     }
 }

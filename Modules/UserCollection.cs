@@ -58,11 +58,11 @@ internal sealed class UserCollection : ChatModule
 
         Log.Debug("[{@header}] Committing user list...", Name);
         DbQueries db = SingleOf<DbQueries>.Obj;
-        StringOperator op = new();
+        StringBuilder sb = new();
         foreach (TwitchUser user in _users)
-            _ = op % $"('{user.Username}', {user.Id}), ";
+            _ = sb.Append($"('{user.Username}', {user.Id}), ");
 
-        op[^2] = ' ';
+        sb[^2] = ' ';
         _index = 0;
         SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
         SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
@@ -71,7 +71,7 @@ internal sealed class UserCollection : ChatModule
         {
             int inserted = await qf.StatementAsync(
                 $"INSERT INTO twitch_users (username, id) "
-                + $"VALUES {op} "
+                + $"VALUES {sb} "
                 + $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
             Log.Debug("{c} users inserted", inserted);
         });

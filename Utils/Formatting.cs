@@ -125,6 +125,4 @@ internal static class Formatting
     {
         return count == 1 ? str : specialCase;
     }
-
-    public static StringOperator Op(this string str) => str;
 }

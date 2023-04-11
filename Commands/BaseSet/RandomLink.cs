@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using SqlKata.Execution;
 using Tack.Database;
 using Tack.Handlers;
@@ -28,7 +27,7 @@ internal sealed class RandomLink : Command
         string? targetChannel = Options.ParseString("channel", ctx.Message.Content)?.ToLower();
 
         (string Username, string Channel, string Link, DateTime TimePosted) randomlink;
-        var queryString = new StringOperator();
+        var queryString = new StringBuilder();
 
         string?[] options = new[]
         {
@@ -36,24 +35,24 @@ internal sealed class RandomLink : Command
             targetUser is null ? null : $"username LIKE '%{targetUser}%'",
             targetChannel is null ? null : $"channel LIKE '%{targetChannel}%'"
         };
-        var queryConditions = new StringOperator();
+        var queryConditions = new StringBuilder();
         string?[] selectedOptions = options.Where(x => x is not null).ToArray();
         if (selectedOptions.Length > 0)
         {
             _ = queryConditions
-                % "WHERE "
-                % string.Join(" AND ", selectedOptions);
+                .Append("WHERE ")
+                .Append(
+                string.Join(" AND ", selectedOptions));
         }
 
-        _ = queryString
-            % queryConditions
-            % " OFFSET floor"
-            % '('
-            % "random()"
-            % '*'
-            % $"(SELECT COUNT(*) FROM collected_links {queryConditions})"
-            % ')'
-            % "LIMIT 1";
+        _ = queryString.Append(queryConditions)
+            .Append(" OFFSET floor")
+            .Append('(')
+            .Append("random()")
+            .Append('*')
+            .Append($"(SELECT COUNT(*) FROM collected_links {queryConditions})")
+            .Append(')')
+            .Append("LIMIT 1");
 
         IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.ValueStatement(async qf =>
         {
