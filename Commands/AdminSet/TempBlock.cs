@@ -47,7 +47,7 @@ internal sealed class TempBlock : Command
         {
             response = await _requests.PutAsync($"{_reqUrl}/add?targetId={getTarget.Id}&hours={args[1]}", null);
         }
-        catch (TimeoutException)
+        catch (TaskCanceledException)
         {
             Log.Error("[{h}] Retrieving user {u} timed out.", nameof(TempBlock), args[0]);
             return;
