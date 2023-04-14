@@ -198,4 +198,7 @@ internal static class ExternalApiHandler
     #endregion
 }
 
-public record struct Result<T>(T Value, bool Success, Exception Exception);
+public record struct Result<T>(T Value, bool Success, Exception Exception)
+{
+    public static implicit operator T(Result<T> Result) => Result.Value;
+};

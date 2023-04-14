@@ -31,18 +31,28 @@ internal sealed class TempBlock : Command
 
         if (!int.TryParse(args[1], out int i))
         {
-            await MessageHandler.SendMessage(channel, $"@{user}, Args[1] could not be converted to int");
+            await MessageHandler.SendMessage(channel, $"@{user}, {args[1]} could not be converted to int");
             return;
         }
 
-        Result<User> getTarget = await User.Get(args[0]);
-        if (!getTarget.Success)
+        IvrUser getTarget = await ExternalApiHandler.GetIvrUser(args[0]);
+        if (getTarget is null)
         {
-            await MessageHandler.SendMessage(channel, $"@{user}, User could not be retrieved through Helix");
+            await MessageHandler.SendMessage(channel, $"@{user}, User could not be retrieved through Ivr.fi");
             return;
         }
 
-        HttpResponseMessage response = await _requests.PutAsync($"{_reqUrl}/add?targetId={getTarget.Value.Id}&hours={args[1]}", null);
+        HttpResponseMessage response;
+        try
+        {
+            response = await _requests.PutAsync($"{_reqUrl}/add?targetId={getTarget.Id}&hours={args[1]}", null);
+        }
+        catch (TimeoutException)
+        {
+            Log.Error("[{h}] Retrieving user {u} timed out.", nameof(TempBlock), args[0]);
+            return;
+        }
+
         if (response.StatusCode == HttpStatusCode.Conflict)
         {
             await MessageHandler.SendMessage(channel, $"@{user}, User already blocked");
