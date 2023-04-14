@@ -27,6 +27,6 @@ internal sealed class Ping : Command
             + $"● Uptime: {uptime}"
             + $"● M:{SingleOf<MainClient>.Obj.Client.JoinedChannels.Count}," +
                 $"A:{SingleOf<AnonymousClient>.Obj.Client.JoinedChannels.Count}," +
-                $"UP:{new DateTimeOffset(Program.StartupTime).ToUnixTimeMilliseconds}");
+                $"UP:{new DateTimeOffset(Program.StartupTime).ToUnixTimeMilliseconds()}");
     }
 }
