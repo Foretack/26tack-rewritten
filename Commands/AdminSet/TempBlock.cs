@@ -49,7 +49,7 @@ internal sealed class TempBlock : Command
         }
         catch (TaskCanceledException)
         {
-            Log.Error("[{h}] Retrieving user {u} timed out.", nameof(TempBlock), args[0]);
+            Log.Error("[{h}] Blocking user {u} timed out.", nameof(TempBlock), args[0]);
             return;
         }
 
