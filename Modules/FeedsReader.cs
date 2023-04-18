@@ -68,11 +68,15 @@ internal sealed class FeedsReader : IModule
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
                 StringBuilder sb = new(sub.Value.PrependText);
                 _ = sb.Append(' ')
-                    .Append(item.Title)
-                    .Append(' ')
+                    .Append(item.Title);
+                if (sub.Value.IncludeLink)
+                {
+                    _ = sb.Append(' ')
                     .Append("--")
                     .Append(' ')
-                    .AppendWhen(sub.Value.IncludeLink, item.Link);
+                    .Append(item.Link);
+                }
+
                 foreach (string channel in sub.Value.Channels)
                 {
                     await MessageHandler.SendMessage(channel, sb.ToString());
