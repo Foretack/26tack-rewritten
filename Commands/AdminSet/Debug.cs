@@ -136,6 +136,10 @@ internal sealed class Debug : Command
             case "modules":
                 await MessageHandler.SendMessage(channel, ModulesHandler.ListEnabledModules());
                 break;
+
+            case "reconnect":
+                await SingleOf<MainClient>.Obj.Client.Reconnect();
+                break;
         }
     }
 
