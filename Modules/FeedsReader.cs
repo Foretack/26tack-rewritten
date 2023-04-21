@@ -27,9 +27,8 @@ internal sealed class FeedsReader : IModule
         if (!Enabled)
             return;
 
-        Dictionary<string, RssFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
-        Dictionary<string, List<string>> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, List<string>>()));
+        Dictionary<string, RssFeedSubscription> subs = await GetSubscriptions();
+        Dictionary<string, List<string>> latest = await GetLatestItems();
 
         foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
@@ -55,17 +54,12 @@ internal sealed class FeedsReader : IModule
             Log.Debug("Reading feed {title}", feedReadResult.Title);
 
             IList<FeedItem> items = feedReadResult.Items;
-            foreach (FeedItem? item in items)
+            foreach (FeedItem item in items)
             {
-                if (item is null)
-                    continue;
                 if (latest[sub.Key].Contains($"{item.Title} ({item.Link})"))
                     continue;
 
                 Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
-
-                latest[sub.Key].Add($"{item.Title} ({item.Link})");
-                await Redis.Cache.SetObjectAsync("rss:latest", latest);
                 StringBuilder sb = new(sub.Value.PrependText);
                 _ = sb.Append(' ')
                     .Append(item.Title);
@@ -81,8 +75,25 @@ internal sealed class FeedsReader : IModule
                 {
                     await MessageHandler.SendMessage(channel, sb.ToString());
                 }
+
+                if (latest[sub.Key].Count >= items.Count * 10)
+                    latest[sub.Key] = new List<string>(items.Select(x => $"{x.Title} ({x.Link})"));
+
+                latest[sub.Key].Add($"{item.Title} ({item.Link})");
+                await Redis.Cache.SetObjectAsync("rss:latest", latest);
             }
         }
+    }
+
+    private static Task<Dictionary<string, RssFeedSubscription>> GetSubscriptions()
+    {
+        return Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
+    }
+
+    private static Task<Dictionary<string, List<string>>> GetLatestItems()
+    {
+        return Redis.Cache.FetchObjectAsync("rss:latest",
+            () => Task.FromResult(new Dictionary<string, List<string>>()));
     }
 
     public void Enable()
