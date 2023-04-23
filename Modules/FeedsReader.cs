@@ -49,8 +49,7 @@ internal sealed class FeedsReader : IModule
             }
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
-
-            IList<FeedItem> items = feedReadResult.Items;
+            IEnumerable<FeedItem> items = feedReadResult.Items.OrderBy(x => x.PublishingDate ?? DateTime.MinValue);
             foreach (FeedItem item in items)
             {
                 if (!item.PublishingDate.HasValue)
