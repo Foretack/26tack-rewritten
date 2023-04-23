@@ -24,11 +24,8 @@ internal sealed class FeedsReader : IModule
 
     private async Task ReadFeeds()
     {
-        if (!Enabled)
-            return;
-
         Dictionary<string, RssFeedSubscription> subs = await GetSubscriptions();
-        Dictionary<string, List<string>> latest = await GetLatestItems();
+        Dictionary<string, DateTime> latest = await GetLatestItems();
 
         foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
@@ -56,8 +53,15 @@ internal sealed class FeedsReader : IModule
             IList<FeedItem> items = feedReadResult.Items;
             foreach (FeedItem item in items)
             {
-                if (latest[sub.Key].Contains($"{item.Title} ({item.Link})"))
+                if (!item.PublishingDate.HasValue)
+                {
+                    Log.Warning("[{h}] Item from {feedTitle} has unparsable date. Skipping", Name, feedReadResult.Title);
                     continue;
+                }
+                else if (item.PublishingDate.Value.Date <= latest[sub.Key])
+                {
+                    continue;
+                }
 
                 Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
                 StringBuilder sb = new(sub.Value.PrependText);
@@ -71,16 +75,15 @@ internal sealed class FeedsReader : IModule
                     .Append(item.Link);
                 }
 
-                foreach (string channel in sub.Value.Channels)
-                {
-                    await MessageHandler.SendMessage(channel, sb.ToString());
-                }
-
-                if (latest[sub.Key].Count >= items.Count * 10)
-                    latest[sub.Key] = new List<string>(items.Select(x => $"{x.Title} ({x.Link})"));
-
-                latest[sub.Key].Add($"{item.Title} ({item.Link})");
+                latest[sub.Key] = item.PublishingDate.Value;
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
+                if (Enabled)
+                {
+                    foreach (string channel in sub.Value.Channels)
+                    {
+                        await MessageHandler.SendMessage(channel, sb.ToString());
+                    }
+                }
             }
         }
     }
@@ -90,10 +93,10 @@ internal sealed class FeedsReader : IModule
         return Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
     }
 
-    private static Task<Dictionary<string, List<string>>> GetLatestItems()
+    private static Task<Dictionary<string, DateTime>> GetLatestItems()
     {
         return Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, List<string>>()));
+            () => Task.FromResult(new Dictionary<string, DateTime>()));
     }
 
     public void Enable()
