@@ -57,7 +57,7 @@ internal sealed class RandomMidjourney : Command
         requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
         HttpResponseMessage response = await requests.PostAsync(AppConfigLoader.Config.ImageHostLink, content);
         string responseString = await response.Content.ReadAsStringAsync();
-        if (!responseString.Contains(AppConfigLoader.Config.ImageHostLink[..5]))
+        if (!responseString.StartsWith("https"))
         {
             await MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
             return;
