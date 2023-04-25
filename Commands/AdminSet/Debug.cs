@@ -138,7 +138,7 @@ internal sealed class Debug : Command
                 break;
 
             case "reconnect":
-                await SingleOf<MainClient>.Obj.Client.Reconnect();
+                await SingleOf<MainClient>.Obj.Client.ReconnectAsync();
                 break;
         }
     }
