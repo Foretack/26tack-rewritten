@@ -5,6 +5,7 @@ using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Nonclass;
+using Tack.Utils;
 
 namespace Tack.Modules;
 internal sealed class UserCollection : ChatModule
