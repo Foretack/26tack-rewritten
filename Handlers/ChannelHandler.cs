@@ -1,5 +1,4 @@
-﻿using AsyncAwaitBestPractices;
-using MiniTwitch.Irc.Interfaces;
+﻿using MiniTwitch.Irc.Interfaces;
 using MiniTwitch.Irc.Models;
 using Tack.Core;
 using Tack.Database;
@@ -143,7 +142,7 @@ public static class ChannelHandler
         int cCount = FetchedChannels.Count;
 
         if (pCount != cCount)
-            await MessageHandler.SendColoredMessage(AppConfigLoader.Config.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", UserColors.YellowGreen);
+            await MessageHandler.SendColoredMessage(AppConfig.RelayChannel, $"Channel size changed: {pCount} -> {cCount}", UserColors.YellowGreen);
     }
 
     private static void RegisterEvents(bool isReconnect)
@@ -181,7 +180,7 @@ internal static class StreamMonitor
     public static Dictionary<string, TwitchStream> StreamData { get; private set; } = new();
 
     private static readonly LiveStreamMonitorService _monitoringService = new(TwitchApiHandler.Instance.Api, 60);
-    private static readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
+    private static readonly string _relayChannel = AppConfig.RelayChannel;
     #endregion
 
     #region Controls

@@ -1,5 +1,5 @@
 ﻿global using Serilog;
-using System.Diagnostics;
+global using static Tack.AppConfigLoader;
 using System.Reflection;
 using CliWrap;
 using CliWrap.Buffered;
@@ -30,7 +30,7 @@ public static class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
-            .WriteTo.Discord(AppConfigLoader.Config.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
+            .WriteTo.Discord(AppConfig.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
@@ -43,7 +43,7 @@ public static class Program
 
         StartupTime = DateTime.Now;
 
-        Redis.Init($"{AppConfigLoader.Config.RedisHost},password={AppConfigLoader.Config.RedisPass}");
+        Redis.Init($"{AppConfig.RedisHost},password={AppConfig.RedisPass}");
 
         Settings = await Redis.Cache.FetchObjectAsync("bot:settings", () =>
         Task.FromResult(new ProgramSettings() { LogLevel = LogEventLevel.Information, EnabledModules = new() }));

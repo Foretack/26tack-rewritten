@@ -5,7 +5,6 @@ using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Nonclass;
-using Tack.Utils;
 
 namespace Tack.Modules;
 internal sealed class UserCollection : ChatModule
@@ -38,7 +37,7 @@ internal sealed class UserCollection : ChatModule
 
                 _users[_index++] = new(message.Author.Name, message.Author.Id);
                 Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _index + 1, MAX_ARR_SIZE);
-                return default; 
+                return default;
             }
         }
         else
@@ -46,7 +45,7 @@ internal sealed class UserCollection : ChatModule
             SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
             SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
             Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, nameof(OnMessage));
-        } 
+        }
 
         return default;
     }

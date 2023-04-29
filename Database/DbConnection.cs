@@ -11,10 +11,10 @@ namespace Tack.Database;
 internal abstract class DbConnection : Singleton
 {
     private static readonly string ConnectionString =
-        $"Host={AppConfigLoader.Config.DbHost};" +
-        $"Username={AppConfigLoader.Config.DbUser};" +
-        $"Password={AppConfigLoader.Config.DbPass};" +
-        $"Database={AppConfigLoader.Config.DbName}";
+        $"Host={AppConfig.DbHost};" +
+        $"Username={AppConfig.DbUser};" +
+        $"Password={AppConfig.DbPass};" +
+        $"Database={AppConfig.DbName}";
     private static readonly ConcurrentQueue<Func<QueryFactory, Task>> s_queryQueue = new();
     private static readonly SemaphoreSlim s_operationLock = new(1);
 
@@ -86,7 +86,7 @@ internal abstract class DbConnection : Singleton
             try
             {
                 await f(QueryFactory).ConfigureAwait(false);
-            } 
+            }
             finally
             {
                 s_opInProgress = false;

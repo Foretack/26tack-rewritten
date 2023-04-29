@@ -1,5 +1,4 @@
-﻿using System;
-using SqlKata.Execution;
+﻿using SqlKata.Execution;
 using Tack.Handlers;
 using Tack.Models;
 using Tack.Utils;

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using MiniTwitch.Irc;
-using MiniTwitch.Irc.Enums;
-using Tack.Models;
-using MiniTwitch.Irc.Models;
 using MiniTwitch.Irc.Interfaces;
+using MiniTwitch.Irc.Models;
+using Tack.Models;
 
 namespace Tack.Core;
 
@@ -18,8 +17,8 @@ internal sealed class MainClient : Singleton
     {
         Client = new(options =>
         {
-            options.Username = AppConfigLoader.Config.BotUsername;
-            options.OAuth = AppConfigLoader.Config.BotAccessToken;
+            options.Username = AppConfig.BotUsername;
+            options.OAuth = AppConfig.BotAccessToken;
             options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
         });
         Client.OnUserstate += OnUserstate;
@@ -27,12 +26,12 @@ internal sealed class MainClient : Singleton
 
     public async Task SetSelf()
     {
-        Handlers.Result<User> userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+        Handlers.Result<User> userResult = await User.Get(AppConfig.BotUsername);
         while (!userResult.Success)
         {
             Log.Fatal("[{header}] Fetching user failed. Retrying...", nameof(MainClient));
             await Task.Delay(1000);
-            userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+            userResult = await User.Get(AppConfig.BotUsername);
         }
 
         Self = userResult.Value;

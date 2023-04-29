@@ -121,7 +121,7 @@ internal sealed class Debug : Command
             case "reloadconfig":
                 try
                 {
-                    AppConfigLoader.ReloadConfig();
+                    ReloadConfig();
                     await MessageHandler.SendMessage(channel, "Config reloaded!");
                 }
                 catch (Exception e)

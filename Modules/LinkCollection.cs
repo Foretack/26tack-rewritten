@@ -33,7 +33,7 @@ internal sealed class LinkCollection : ChatModule
     protected override ValueTask OnMessage(Privmsg message)
     {
         if (message.Content.Length < 10
-        || message.Author.Name == AppConfigLoader.Config.BotUsername
+        || message.Author.Name == AppConfig.BotUsername
         || message.Author.Name.Contains("bot")
         || _bots.Contains(message.Author.Name)
         || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == message.Channel.Name))

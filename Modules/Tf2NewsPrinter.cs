@@ -17,7 +17,7 @@ internal sealed class Tf2NewsPrinter : IModule
 
     private int _arrowLength;
     private readonly Regex _arrow = new(@"<:arrow:[0-9]+>|:arrow:");
-    private readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
+    private readonly string _relayChannel = AppConfig.RelayChannel;
 
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
     {

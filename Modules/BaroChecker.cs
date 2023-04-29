@@ -65,7 +65,7 @@ internal sealed class BaroChecker : IModule
         if (!Enabled)
             return;
         await MessageHandler.SendMessage("pajlada", $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
-        await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
+        await MessageHandler.SendMessage(AppConfig.RelayChannel, $"Void trader Baro Ki’Teer has arrived at {baro.Location}! 💠");
     }
 
     private async Task DepartedEv()
@@ -74,7 +74,7 @@ internal sealed class BaroChecker : IModule
         if (!Enabled)
             return;
         await MessageHandler.SendMessage("pajlada", "Void trader Baro Ki’Teer has departed! 💠");
-        await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
+        await MessageHandler.SendMessage(AppConfig.RelayChannel, "Void trader Baro Ki’Teer has departed! 💠");
     }
 
     public void Enable()

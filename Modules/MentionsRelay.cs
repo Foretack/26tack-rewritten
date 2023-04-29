@@ -19,7 +19,7 @@ internal sealed class MentionsRelay : ChatModule
         OnDisabled = x => Log.Warning($"{x.Name} has been disabled!");
     }
 
-    private static readonly Regex _mention = new(AppConfigLoader.Config.MentionsRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private static readonly Regex _mention = new(AppConfig.MentionsRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     protected override async ValueTask OnMessage(Privmsg message)
     {
         if (!Permission.IsBlacklisted(message.Author.Name) && _mention.IsMatch(message.Content))
@@ -32,7 +32,7 @@ internal sealed class MentionsRelay : ChatModule
             else
                 msg = $"```ansi{CRLF}\u001b[2;32m\u001b[0m\u001b[2;32m{DateTime.Now:F}\u001b[0m{CRLF}{SEPARATOR}{CRLF}\u001b[2;35m\u001b[0m\u001b[1;2m\u001b[1;35m@{user}\u001b[0m\u001b[0m in \u001b[1;2m\u001b[1;41m#{message.Channel.Name}\u001b[0m\u001b[0m{CRLF}{SEPARATOR_LONG}{CRLF}{content}{CRLF}```";
 
-            await DiscordChat.SendMessage(AppConfigLoader.Config.Mentions, msg);
+            await DiscordChat.SendMessage(AppConfig.Mentions, msg);
         }
     }
 }

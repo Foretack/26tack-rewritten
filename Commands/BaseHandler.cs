@@ -5,7 +5,7 @@ namespace Tack.Commands;
 internal sealed class BaseHandler : ChatCommandHandler
 {
     public override string Name => "Base";
-    public override string Prefix => AppConfigLoader.Config.BasePrefix;
+    public override string Prefix => AppConfig.BasePrefix;
 
     public BaseHandler()
     {

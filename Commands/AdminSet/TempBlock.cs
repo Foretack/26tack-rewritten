@@ -11,12 +11,12 @@ internal sealed class TempBlock : Command
         permission: PermissionLevels.Whitelisted
     );
 
-    private readonly string _reqUrl = AppConfigLoader.Config.BlocksLink;
+    private readonly string _reqUrl = AppConfig.BlocksLink;
     private readonly HttpClient _requests = new()
     {
         DefaultRequestHeaders =
         {
-            { "Authorization", $"Basic {AppConfigLoader.Config.BlocksAuth}" }
+            { "Authorization", $"Basic {AppConfig.BlocksAuth}" }
         }
     };
 

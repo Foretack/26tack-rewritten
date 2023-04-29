@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using MiniTwitch.Irc;
-using MiniTwitch.Irc.Enums;
 using Tack.Models;
 
 namespace Tack.Core;

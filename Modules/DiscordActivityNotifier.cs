@@ -34,7 +34,7 @@ internal class DiscordActivityNotifier : IModule
                 string lenString = activity.EndTimestamp is null ? string.Empty : $"{Time.Until((DateTime)activity.EndTimestamp):m'm 's's'}";
                 if (!ActOnCooldown() && activity.Details != CurrentSong?.Details)
                 {
-                    await MessageHandler.SendMessage(AppConfigLoader.Config.RelayChannel,
+                    await MessageHandler.SendMessage(AppConfig.RelayChannel,
                         $"{presence.Author.Username} is listening to: \"{activity.Details}\" by {activity.State} [{lenString}] 🎶 ");
                 }
 

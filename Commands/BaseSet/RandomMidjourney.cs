@@ -27,7 +27,7 @@ internal sealed class RandomMidjourney : Command
             $"LIMIT 1").GetAsync();
         });
 
-        dynamic ? row = query.FirstOrDefault();
+        dynamic? row = query.FirstOrDefault();
         if (row is null)
         {
             await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
@@ -54,8 +54,8 @@ internal sealed class RandomMidjourney : Command
             { new ByteArrayContent(bytes), "file", $"image{Random.Shared.Next(1000)}.{row.link_ext}" }
         };
 
-        requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
-        HttpResponseMessage response = await requests.PostAsync(AppConfigLoader.Config.ImageHostLink, content);
+        requests.DefaultRequestHeaders.Add("Authorization", AppConfig.ImageHostAuth);
+        HttpResponseMessage response = await requests.PostAsync(AppConfig.ImageHostLink, content);
         string responseString = await response.Content.ReadAsStringAsync();
         if (!responseString.StartsWith("https"))
         {
