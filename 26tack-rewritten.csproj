@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.6" />
     <PackageReference Include="CachingFramework.Redis" Version="15.0.2" />
-    <PackageReference Include="CliWrap" Version="3.6.0" />
+    <PackageReference Include="CliWrap" Version="3.6.1" />
     <PackageReference Include="CodeHollow.FeedReader" Version="1.2.6" />
     <PackageReference Include="Config.Net" Version="5.1.5" />
     <PackageReference Include="Config.Net.Yaml" Version="5.1.5" />
