@@ -50,9 +50,12 @@ internal sealed class FeedsReader : IModule
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
             IEnumerable<FeedItem> items = feedReadResult.Items
-                .Where(x => (x.PublishingDate ?? DateTime.MinValue).Ticks > latest[sub.Key]);
+                .OrderBy(x => (x.PublishingDate ?? DateTime.MinValue).Ticks);
             foreach (FeedItem item in items)
             {
+                if ((item.PublishingDate?.Ticks ?? 0) <= latest[sub.Key])
+                    continue;
+
                 Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
                 StringBuilder sb = new(sub.Value.PrependText);
                 _ = sb.Append(' ')
