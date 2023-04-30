@@ -25,7 +25,7 @@ internal sealed class FeedsReader : IModule
     private async Task ReadFeeds()
     {
         Dictionary<string, RssFeedSubscription> subs = await GetSubscriptions();
-        Dictionary<string, DateTime> latest = await GetLatestItems();
+        Dictionary<string, long> latest = await GetLatestItems();
 
         foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
@@ -49,19 +49,10 @@ internal sealed class FeedsReader : IModule
             }
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
-            IEnumerable<FeedItem> items = feedReadResult.Items.OrderBy(x => (x.PublishingDate ?? DateTime.MinValue).Ticks);
+            IEnumerable<FeedItem> items = feedReadResult.Items
+                .Where(x => (x.PublishingDate ?? DateTime.MinValue).Ticks > latest[sub.Key]);
             foreach (FeedItem item in items)
             {
-                if (!item.PublishingDate.HasValue)
-                {
-                    Log.Warning("[{h}] Item from {feedTitle} has unparsable date. Skipping", Name, feedReadResult.Title);
-                    continue;
-                }
-                else if (item.PublishingDate.Value.Date <= latest[sub.Key])
-                {
-                    continue;
-                }
-
                 Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
                 StringBuilder sb = new(sub.Value.PrependText);
                 _ = sb.Append(' ')
@@ -74,7 +65,7 @@ internal sealed class FeedsReader : IModule
                     .Append(item.Link);
                 }
 
-                latest[sub.Key] = item.PublishingDate.Value;
+                latest[sub.Key] = item.PublishingDate!.Value.Ticks;
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
                 if (Enabled)
                 {
@@ -92,10 +83,10 @@ internal sealed class FeedsReader : IModule
         return Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
     }
 
-    private static Task<Dictionary<string, DateTime>> GetLatestItems()
+    private static Task<Dictionary<string, long>> GetLatestItems()
     {
         return Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, DateTime>()));
+            () => Task.FromResult(new Dictionary<string, long>()));
     }
 
     public void Enable()
