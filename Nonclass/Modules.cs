@@ -1,6 +1,5 @@
-﻿using AsyncAwaitBestPractices;
+﻿using MiniTwitch.Irc.Models;
 using Tack.Core;
-using Tack.Handlers;
 using Tack.Models;
 
 namespace Tack.Nonclass;
@@ -14,7 +13,7 @@ public interface IModule
     public void UpdateSettings();
 }
 
-public abstract class ChatModule : IModule
+public abstract class ChatModule : Singleton, IModule
 {
     /// <summary>
     /// The name of the class that is derived from ChatModule
@@ -27,17 +26,13 @@ public abstract class ChatModule : IModule
 
     protected ChatModule() => Enable();
 
-    private void OnTwitchMessage(object? sender, Core.OnMessageArgs e)
-    {
-        OnMessage(e.ChatMessage).SafeFireAndForget(x => Log.Error(x, $"{Name} encountered an issue"));
-    }
-
-    protected abstract ValueTask OnMessage(TwitchMessage ircMessage);
+    protected abstract ValueTask OnMessage(Privmsg message);
 
     public void Enable()
     {
         Enabled = true;
-        MessageHandler.OnTwitchMsg += OnTwitchMessage;
+        SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
         OnEnabled.Invoke(this);
         UpdateSettings();
         Log.Debug("Enabled module: {name}", Name);
@@ -46,7 +41,8 @@ public abstract class ChatModule : IModule
     public void Disable()
     {
         Enabled = false;
-        MessageHandler.OnTwitchMsg -= OnTwitchMessage;
+        SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
         OnDisabled.Invoke(this);
         UpdateSettings();
         Log.Debug("Disabled module: {name}", Name);

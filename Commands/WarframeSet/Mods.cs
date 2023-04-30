@@ -17,13 +17,13 @@ internal sealed class Mods : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Specify the mod you're looking for FeelsDankMan");
+            await MessageHandler.SendMessage(channel, $"@{user}, Specify the mod you're looking for FeelsDankMan");
             return;
         }
 
@@ -35,7 +35,7 @@ internal sealed class Mods : Command
             Result<ModInfo> r = await ExternalApiHandler.WarframeStatusApi<ModInfo>($"mods/{modName}", string.Empty, string.Empty);
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
 
@@ -45,7 +45,7 @@ internal sealed class Mods : Command
 
         ModInfo mod = value;
 
-        int level = Options.ParseInt("rank", ctx.IrcMessage.Message) ?? mod.FusionLimit;
+        int level = Options.ParseInt("rank", ctx.Message.Content) ?? mod.FusionLimit;
         if (level > mod.FusionLimit)
             level = mod.FusionLimit;
         string modString =
@@ -53,6 +53,6 @@ internal sealed class Mods : Command
             $"▣ [Rank:{level}/{mod.FusionLimit}] drain:{mod.BaseDrain + level} " +
             $"▣ {string.Join(" | ", mod.LevelStats[level].Stats)} ";
 
-        MessageHandler.SendMessage(channel, $"@{user}, {modString}");
+        await MessageHandler.SendMessage(channel, $"@{user}, {modString}");
     }
 }

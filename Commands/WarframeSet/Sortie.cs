@@ -17,8 +17,8 @@ internal sealed class Sortie : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
 
         (bool keyExists, CurrentSortie value) = await Redis.Cache.TryGetObjectAsync<CurrentSortie>("warframe:sortiedata");
         if (!keyExists)
@@ -26,7 +26,7 @@ internal sealed class Sortie : Command
             Result<CurrentSortie> r = await ExternalApiHandler.WarframeStatusApi<CurrentSortie>("sortie");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
+                await MessageHandler.SendMessage(channel, $"@{user}, Failed to fetch the current sortie. ({r.Exception.Message})");
                 return;
             }
 
@@ -39,7 +39,7 @@ internal sealed class Sortie : Command
         if (Time.HasPassed(sortie.Expiry))
         {
             _ = await Redis.Cache.RemoveAsync("warframe:sortiedata");
-            MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
+            await MessageHandler.SendMessage(channel, $"@{user}, Sortie data is outdated. You should try again later ppL");
             return;
         }
 
@@ -48,7 +48,7 @@ internal sealed class Sortie : Command
             $"➜ ■ {sortie.Variants[1].MissionType} [{ModifierOf(sortie.Variants[1])}] " +
             $"➜ ◆ {(sortie.Variants[2].MissionType == "Assassination" ? $"{sortie.Boss} Assassination" : sortie.Variants[2].MissionType)} [{ModifierOf(sortie.Variants[2])}]";
 
-        MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {Time.UntilString(sortie.Expiry)}");
+        await MessageHandler.SendMessage(channel, $"@{user}, {sortieString} -- time left: {Time.UntilString(sortie.Expiry)}");
     }
 
     private string ModifierOf(Variant variant)

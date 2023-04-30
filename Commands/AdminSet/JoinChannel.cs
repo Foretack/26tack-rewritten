@@ -14,33 +14,33 @@ internal sealed class JoinChannel : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, specify a channel to join fdm");
+            await MessageHandler.SendMessage(channel, $"@{user}, specify a channel to join fdm");
             return;
         }
 
         string targetChannel = args[0].ToLower();
         if (ChannelHandler.FetchedChannels.Any(x => x.Username == targetChannel))
         {
-            MessageHandler.SendMessage(channel, $"I'm already in that channel! (Aborted)");
+            await MessageHandler.SendMessage(channel, $"I'm already in that channel! (Aborted)");
             return;
         }
 
-        int priority = Options.ParseInt("priority", ctx.IrcMessage.Message) ?? 0;
-        bool logged = Options.ParseBool("logged", ctx.IrcMessage.Message) ?? true;
+        int priority = Options.ParseInt("priority", ctx.Message.Content) ?? 0;
+        bool logged = Options.ParseBool("logged", ctx.Message.Content) ?? true;
 
         bool successful = await ChannelHandler.JoinChannel(targetChannel, priority, logged);
         if (successful)
         {
-            MessageHandler.SendMessage(channel, $"Attempted to join {targetChannel}");
+            await MessageHandler.SendMessage(channel, $"Attempted to join {targetChannel}");
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"@{user}, There was an error trying to join that channel fdm");
+        await MessageHandler.SendMessage(channel, $"@{user}, There was an error trying to join that channel fdm");
     }
 }

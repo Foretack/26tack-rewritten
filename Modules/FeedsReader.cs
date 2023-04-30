@@ -1,4 +1,7 @@
-﻿using CodeHollow.FeedReader;
+﻿using System.Text;
+using System.Xml;
+using CodeHollow.FeedReader;
+using CodeHollow.FeedReader.Parser;
 using Tack.Core;
 using Tack.Database;
 using Tack.Handlers;
@@ -21,12 +24,8 @@ internal sealed class FeedsReader : IModule
 
     private async Task ReadFeeds()
     {
-        if (!Enabled)
-            return;
-
-        Dictionary<string, RssFeedSubscription> subs = await Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
-        Dictionary<string, List<string>> latest = await Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, List<string>>()));
+        Dictionary<string, RssFeedSubscription> subs = await GetSubscriptions();
+        Dictionary<string, long> latest = await GetLatestItems();
 
         foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
@@ -36,32 +35,61 @@ internal sealed class FeedsReader : IModule
                 await Redis.Cache.SetObjectAsync("rss:latest", latest);
             }
 
-            Feed? feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
-            if (feedReadResult is null)
+            Feed? feedReadResult;
+            try
             {
+                feedReadResult = await FeedReader.ReadAsync(sub.Value.Link);
+                if (feedReadResult is null)
+                    continue;
+            }
+            catch (Exception ex) when (ex is XmlException or FeedTypeNotSupportedException)
+            {
+                Log.Debug(ex, "[{h}] Reading feed [{f}] threw a silent exception: ", nameof(FeedsReader), sub.Key);
                 continue;
             }
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
-
-            FeedItem? item = feedReadResult.Items.FirstOrDefault();
-            if (item is null)
-                continue;
-            if (latest[sub.Key].Contains(item.Link))
-                continue;
-
-            Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
-
-            if (latest[sub.Key].Count >= 50)
-                latest[sub.Key].Clear();
-            latest[sub.Key].Add($"{item.Title} ({item.Link})");
-            await Redis.Cache.SetObjectAsync("rss:latest", latest);
-
-            foreach (string channel in sub.Value.Channels)
+            IEnumerable<FeedItem> items = feedReadResult.Items
+                .OrderBy(x => (x.PublishingDate ?? DateTime.MinValue).Ticks);
+            foreach (FeedItem item in items)
             {
-                MessageHandler.SendMessage(channel, $"{sub.Value.PrependText} {item.Title} -- {item.Link}");
+                if ((item.PublishingDate?.Ticks ?? 0) <= latest[sub.Key])
+                    continue;
+
+                Log.Information("💡 New post from [{origin}]: {title} -- {link}", sub.Key, item.Title, item.Link);
+                StringBuilder sb = new(sub.Value.PrependText);
+                _ = sb.Append(' ')
+                    .Append(item.Title);
+                if (sub.Value.IncludeLink)
+                {
+                    _ = sb.Append(' ')
+                    .Append("--")
+                    .Append(' ')
+                    .Append(item.Link);
+                }
+
+                latest[sub.Key] = item.PublishingDate!.Value.Ticks;
+                await Redis.Cache.SetObjectAsync("rss:latest", latest);
+                if (Enabled)
+                {
+                    foreach (string channel in sub.Value.Channels)
+                    {
+                        await MessageHandler.SendMessage(channel, sb.ToString());
+                    }
+                }
             }
         }
+    }
+
+    private static Task<Dictionary<string, RssFeedSubscription>> GetSubscriptions()
+    {
+        return Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
+    }
+
+    private static Task<Dictionary<string, long>> GetLatestItems()
+    {
+        return Redis.Cache.FetchObjectAsync("rss:latest",
+            () => Task.FromResult(new Dictionary<string, long>()));
     }
 
     public void Enable()

@@ -17,16 +17,14 @@ internal sealed class Tf2NewsPrinter : IModule
 
     private int _arrowLength;
     private readonly Regex _arrow = new(@"<:arrow:[0-9]+>|:arrow:");
-    private readonly string _relayChannel = AppConfigLoader.Config.RelayChannel;
+    private readonly string _relayChannel = AppConfig.RelayChannel;
 
     private async void OnDiscordMessage(object? sender, Core.OnDiscordMsgArgs e)
     {
         Models.DiscordMessage? message = e.DiscordMessage;
-        if (message is null
-        || message.ChannelId == 0
-        || message.Author.Username is null
+        if (message is not { ChannelId: > 0 }
         || message.ChannelId != 864407160422662184
-        || message.Author.Username != "TF2 Community #updates"
+        || message.Author.Username is not "TF2 Community #updates"
         || (!message.Content.Contains("Team Fortress 2 Update Released")
         && !_arrow.IsMatch(message.Content)))
         {
@@ -41,11 +39,11 @@ internal sealed class Tf2NewsPrinter : IModule
             if (line.Length < _arrowLength + 4)
                 continue;
             if (line[..4] == "    " && _arrow.IsMatch(line[4..(_arrowLength + 4)]))
-                MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
+                await MessageHandler.SendMessage(_relayChannel, "➜ " + line[(_arrowLength + 4)..]);
             else if (_arrow.IsMatch(line[.._arrowLength]))
-                MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
+                await MessageHandler.SendMessage(_relayChannel, "● " + line[_arrowLength..]);
             else if (line.StartsWith("https://www.teamfortress.com"))
-                MessageHandler.SendMessage(_relayChannel, line);
+                await MessageHandler.SendMessage(_relayChannel, line);
             else
                 continue;
             await Task.Delay(500);

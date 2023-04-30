@@ -21,8 +21,8 @@ internal sealed class Profile : Command
     private const int LeechedChannel = 35833485;
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
 
         (bool keyExists, string value) = await Redis.Cache.TryGetObjectAsync<string>("warframe:v5_ext_token");
         if (!keyExists)
@@ -30,7 +30,7 @@ internal sealed class Profile : Command
             Result<string> t = await ExternalApiHandler.GetWarframeTwitchExtensionTokenV5(LeechedChannel);
             if (!t.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation.");
+                await MessageHandler.SendMessage(channel, $"@{user}, An error occured with token generation.");
                 Log.Warning(t.Exception, $"Error generating Warframe extension token");
                 return;
             }
@@ -41,24 +41,24 @@ internal sealed class Profile : Command
 
         string token = value;
 
-        string target = ctx.Args.Length == 0 ? ctx.IrcMessage.Username : ctx.Args[0];
+        string target = ctx.Args.Length == 0 ? ctx.Message.Author.Name : ctx.Args[0];
         Result<(Stream? Stream, HttpStatusCode Code)> data = await ExternalApiHandler.GetWarframeProfileData(target, token);
         if (data.Value.Code == HttpStatusCode.NoContent)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, User does not have loadout sharing enabled. Loudout sharing can be enabled under data permissions on: https://www.warframe.com/user");
+            await MessageHandler.SendMessage(channel, $"@{user}, User does not have loadout sharing enabled. Loudout sharing can be enabled under data permissions on: https://www.warframe.com/user");
             return;
         }
 
         if (data.Value.Code != HttpStatusCode.OK)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Account Data Not Found. The requested account doesn't exist or isn't public. :/");
+            await MessageHandler.SendMessage(channel, $"@{user}, Account Data Not Found. The requested account doesn't exist or isn't public. :/");
             return;
         }
 
         ProfileRoot? profile = await JsonSerializer.DeserializeAsync<ProfileRoot>(data.Value.Stream!);
         if (profile is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, There was an error parsing your data. Saj ");
+            await MessageHandler.SendMessage(channel, $"@{user}, There was an error parsing your data. Saj ");
             return;
         }
 
@@ -79,6 +79,6 @@ internal sealed class Profile : Command
             .Append($"] ")
             .Append(lastUpdated.TotalSeconds > 59 ? $"(last updated {lastUpdated.FormatTimeLeft()} ago)" : string.Empty);
 
-        MessageHandler.SendMessage(channel, message.ToString());
+        await MessageHandler.SendMessage(channel, message.ToString());
     }
 }

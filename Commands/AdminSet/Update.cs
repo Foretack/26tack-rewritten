@@ -15,26 +15,26 @@ internal sealed class Update : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
 
-        var db = new DbQueries();
+        DbQueries db = SingleOf<DbQueries>.Obj;
         _ = await db.LogException(new Debug.TestException($"UPDATE COMMAND USAGE BY {user}"));
 
         string? pullResult = await Program.GitPull();
 
         if (pullResult is null)
         {
-            MessageHandler.SendMessage(channel, $"something went wrong CaitlynS");
+            await MessageHandler.SendMessage(channel, $"something went wrong CaitlynS");
             return;
         }
 
         if (pullResult.Contains("Already up to date."))
         {
-            MessageHandler.SendMessage(channel, $"Pepega {pullResult}");
+            await MessageHandler.SendMessage(channel, $"Pepega {pullResult}");
             return;
         }
 
-        MessageHandler.SendMessage(channel, $"PPardner 🔧 {user} {pullResult}");
+        await MessageHandler.SendMessage(channel, $"PPardner 🔧 {user} {pullResult}");
     }
 }

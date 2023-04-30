@@ -15,29 +15,23 @@ internal sealed class Suggest : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string rawname = ctx.IrcMessage.Username;
-        string id = ctx.IrcMessage.UserId;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string rawname = ctx.Message.Author.Name;
+        long id = ctx.Message.Author.Id;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan you must give a suggestion to... suggest something... ");
+            await MessageHandler.SendMessage(channel, $"@{user}, FeelsDankMan you must give a suggestion to... suggest something... ");
             return;
         }
 
-        var db = new DbQueries();
+        DbQueries db = SingleOf<DbQueries>.Obj;
         var partialUser = new PartialUser(user, rawname, id);
-        bool success = await db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
+        db.CreateSuggestion(partialUser, string.Join(' ', args).Replace('\'', '_'));
 
-        if (success)
-        {
-            await MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
+        await MessageHandler.SendColoredMessage(channel, $"@{user}, ApuApustaja 👍 Your suggestion has been saved. You will most likely be " +
                 $"notified through a supibot reminder regarding it's status", UserColors.SeaGreen);
-            return;
-        }
-
-        MessageHandler.SendMessage(channel, $"@{user}, PoroSad There was an error processing your suggestion. Try again later?");
     }
 }

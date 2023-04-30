@@ -15,8 +15,8 @@ internal sealed class Invasions : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
 
         (bool keyExists, InvasionNode[] value) = await Redis.Cache.TryGetObjectAsync<InvasionNode[]>("warframe:invasions");
         if (!keyExists)
@@ -24,7 +24,7 @@ internal sealed class Invasions : Command
             Result<InvasionNode[]> r = await ExternalApiHandler.WarframeStatusApi<InvasionNode[]>("invasions");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
 
@@ -35,7 +35,7 @@ internal sealed class Invasions : Command
         InvasionNode[] invasionNodes = value;
 
         string message = await SumItems(invasionNodes);
-        MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
+        await MessageHandler.SendMessage(channel, $"@{user}, Total rewards of ongoing invasions: {message}");
     }
 
     private async Task<string> SumItems(InvasionNode[] invasions)

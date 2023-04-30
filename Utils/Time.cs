@@ -24,16 +24,6 @@ internal static class Time
         return (DateTime.Now - time.ToLocalTime()).FormatTimeLeft();
     }
 
-    public static void Schedule(Action action, DateTime dueTime)
-    {
-        Schedule(action, Until(dueTime));
-    }
-
-    public static void DoEvery(int seconds, Action action)
-    {
-        DoEvery(TimeSpan.FromSeconds(seconds), action);
-    }
-
     public static bool HasPassed(DateTime datetime)
     {
         return Time.Until(datetime) <= TimeSpan.Zero;
@@ -44,6 +34,10 @@ internal static class Time
         return timespan <= TimeSpan.Zero;
     }
 
+    public static void Schedule(Action action, DateTime dueTime)
+    {
+        Schedule(action, Until(dueTime));
+    }
     public static void Schedule(Action action, TimeSpan dueTime)
     {
         if (dueTime.TotalMilliseconds < 0)
@@ -80,6 +74,10 @@ internal static class Time
         null, dueTime, Timeout.InfiniteTimeSpan);
     }
 
+    public static void DoEvery(int seconds, Action action)
+    {
+        DoEvery(TimeSpan.FromSeconds(seconds), action);
+    }
     public static void DoEvery(TimeSpan period, Action action)
     {
         if (period.TotalMilliseconds < 0)

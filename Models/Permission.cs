@@ -1,9 +1,13 @@
-﻿using Tack.Database;
+﻿using MiniTwitch.Irc.Models;
+using Tack.Database;
 using Tack.Nonclass;
 
 namespace Tack.Models;
+
 public sealed class Permission
 {
+    private const string BROADCASTER_ROLE = "broadcaster/1";
+
     public int Level { get; set; } // forsenLevel
     public string Username { get; set; }
 
@@ -12,19 +16,20 @@ public sealed class Permission
     private readonly bool _isVIP;
     private readonly bool _isSubscriber;
 
-    private static readonly List<string> _blacklistedUsers = DbQueries.NewInstance().GetBlacklistedUsers().Result.ToList();
-    private static readonly List<string> _whitelistedUsers = DbQueries.NewInstance().GetWhitelistedUsers().Result.ToList();
+    private static readonly List<string> _blacklistedUsers = SingleOf<DbQueries>.Obj.GetBlacklistedUsers().Result.ToList();
+    private static readonly List<string> _whitelistedUsers = SingleOf<DbQueries>.Obj.GetWhitelistedUsers().Result.ToList();
 
-    public Permission(TwitchMessage ircMessage)
+    public Permission(Privmsg ircMessage)
     {
-        Username = ircMessage.Username;
-        _isBroadcaster = ircMessage.IsBroadcaster;
-        _isModerator = ircMessage.IsModerator;
-        _isVIP = ircMessage.IsVip;
-        _isSubscriber = ircMessage.IsSubscriber;
+        Username = ircMessage.Author.Name;
+        _isBroadcaster = ircMessage.Author.Badges.Contains(BROADCASTER_ROLE);
+        _isModerator = ircMessage.Author.IsMod;
+        _isVIP = ircMessage.Author.IsVip;
+        _isSubscriber = ircMessage.Author.IsSubscriber;
         Level = EvaluateLevel();
     }
 
+    // TODO: this is terrible
     private int EvaluateLevel()
     {
         int level = 0;

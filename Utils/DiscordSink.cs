@@ -22,7 +22,7 @@ internal sealed class DiscordSink : ILogEventSink
         _formatProvider = formatProvider;
         _webhookUrl = webhookUrl;
         _restrictedToMinimumLevel = restrictedToMinimumLevel;
-        Time.DoEvery(TimeSpan.FromSeconds(3), SendWebhook);
+        Time.DoEvery(TimeSpan.FromSeconds(2), SendWebhook);
     }
 
     public void Emit(LogEvent logEvent)

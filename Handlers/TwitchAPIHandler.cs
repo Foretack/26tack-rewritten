@@ -5,14 +5,14 @@ using TwitchLib.Api.Core;
 namespace Tack.Handlers;
 internal sealed class TwitchApiHandler
 {
-    public static TwitchApiHandler Instance { get; } = new(AppConfigLoader.Config);
+    public static TwitchApiHandler Instance { get; } = new(AppConfig);
     public TwitchAPI Api { get; init; }
     public HttpClient CreateClient => new()
     {
         DefaultRequestHeaders =
         {
-            { "Authorization", $"Bearer {AppConfigLoader.Config.BotAccessToken}" },
-            {"Client-Id", AppConfigLoader.Config.BotClientId }
+            { "Authorization", $"Bearer {AppConfig.BotAccessToken}" },
+            {"Client-Id", AppConfig.BotClientId }
         }
     };
 

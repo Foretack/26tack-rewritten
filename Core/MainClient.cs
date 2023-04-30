@@ -1,85 +1,53 @@
-﻿using Tack.Models;
-using TwitchLib.Client;
-using TwitchLib.Client.Events;
-using TwitchLib.Client.Models;
-using TwitchLib.Communication.Clients;
-using TwitchLib.Communication.Events;
-using TwitchLib.Communication.Models;
+﻿using Microsoft.Extensions.Logging;
+using MiniTwitch.Irc;
+using MiniTwitch.Irc.Interfaces;
+using MiniTwitch.Irc.Models;
+using Tack.Models;
 
 namespace Tack.Core;
-public static class MainClient
+
+internal sealed class MainClient : Singleton
 {
-    #region Properties
-    public static bool Connected { get; private set; } = false;
-    public static TwitchClient Client { get; private set; } = new TwitchClient();
-    public static User Self { get; private set; } = default!;
-    #endregion
+    public IrcClient Client { get; }
+    public User Self { get; private set; } = default!;
 
-    #region Initialization
-    public static async Task Initialize()
+    private readonly Dictionary<string, IUserstateSelf> _states = new();
+
+    public MainClient()
     {
-        var options = new ClientOptions
+        Client = new(options =>
         {
-            MessagesAllowedInPeriod = 150,
-            ThrottlingPeriod = TimeSpan.FromSeconds(30)
-        };
+            options.Username = AppConfig.BotUsername;
+            options.OAuth = AppConfig.BotAccessToken;
+            options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
+        });
+        Client.OnUserstate += OnUserstate;
+    }
 
-        var policy = new ReconnectionPolicy(10);
-        policy.SetMaxAttempts(10);
-        options.ReconnectionPolicy = policy;
-
-        var webSocketClient = new WebSocketClient(options);
-        Client = new TwitchClient(webSocketClient)
-        {
-            AutoReListenOnException = true
-        };
-
-        var credentials = new ConnectionCredentials(AppConfigLoader.Config.BotUsername, AppConfigLoader.Config.BotAccessToken);
-        Client.Initialize(credentials);
-
-        Handlers.Result<User> userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+    public async Task SetSelf()
+    {
+        Handlers.Result<User> userResult = await User.Get(AppConfig.BotUsername);
         while (!userResult.Success)
         {
             Log.Fatal("[{header}] Fetching user failed. Retrying...", nameof(MainClient));
             await Task.Delay(1000);
-            userResult = await User.Get(AppConfigLoader.Config.BotUsername);
+            userResult = await User.Get(AppConfig.BotUsername);
         }
 
         Self = userResult.Value;
-
-        Connect();
     }
 
-    private static void Connect()
+    public bool ModeratesChannel(string channel)
     {
-        _ = Client.Connect();
-        Client.OnConnected += ClientConnectedEvent;
-        Client.OnDisconnected += ClientDisconnectedEvent;
-        Client.OnError += ClientErrorEvent;
-        Client.OnConnectionError += ClientConnectionErrorEvent;
-    }
-    #endregion
+        if (!_states.ContainsKey(channel))
+            return false;
 
-    #region Client events
-    private static void ClientConnectedEvent(object? sender, OnConnectedArgs e)
-    {
-        Log.Information($"[Main] Connected");
-        Connected = true;
+        return _states[channel].IsMod;
     }
 
-    private static void ClientConnectionErrorEvent(object? sender, OnConnectionErrorArgs e)
+    private ValueTask OnUserstate(Userstate ustate)
     {
-        Program.RestartProcess(nameof(ClientConnectionErrorEvent));
+        _states[ustate.Channel.Name] = ustate.Self;
+        return ValueTask.CompletedTask;
     }
-
-    private static void ClientErrorEvent(object? sender, OnErrorEventArgs e)
-    {
-        Program.RestartProcess(nameof(ClientErrorEvent));
-    }
-
-    private static void ClientDisconnectedEvent(object? sender, OnDisconnectedEventArgs e)
-    {
-        Program.RestartProcess(nameof(ClientDisconnectedEvent));
-    }
-    #endregion
 }

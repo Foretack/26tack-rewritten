@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
+using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Nonclass;
@@ -8,7 +10,10 @@ using Tack.Utils;
 namespace Tack.Modules;
 internal sealed class UserCollection : ChatModule
 {
-    private readonly FixedStack<TwitchUser> _users = new(500);
+    private const int MAX_ARR_SIZE = 2500;
+
+    private readonly TwitchUser[] _users = new TwitchUser[MAX_ARR_SIZE];
+    private int _index = 0;
 
     public UserCollection(bool enabled)
     {
@@ -19,12 +24,28 @@ internal sealed class UserCollection : ChatModule
             Disable();
     }
 
-    protected override ValueTask OnMessage(TwitchMessage ircMessage)
+    protected override ValueTask OnMessage(Privmsg message)
     {
-        if (!_users.IsFull && !_users.Any(x => x.Username == ircMessage.Username))
+        if (_index + 1 != MAX_ARR_SIZE)
         {
-            _users.Push(new(ircMessage.Username, ircMessage.UserId));
-            Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, ircMessage.Username, _users.Count, 500);
+            if (!_users.Any(x => x.Username == message.Author.Name))
+            {
+                if (message.Author.Name.Length > 25)
+                {
+                    Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(UserCollection), message.Author.Name);
+                    return default;
+                }
+
+                _users[_index++] = new(message.Author.Name, message.Author.Id);
+                Log.Verbose("[{@header}] Added user to list: {user} ({count}/{max})", Name, message.Author.Name, _index + 1, MAX_ARR_SIZE);
+                return default;
+            }
+        }
+        else
+        {
+            SingleOf<MainClient>.Obj.Client.OnMessage -= OnMessage;
+            SingleOf<AnonymousClient>.Obj.Client.OnMessage -= OnMessage;
+            Log.Debug("[{h}] User list full. Unsubscribing from event {ev}", Name, nameof(OnMessage));
         }
 
         return default;
@@ -32,36 +53,44 @@ internal sealed class UserCollection : ChatModule
 
     private async Task Commit()
     {
-        if (!_users.IsFull)
+        if (_index + 1 != MAX_ARR_SIZE)
             return;
-        Log.Debug("[{@header}] Committing user list...", Name);
-        var db = new DbQueries();
-        StringBuilder sb = new();
 
+        Log.Debug("[{@header}] Committing user list...", Name);
+        DbQueries db = SingleOf<DbQueries>.Obj;
+        StringBuilder sb = new();
         foreach (TwitchUser user in _users)
-        {
             _ = sb.Append($"('{user.Username}', {user.Id}), ");
-        }
 
         sb[^2] = ' ';
-        _users.Clear();
-
-        int inserted = await db.Enqueue($"INSERT INTO twitch_users (username, id) " +
-            $"VALUES {sb} " +
-            $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;", 10000);
-        Log.Debug("{c} users inserted", inserted);
+        _index = 0;
+        SingleOf<MainClient>.Obj.Client.OnMessage += OnMessage;
+        SingleOf<AnonymousClient>.Obj.Client.OnMessage += OnMessage;
+        Log.Debug("[{h}] Resubscribed to {ev}", Name, nameof(OnMessage));
+        db.Enqueue(async qf =>
+        {
+            int inserted = await qf.StatementAsync(
+                $"INSERT INTO twitch_users (username, id) "
+                + $"VALUES {sb} "
+                + $"ON CONFLICT ON CONSTRAINT unique_username DO NOTHING;");
+            Log.Debug("{c} users inserted", inserted);
+        });
 
         await Task.Delay(TimeSpan.FromSeconds(5));
-        await UpdateRandomUsers(db);
+        await UpdateRandomUsers();
     }
 
-    private async Task UpdateRandomUsers(DbQueries db)
+    private static async Task UpdateRandomUsers()
     {
-        IEnumerable<dynamic> rows = await db.Enqueue(q => q.SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45").GetAsync());
-        int[] castedRows = rows.Select(x => (int)x.id).ToArray();
-
-        _ = await db.UpdateUsers(castedRows);
+        DbQueries db = SingleOf<DbQueries>.Obj;
+        int[] uids = await db.ValueStatement(async qf =>
+        {
+            IEnumerable<dynamic> rows = await qf.Query().SelectRaw("id FROM twitch_users WHERE inserted = false OFFSET floor(random() * (SELECT count(*) FROM twitch_users WHERE inserted = false)) LIMIT 45")
+                .GetAsync();
+            return rows.Select(x => x.id).OfType<int>().ToArray();
+        });
+        await db.UpdateUsers(uids);
     }
 
-    private record struct TwitchUser(string Username, string Id);
+    private record struct TwitchUser(string Username, long Id);
 }

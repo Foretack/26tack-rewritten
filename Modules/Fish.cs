@@ -39,7 +39,7 @@ internal sealed class Fish : IModule
 
         bool includeEmotes = Rng();
         await Task.Delay(TimeSpan.FromSeconds(Rng(10, 1800)));
-        MessageHandler.SendMessage("pajlada",
+        await MessageHandler.SendMessage("pajlada",
             $"$$fish {(includeEmotes ? _emotes.Choice() : null)}");
     }
 

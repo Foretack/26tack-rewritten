@@ -51,9 +51,16 @@ internal static class ExternalApiHandler
 
     public static async Task<IvrUser[]> GetIvrUsersById(int[] ids)
     {
+        TimeSpan timeout = TimeSpan.FromSeconds(ids.Length * 2);
+        if (timeout.TotalMilliseconds <= 0)
+        {
+            Log.Error("[{h}.{m}()] Timeout cannot be less than or equal to 0. Id count: {c}", nameof(ExternalApiHandler), nameof(GetIvrUsersById), ids.Length);
+            return Array.Empty<IvrUser>();
+        }
+
         var requests = new HttpClient
         {
-            Timeout = TimeSpan.FromSeconds(ids.Length * 2)
+            Timeout = timeout
         };
         requests.DefaultRequestHeaders.Add("User-Agent", "occluder");
 
@@ -87,7 +94,7 @@ internal static class ExternalApiHandler
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to fetch relic data");
-            var db = new DbQueries();
+            DbQueries db = SingleOf<DbQueries>.Obj;
             _ = await db.LogException(ex);
             return null;
         }
@@ -191,4 +198,7 @@ internal static class ExternalApiHandler
     #endregion
 }
 
-public record struct Result<T>(T Value, bool Success, Exception Exception);
+public record struct Result<T>(T Value, bool Success, Exception Exception)
+{
+    public static implicit operator T(Result<T> Result) => Result.Value;
+};

@@ -5,7 +5,7 @@ namespace Tack.Commands;
 internal sealed class WarframeHandler : ChatCommandHandler
 {
     public override string Name => "Warframe";
-    public override string Prefix => AppConfigLoader.Config.WarframePrefix;
+    public override string Prefix => AppConfig.WarframePrefix;
 
     public WarframeHandler()
     {

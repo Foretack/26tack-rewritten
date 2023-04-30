@@ -14,20 +14,20 @@ internal sealed class EditUser : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string commandName = ctx.CommandName;
         string[] args = ctx.Args;
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, You need to specify a user.");
+            await MessageHandler.SendMessage(channel, $"@{user}, You need to specify a user.");
             return;
         }
 
         Result<User> targetResult = await User.Get(args[0]);
         if (!targetResult.Success)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, That user's Twitch account was not found!");
+            await MessageHandler.SendMessage(channel, $"@{user}, That user's Twitch account was not found!");
             return;
         }
 
@@ -41,7 +41,7 @@ internal sealed class EditUser : Command
         };
         if (mode == 0 && (args.Length < 2 || (args[1] != "blacklist" && args[1] != "whitelist")))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Incorrect usage. {commandName} <user> <whitelist/blacklist>");
+            await MessageHandler.SendMessage(channel, $"@{user}, Incorrect usage. {commandName} <user> <whitelist/blacklist>");
             return;
         }
 
@@ -50,22 +50,24 @@ internal sealed class EditUser : Command
         if (mode == 0 && args[1] == "blacklist")
             mode = 2;
 
-        bool success = mode == 1 ? await WhitelistUser(target.Username) : await BlacklistUser(target.Username, target.Id);
-        MessageHandler.SendMessage(channel, success.ToString());
+        if (mode == 1)
+            WhitelistUser(target.Username);
+        else
+            BlacklistUser(target.Username, target.Id);
+
+        await MessageHandler.SendMessage(channel, "k");
     }
 
-    private async Task<bool> BlacklistUser(string username, string id)
+    private static void BlacklistUser(string username, long id)
     {
-        var db = new DbQueries();
-        bool s = await db.BlacklistUser(username, id);
+        DbQueries db = SingleOf<DbQueries>.Obj;
+        db.BlacklistUser(username, id);
         Permission.BlacklistUser(username);
-        return s;
     }
-    private async Task<bool> WhitelistUser(string username)
+    private static void WhitelistUser(string username)
     {
-        var db = new DbQueries();
-        bool s = await db.WhitelistUser(username);
+        DbQueries db = SingleOf<DbQueries>.Obj;
+        db.WhitelistUser(username);
         Permission.WhitelistUser(username);
-        return s;
     }
 }

@@ -17,13 +17,13 @@ internal sealed class Relics : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         string[] args = ctx.Args;
 
         if (args.Length == 0)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Specify an item or a Relic or something fdm");
+            await MessageHandler.SendMessage(channel, $"@{user}, Specify an item or a Relic or something fdm");
             return;
         }
 
@@ -46,7 +46,7 @@ internal sealed class Relics : Command
             RelicData? r = await ExternalApiHandler.GetRelicData();
             if (r is null)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, Error getting relic information :(");
+                await MessageHandler.SendMessage(channel, $"@{user}, Error getting relic information :(");
                 return;
             }
 
@@ -57,7 +57,7 @@ internal sealed class Relics : Command
         RelicData relicData = value;
 
         message = relic ? await GetRelicItems(item, relicData) : await FindRelicsForItem(item, relicData);
-        MessageHandler.SendMessage(channel, $"@{user}, {message}");
+        await MessageHandler.SendMessage(channel, $"@{user}, {message}");
     }
 
     private async Task<string> FindRelicsForItem(string itemName, RelicData relicData)

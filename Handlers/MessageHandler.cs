@@ -1,22 +1,24 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using AsyncAwaitBestPractices;
+using MiniTwitch.Irc;
+using MiniTwitch.Irc.Models;
 using Tack.Core;
 using Tack.Database;
 using Tack.Models;
 using Tack.Utils;
 using TwitchLib.Api.Helix.Models.Chat;
-using TwitchLib.Client.Events;
-using TwitchLib.Communication.Events;
 
 namespace Tack.Handlers;
-internal static class MessageHandler
+public sealed class MessageHandler : Singleton
 {
     #region Fields
-    private static UserColors _currentColor = UserColors.Blue;
-    private static DiscordTrigger[] _discordEvents = DbQueries.NewInstance().GetDiscordTriggers().GetAwaiter().GetResult();
+    private static DiscordTrigger[] _discordEvents = SingleOf<DbQueries>.Obj.GetDiscordTriggers().GetAwaiter().GetResult();
+    private static readonly IrcClient _anonClient = SingleOf<AnonymousClient>.Obj.Client;
+    private static readonly IrcClient _mainClient = SingleOf<MainClient>.Obj.Client;
     private static readonly HttpClient _requests = TwitchApiHandler.Instance.CreateClient;
     private static readonly Dictionary<string, string> _lastSentMessage = new();
+    private static UserColors _currentColor = UserColors.Blue;
     #endregion
 
     #region Events
@@ -25,33 +27,24 @@ internal static class MessageHandler
         add => DiscordChat.DiscordMessageManager.AddEventHandler(value, nameof(OnDiscordMsg));
         remove => DiscordChat.DiscordMessageManager.RemoveEventHandler(value, nameof(OnDiscordMsg));
     }
-    public static event EventHandler<OnMessageArgs> OnTwitchMsg
-    {
-        add => AnonymousChat.TwitchMessageManager.AddEventHandler(value, nameof(OnTwitchMsg));
-        remove => AnonymousChat.TwitchMessageManager.RemoveEventHandler(value, nameof(OnTwitchMsg));
-    }
     #endregion
 
     #region Initialization
-    public static void Initialize()
+    public MessageHandler()
     {
-        OnTwitchMsg += OnMessage;
+        _mainClient.OnMessage += HandleIrcMessage;
+        _anonClient.OnMessage += HandleIrcMessage;
         OnDiscordMsg += OnDiscordMessageReceived;
-        MainClient.Client.OnMessageSent += OnMessageSent;
-        MainClient.Client.OnMessageThrottled += OnMessageThrottled;
-
-        Time.DoEvery(TimeSpan.FromHours(6), async () => await ReloadDiscordTriggers());
     }
 
     public static async Task ReloadDiscordTriggers()
     {
-        using var db = new DbQueries();
-        _discordEvents = await db.GetDiscordTriggers();
+        _discordEvents = await SingleOf<DbQueries>.Obj.GetDiscordTriggers();
     }
     #endregion
 
     #region Sending
-    public static void SendMessage(string channel, string message)
+    public static async ValueTask SendMessage(string channel, string message, bool colored = false)
     {
         message = message.Length >= 500 ? message[..495] + "..." : message;
         if (!_lastSentMessage.ContainsKey(channel))
@@ -63,7 +56,7 @@ internal static class MessageHandler
             message += " 󠀀";
         }
 
-        MainClient.Client.SendMessage(channel, message);
+        await _mainClient.SendMessage(channel, message, colored);
         _lastSentMessage[channel] = message;
     }
     public static async Task SendColoredMessage(string channel, string message, UserColors color)
@@ -73,7 +66,7 @@ internal static class MessageHandler
             // TODO: enable this once it's fixed
             //await TwitchAPIHandler.Instance.Api.Helix.Chat.UpdateUserChatColorAsync(MainClient.Self.Id, color);
             HttpResponseMessage response = await _requests.PutAsync(
-                $"https://api.twitch.tv/helix/chat/color?user_id={MainClient.Self.Id}&color={color.Value}", null);
+                $"https://api.twitch.tv/helix/chat/color?user_id={SingleOf<MainClient>.Obj.Self.Id}&color={color.Value}", null);
             if (!response.IsSuccessStatusCode)
             {
                 Log.Warning($"Failed to change user color: {(int)response.StatusCode} {response.StatusCode}");
@@ -82,64 +75,46 @@ internal static class MessageHandler
             _currentColor = color;
         }
 
-        SendMessage(channel, "/me " + message);
-    }
-    private static void OnMessageSent(object? sender, OnMessageSentArgs e)
-    {
-        Log.Debug("Sent message: {message}", e.SentMessage.Message);
-    }
-    private static void OnMessageThrottled(object? sender, OnMessageThrottledEventArgs e)
-    {
-        Log.Warning("Message throttled: {message} ({count} sent in {period})",
-            e.Message,
-            e.SentMessageCount,
-            e.AllowedInPeriod);
+        await SendMessage(channel, message, true);
     }
     #endregion
 
     #region Receiving
-    internal static void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
+    internal void OnDiscordMessageReceived(object? sender, OnDiscordMsgArgs args)
     {
         DiscordMessage message = args.DiscordMessage;
-        Log.Verbose("[{header}] {username} {channel}: {content}",
-            $"Discord:{message.GuildName}",
-            message.Author.Username,
-            message.ChannelName,
-            message.Content);
         HandleDiscordMessage(message).SafeFireAndForget(onException: ex => Log.Error(ex, "Error processing Discord message: "));
-    }
-    private static void OnMessage(object? sender, OnMessageArgs e)
-    {
-        HandleIrcMessage(e.ChatMessage);
     }
     #endregion
 
     #region Handling
-    private static void HandleIrcMessage(TwitchMessage ircMessage)
+    private static ValueTask HandleIrcMessage(Privmsg ircMessage)
     {
         try
         {
-            string message = ircMessage.Message;
-            string channel = ircMessage.Channel;
-            string[] splitMessage = message.Replace("\U000E0000", " ").Split(' ');
-            string[] commandArgs = splitMessage.Skip(1).ToArray();
+            string message = ircMessage.Content;
+            string channel = ircMessage.Channel.Name;
 
             if (CommandHandler.Prefixes.Any(x => message.StartsWith(x))
             && ChannelHandler.MainJoinedChannelNames.Contains(channel))
             {
+                string[] splitMessage = message.Replace("\U000E0000", " ").Split(' ');
+                string[] commandArgs = splitMessage.Skip(1).ToArray();
                 string commandName = splitMessage[0].Replace(CommandHandler.Prefixes.First(x => message.StartsWith(x)), string.Empty);
                 var permission = new Permission(ircMessage);
                 var ctx = new CommandContext(ircMessage, commandArgs, commandName, permission);
-                CommandHandler.HandleCommand(ctx);
+                return CommandHandler.HandleCommand(ctx);
             }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Handling message failed.");
         }
+
+        return ValueTask.CompletedTask;
     }
 
-    private static async ValueTask HandleDiscordMessage(DiscordMessage msg)
+    private async ValueTask HandleDiscordMessage(DiscordMessage msg)
     {
         DiscordTrigger[] evs = _discordEvents.Where(x =>
             x.ChannelId == msg.ChannelId && (msg.Author.Username.Contains(x.NameContains) || x.NameContains == "_ANY_")

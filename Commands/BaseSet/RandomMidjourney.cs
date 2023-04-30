@@ -17,19 +17,20 @@ internal sealed class RandomMidjourney : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string channel = ctx.IrcMessage.Channel;
-        string user = ctx.IrcMessage.DisplayName;
+        string channel = ctx.Message.Channel.Name;
+        string user = ctx.Message.Author.DisplayName;
 
-        using var db = new DbQueries();
-        IEnumerable<dynamic> query = await db.Enqueue(q => q.SelectRaw(
-            $"* FROM midjourney_images " +
+        IEnumerable<dynamic> query = await SingleOf<DbQueries>.Obj.ValueStatement(async qf =>
+        {
+            return await qf.Query().SelectRaw($"* FROM midjourney_images " +
             $"OFFSET floor(random() * (SELECT COUNT(*) FROM midjourney_images)) " +
-            $"LIMIT 1").GetAsync());
+            $"LIMIT 1").GetAsync();
+        });
 
         dynamic? row = query.FirstOrDefault();
         if (row is null)
         {
-            MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
+            await MessageHandler.SendMessage(channel, $"@{user}, I could not fetch a random image PoroSad");
             return;
         }
 
@@ -43,8 +44,8 @@ internal sealed class RandomMidjourney : Command
         }
         catch
         {
-            _ = await db.Enqueue("midjourney_images", q => q.Where("link", "=", $"{row.link}").DeleteAsync());
-            MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
+            SingleOf<DbQueries>.Obj.Enqueue(async q => await q.Query("midjourney_images").Where("link", "=", $"{row.link}").DeleteAsync());
+            await MessageHandler.SendMessage(channel, "Fetched an image that no longer exists! Try again. PoroSad");
             return;
         }
 
@@ -53,16 +54,16 @@ internal sealed class RandomMidjourney : Command
             { new ByteArrayContent(bytes), "file", $"image{Random.Shared.Next(1000)}.{row.link_ext}" }
         };
 
-        requests.DefaultRequestHeaders.Add("Authorization", AppConfigLoader.Config.ImageHostAuth);
-        HttpResponseMessage response = await requests.PostAsync(AppConfigLoader.Config.ImageHostLink, content);
+        requests.DefaultRequestHeaders.Add("Authorization", AppConfig.ImageHostAuth);
+        HttpResponseMessage response = await requests.PostAsync(AppConfig.ImageHostLink, content);
         string responseString = await response.Content.ReadAsStringAsync();
-        if (!responseString.Contains(AppConfigLoader.Config.ImageHostLink[..5]))
+        if (!responseString.StartsWith("https"))
         {
-            MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
+            await MessageHandler.SendMessage(channel, $"@{user}, Image could not be uploaded PoroSad");
             return;
         }
 
         string? ps = row.prompt as string;
-        MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^1] : ps)}\" {responseString}");
+        await MessageHandler.SendMessage(channel, $"@{user}, \"{(ps?.EndsWith(' ') ?? false ? ps[..^1] : ps)}\" {responseString}");
     }
 }

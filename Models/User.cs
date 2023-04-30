@@ -7,7 +7,7 @@ public sealed class User
 {
     public string DisplayName { get; init; }
     public string Username { get; init; }
-    public string Id { get; init; }
+    public long Id { get; init; }
     public string Type { get; init; }
     public string BroadcasterType { get; init; }
     public DateTime CreatedAt { get; init; }
@@ -49,7 +49,7 @@ public sealed class User
     {
         DisplayName = helixUser.DisplayName;
         Username = helixUser.Login;
-        Id = helixUser.Id;
+        Id = long.Parse(helixUser.Id);
         Type = helixUser.Type;
         BroadcasterType = helixUser.BroadcasterType;
         CreatedAt = helixUser.CreatedAt;
@@ -60,5 +60,5 @@ public sealed class User
     }
 }
 
-public sealed record PartialUser(string Displayname, string Username, string ID);
-public sealed record ExtendedChannel(string Displayname, string Username, string ID, string AvatarUrl, DateTime DateJoined, int Priority, bool Logged);
+public sealed record PartialUser(string Displayname, string Username, long Id);
+public sealed record ExtendedChannel(string Displayname, string Username, long Id, string AvatarUrl, DateTime DateJoined, int Priority, bool Logged);

@@ -1,13 +1,14 @@
 ﻿using Tack.Core;
+using Tack.Models;
 using Tack.Modules;
 using Tack.Nonclass;
 
 namespace Tack.Handlers;
-internal static class ModulesHandler
+internal sealed class ModulesHandler : Singleton
 {
     private static readonly Dictionary<string, IModule> _modules = new();
 
-    public static void Initialize()
+    public ModulesHandler()
     {
         AddModule(new LinkCollection(Program.Settings[nameof(LinkCollection)]));
         AddModule(new MentionsRelay(Program.Settings[nameof(MentionsRelay)]));

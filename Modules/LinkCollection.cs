@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using MiniTwitch.Irc.Models;
 using SqlKata.Execution;
 using Tack.Database;
 using Tack.Handlers;
@@ -13,7 +14,7 @@ internal sealed class LinkCollection : ChatModule
     {
         if (!enabled)
             Disable();
-        Time.DoEvery(TimeSpan.FromMinutes(5), async () => await Commit());
+        Time.DoEvery(TimeSpan.FromMinutes(5), Commit);
     }
 
     private static readonly Regex _regex = new(@"https?:[\\/][\\/](www\.|[-a-zA-Z0-9]+\.)?[-a-zA-Z0-9@:%._\+~#=]{3,}(\.[a-zA-Z]{2,10})+(/([-a-zA-Z0-9@:%._\+~#=/?&]+)?)?\b", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
@@ -29,53 +30,52 @@ internal sealed class LinkCollection : ChatModule
     private static readonly IEnumerable<string> _columns = new[] { "username", "channel", "link_text" };
     private bool _toggle = false;
 
-    protected override ValueTask OnMessage(TwitchMessage ircMessage)
+    protected override ValueTask OnMessage(Privmsg message)
     {
-        if (ircMessage.Message.Length < 10
-        || ircMessage.Username == AppConfigLoader.Config.BotUsername
-        || ircMessage.Username.Contains("bot")
-        || _bots.Contains(ircMessage.Username)
-        || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == ircMessage.Channel))
+        if (message.Content.Length < 10
+        || message.Author.Name == AppConfig.BotUsername
+        || message.Author.Name.Contains("bot")
+        || _bots.Contains(message.Author.Name)
+        || ChannelHandler.FetchedChannels.Any(x => !x.Logged && x.Username == message.Channel.Name))
         {
             return default;
         }
 
-        string? link = _regex.Match(ircMessage.Message).Value;
-        if (link is null
-        || link.Length < 10
-        || link.Length > 400
-        || !link.StartsWith('h'))
+        if (message.Author.Name.Length > 25)
         {
+            Log.Warning("[{@header}] @{guy} <- This guy's name is longer than 25??", nameof(LinkCollection), message.Author.Name);
             return default;
         }
+
+        string? link = _regex.Match(message.Content).Value;
+        if (link is { Length: < 10 or > 400 } || link[0] != 'h')
+            return default;
 
         List<LinkData> list = _commitLists[_toggle ? 0 : 1];
-        list.Add((ircMessage.Username, ircMessage.Channel, link));
+        list.Add((message.Author.Name, message.Channel.Name, link));
         Log.Verbose("[{@header}] Link added: {link} ({total})", Name, link, list.Count);
 
         return default;
     }
 
-    private async Task Commit()
+    private void Commit()
     {
         _toggle = !_toggle;
-        Log.Debug("[{@header}] Committing link list...", Name);
-        using var db = new DbQueries();
         List<LinkData> list = _commitLists[_toggle ? 1 : 0];
-        if (!list.Any() || list.Count == 0)
+        if (list is { Count: < 10 })
+        {
+            Log.Debug("[{header}] Link list has less than 10 items. Skipping...", Name);
             return;
+        }
+
+        Log.Debug("[{@header}] Committing link list...", Name);
         IEnumerable<object[]> data = list.Select(x => new object[] { x.Username, x.Channel, x.Link });
-        try
+        SingleOf<DbQueries>.Obj.Enqueue(async qf =>
         {
-            _ = await db.Enqueue("collected_links", q => q.InsertAsync(_columns, data), 2500);
-            Log.Debug("{l} links added", list.Count);
+            int inserted = await qf.Query("collected_links").InsertAsync(_columns, data);
+            Log.Debug("{l} links added", inserted);
             list.Clear();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to commit link list to DB");
-            Log.Error("List size: {size}", list.Count);
-        }
+        });
     }
 
     private record struct LinkData(string Username, string Channel, string Link)

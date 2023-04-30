@@ -18,8 +18,8 @@ internal sealed class Alerts : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
         var ab = new StringBuilder();
 
         (bool keyExists, Alert[] value) = await Redis.Cache.TryGetObjectAsync<Alert[]>("warframe:alerts");
@@ -28,7 +28,7 @@ internal sealed class Alerts : Command
             Result<Alert[]> r = await ExternalApiHandler.WarframeStatusApi<Alert[]>("alerts");
             if (!r.Success)
             {
-                MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
+                await MessageHandler.SendMessage(channel, $"@{user}, ⚠ Request failed: {r.Exception.Message}");
                 return;
             }
 

@@ -1,5 +1,4 @@
 ﻿using Tack.Core;
-using Tack.Database;
 using Tack.Handlers;
 using Tack.Misc;
 using Tack.Models;
@@ -17,14 +16,17 @@ internal sealed class Ping : Command
 
     public override async Task Execute(CommandContext ctx)
     {
-        string user = ctx.IrcMessage.DisplayName;
-        string channel = ctx.IrcMessage.Channel;
-        double latency = DateTimeOffset.Now.ToUnixTimeMilliseconds() - double.Parse(ctx.IrcMessage.TmiSentTs);
+        string user = ctx.Message.Author.DisplayName;
+        string channel = ctx.Message.Channel.Name;
+        TimeSpan latency = DateTimeOffset.Now - ctx.Message.SentTimestamp;
         string uptime = Time.SinceString(Program.StartupTime);
-        (bool keyExists, string value) = await Redis.Cache.TryGetObjectAsync<string>("shards:ping");
 
-        MessageHandler.SendMessage(channel, $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} " +
-            $"● {latency}ms " +
-            $"● Uptime: {uptime} ● Shard status: {(keyExists ? value : null)}");
+        await MessageHandler.SendMessage(channel,
+            $"{string.Join($" {user} ", RandomReplies.PingReplies.Choice())} "
+            + $"● {latency.TotalMilliseconds}ms "
+            + $"● Uptime: {uptime}"
+            + $"● M:{SingleOf<MainClient>.Obj.Client.JoinedChannels.Count}," +
+                $"A:{SingleOf<AnonymousClient>.Obj.Client.JoinedChannels.Count}," +
+                $"UP:{new DateTimeOffset(Program.StartupTime).ToUnixTimeMilliseconds()}");
     }
 }
