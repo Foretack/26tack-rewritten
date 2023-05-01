@@ -28,7 +28,6 @@ internal sealed class StreamMonitor : IModule
         TwitchStreams = ChannelHandler.FetchedChannels.Where(x => x.Priority >= 0).ToDictionary(
             x => x.Username,
             y => new TwitchStream(y.Username, false, string.Empty, string.Empty, DateTime.Now));
-        _ms.SetChannelsByName(ChannelHandler.FetchedChannels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
 
         _ms.OnServiceStarted += (_, _) => Log.Information("[{h}] Initialized", Name);
         _ms.OnStreamOnline += StreamOnline;
@@ -116,6 +115,7 @@ internal sealed class StreamMonitor : IModule
     {
         Enabled = true;
         UpdateSettings();
+        _ms.SetChannelsByName(ChannelHandler.FetchedChannels.Where(x => x.Priority >= 0).Select(x => x.Username).ToList());
         _ms.Start();
         Log.Information("[{name}] Started", Name);
     }
