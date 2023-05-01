@@ -8,6 +8,8 @@ using Tack.Handlers;
 using Tack.Models;
 using Tack.Nonclass;
 using Tack.Utils;
+using LatestPosts = System.Collections.Generic.Dictionary<string, long>;
+using Subscriptions = System.Collections.Generic.Dictionary<string, Tack.Models.RssFeedSubscription>;
 
 namespace Tack.Modules;
 internal sealed class FeedsReader : IModule
@@ -24,8 +26,8 @@ internal sealed class FeedsReader : IModule
 
     private async Task ReadFeeds()
     {
-        Dictionary<string, RssFeedSubscription> subs = await GetSubscriptions();
-        Dictionary<string, long> latest = await GetLatestItems();
+        Subscriptions subs = await GetSubscriptions();
+        LatestPosts latest = await GetLatestItems();
 
         foreach (KeyValuePair<string, RssFeedSubscription> sub in subs)
         {
@@ -81,15 +83,14 @@ internal sealed class FeedsReader : IModule
         }
     }
 
-    private static Task<Dictionary<string, RssFeedSubscription>> GetSubscriptions()
+    private static Task<Subscriptions> GetSubscriptions()
     {
-        return Redis.Cache.GetObjectAsync<Dictionary<string, RssFeedSubscription>>("rss:subscriptions");
+        return Redis.Cache.GetObjectAsync<Subscriptions>("rss:subscriptions");
     }
 
-    private static Task<Dictionary<string, long>> GetLatestItems()
+    private static Task<LatestPosts> GetLatestItems()
     {
-        return Redis.Cache.FetchObjectAsync("rss:latest",
-            () => Task.FromResult(new Dictionary<string, long>()));
+        return Redis.Cache.FetchObjectAsync("rss:latest", () => Task.FromResult(new LatestPosts()));
     }
 
     public void Enable()
