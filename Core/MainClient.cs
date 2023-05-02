@@ -19,7 +19,7 @@ internal sealed class MainClient : Singleton
         {
             options.Username = AppConfig.BotUsername;
             options.OAuth = AppConfig.BotAccessToken;
-            options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
+            options.Logger = new LoggerFactory().AddSerilog(Log.Logger).CreateLogger<MainClient>();
         });
         Client.OnUserstate += OnUserstate;
     }

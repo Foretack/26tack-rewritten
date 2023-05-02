@@ -12,7 +12,7 @@ internal sealed class AnonymousClient : Singleton
         Client = new(options =>
         {
             options.Anonymous = true;
-            options.Logger = new LoggerFactory().AddSerilog(Log.Logger);
+            options.Logger = new LoggerFactory().AddSerilog(Log.Logger).CreateLogger<AnonymousClient>();
         });
     }
 }
