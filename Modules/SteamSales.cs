@@ -19,9 +19,9 @@ internal class SteamSales : IModule
     public string Name => GetType().Name;
     public bool Enabled { get; private set; }
 
-    private readonly Regex _freeWeekend = new(@".*FREE WEEKEND.*Play (?<game>.*) free this weekend and save (?<percent>[0-9]+%) when .*!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(10));
-    private readonly Regex _sale = new(@".*Save (up to )?(?<percent>[0-9]+%) with the (?<saleName>.*)!\n\n(?<link>https://store\.steampowered\.com/sale/[^\n]+)", RegexOptions.ExplicitCapture | RegexOptions.Compiled, TimeSpan.FromMilliseconds(10));
-    private readonly Regex _gameDeal = new(@".*Save (?<percent>[0-9]+%) on (?<game>.*)!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(10));
+    private readonly Regex _freeWeekend = new(@".*FREE WEEKEND.*Play (?<game>.*) free this weekend and save (?<percent>[0-9]+%) when .*!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private readonly Regex _sale = new(@".*Save (up to )?(?<percent>[0-9]+%) with the (?<saleName>.*)!\n\n(?<link>https://store\.steampowered\.com/sale/[^\n]+)", RegexOptions.ExplicitCapture | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private readonly Regex _gameDeal = new(@".*Save (?<percent>[0-9]+%) on (?<game>.*)!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
 
     public SteamSales(bool enabled)
     {
