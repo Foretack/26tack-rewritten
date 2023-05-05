@@ -19,6 +19,7 @@ internal sealed class ModulesHandler : Singleton
         AddModule(new FeedsReader(Program.Settings[nameof(FeedsReader)]));
         AddModule(new UserCollection(Program.Settings[nameof(UserCollection)]));
         AddModule(new StreamMonitor(Program.Settings[nameof(StreamMonitor)]));
+        AddModule(new SteamSales(Program.Settings[nameof(SteamSales)]));
     }
 
     private static void AddModule(IModule module)
