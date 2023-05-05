@@ -34,7 +34,7 @@ internal class SteamSales : IModule
     private async Task Report()
     {
         await using SteamSalesMeta meta = await Redis.Cache.FetchObjectAsync($"bot:modules:{Name}",
-            () => Task.FromResult(new SteamSalesMeta(0, new())));
+            () => Task.FromResult(new SteamSalesMeta(new())));
         Feed feedReadResult;
         try
         {
@@ -53,9 +53,10 @@ internal class SteamSales : IModule
                 .OrderBy(x => new DateTimeOffset(x.PublishingDate ?? DateTime.MinValue).ToUnixTimeSeconds());
         foreach (FeedItem item in items)
         {
-            if ((item.PublishingDate?.Ticks ?? 0) <= meta.Latest)
+            if (item.PublishingDate is not null && item.PublishingDate?.Ticks > meta.Latest)
                 continue;
 
+            meta.Latest = item.PublishingDate!.Value.Ticks;
             Log.Information("🐦 New tweet from steam: {title} -- {link}", item.Title, item.Link);
             StringBuilder sb = new("GabeN ");
             if (_sale.Match(item.Title) is { Success: true } sale)
