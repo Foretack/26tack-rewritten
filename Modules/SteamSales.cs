@@ -53,7 +53,7 @@ internal class SteamSales : IModule
                 .OrderBy(x => new DateTimeOffset(x.PublishingDate ?? DateTime.MinValue).ToUnixTimeSeconds());
         foreach (FeedItem item in items)
         {
-            if (item.PublishingDate is not null && item.PublishingDate?.Ticks > meta.Latest)
+            if (item.PublishingDate is null || item.PublishingDate?.Ticks <= meta.Latest)
                 continue;
 
             meta.Latest = item.PublishingDate!.Value.Ticks;
