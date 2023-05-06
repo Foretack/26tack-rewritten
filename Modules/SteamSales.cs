@@ -19,9 +19,9 @@ internal class SteamSales : IModule
     public string Name => GetType().Name;
     public bool Enabled { get; private set; }
 
-    private readonly Regex _freeWeekend = new(@".*FREE WEEKEND.*Play (?<game>.*) free this weekend and save (?<percent>[0-9]+%) when .*!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private readonly Regex _freeWeekend = new(@".*FREE WEEKEND.*Play (?<game>.*) free this weekend and save (?<percent>[0-9]+%) when .*!\n\n(?<link>https://store\.steampowered\.com/app/(?<appId>[0-9]+)/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
     private readonly Regex _sale = new(@".*Save (?<upTo>up to )?(?<percent>[0-9]+%) with the (?<saleName>.*)!\n\n(?<link>https://store\.steampowered\.com/sale/[^\n]+)", RegexOptions.ExplicitCapture | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
-    private readonly Regex _gameDeal = new(@".*Save (?<percent>[0-9]+%) on (?<game>.*)!\n\n(?<link>https://store\.steampowered\.com/app/[0-9]+/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+    private readonly Regex _gameDeal = new(@".*Save (?<percent>[0-9]+%) on (?<game>.*)!\n\n(?<link>https://store\.steampowered\.com/app/(?<appId>[0-9]+)/[^/]*/)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
 
     public SteamSales(bool enabled)
     {
@@ -33,7 +33,7 @@ internal class SteamSales : IModule
 
     private async Task Report()
     {
-        await using SteamSalesMeta meta = await Redis.Cache.FetchObjectAsync($"bot:modules:{Name}",
+        await using SteamSalesMeta meta = await Redis.Cache.FetchObjectAsync(SteamSalesMeta.KeyName,
             () => Task.FromResult(new SteamSalesMeta(new())));
         Feed feedReadResult;
         try
@@ -51,6 +51,7 @@ internal class SteamSales : IModule
         Log.Debug("Reading feed {title}", feedReadResult.Title);
         IEnumerable<FeedItem> items = feedReadResult.Items
                 .OrderBy(x => new DateTimeOffset(x.PublishingDate ?? DateTime.MinValue).ToUnixTimeSeconds());
+        long appId = 0;
         foreach (FeedItem item in items)
         {
             if (item.PublishingDate is null || item.PublishingDate?.Ticks <= meta.Latest)
@@ -69,31 +70,50 @@ internal class SteamSales : IModule
                     .Append(']')
                     .Append($" {sale.Groups["saleName"]}: ")
                     .Append(sale.Groups["link"]);
+
+                if (sale.Groups.ContainsKey("appId"))
+                    appId = long.Parse(sale.Groups["appId"].Value);
             }
             else if (_freeWeekend.Match(item.Title) is { Success: true } free)
             {
                 _ = sb.Append($"[-{free.Groups["percent"]} & free this weekend] ")
                     .Append($"{free.Groups["game"]}: ")
                     .Append($"{free.Groups["link"]}");
+
+                if (free.Groups.ContainsKey("appId"))
+                    appId = long.Parse(free.Groups["appId"].Value);
             }
             else if (_gameDeal.Match(item.Title) is { Success: true } deal)
             {
                 _ = sb.Append($"[-{deal.Groups["percent"]}] ")
                     .Append($"{deal.Groups["game"]}: ")
                     .Append($"{deal.Groups["link"]}");
+
+                if (deal.Groups.ContainsKey("appId"))
+                    appId = long.Parse(deal.Groups["appId"].Value);
             }
             else
             {
                 _ = sb.Append(item.Title);
             }
 
-            if (Enabled)
+            if (!Enabled)
+                continue;
+
+            foreach (string channel in meta.Channels)
             {
-                foreach (string channel in meta.Channels)
-                {
-                    await MessageHandler.SendMessage(channel, sb.ToString());
-                    await Task.Delay(250);
-                }
+                await MessageHandler.SendMessage(channel, sb.ToString());
+                await Task.Delay(250);
+            }
+
+            if (!meta.Subs.ContainsKey(appId))
+                continue;
+
+            foreach (string user in meta.Subs[appId])
+            {
+                await MessageHandler.SendMessage("supibot", $"$remind {user} {sb}");
+                _ = meta.Subs[appId].Remove(user);
+                await Task.Delay(TimeSpan.FromSeconds(15));
             }
         }
     }

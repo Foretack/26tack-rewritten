@@ -15,5 +15,6 @@ internal sealed class BaseHandler : ChatCommandHandler
         //AddCommand(new LongPing()); Note: Don't uncomment until bot is verified. This causes issues with ratelimits
         AddCommand(new RandomLink());
         AddCommand(new RandomMidjourney());
+        AddCommand(new RemindMe());
     }
 }
