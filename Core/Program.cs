@@ -1,8 +1,6 @@
 ﻿global using Serilog;
 global using static Tack.AppConfigLoader;
 using System.Reflection;
-using CliWrap;
-using CliWrap.Buffered;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -18,8 +16,6 @@ public static class Program
     public static ProgramSettings Settings { get; private set; } = default!;
     public static LoggingLevelSwitch LogSwitch { get; } = new LoggingLevelSwitch();
     public static DateTime StartupTime { get; private set; } = new DateTime();
-
-    private static readonly string _assemblyName = Assembly.GetEntryAssembly()?.GetName().Name ?? throw new ArgumentException($"{nameof(_assemblyName)} can not be null.");
     #endregion
 
     #region Main
@@ -85,19 +81,4 @@ public static class Program
         }
     }
     #endregion
-
-    public static async Task<string?> GitPull()
-    {
-        try
-        {
-            BufferedCommandResult pullResults = await Cli.Wrap("git").WithArguments("pull").ExecuteBufferedAsync();
-            return pullResults.StandardOutput.Split('\n')
-                .First(x => x.Contains("files changed") || x.Contains("file changed") || x.Contains("Already up to date"));
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, $"git pull command failed");
-            return null;
-        }
-    }
 }

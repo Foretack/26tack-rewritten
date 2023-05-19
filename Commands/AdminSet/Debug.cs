@@ -34,10 +34,6 @@ internal sealed class Debug : Command
                 bool s = await db.LogException(new TestException(message));
                 await MessageHandler.SendMessage(channel, s.ToString());
                 break;
-            case "pull":
-                string output = await Program.GitPull() ?? "Command execution failed, check console :(";
-                await MessageHandler.SendMessage(channel, output);
-                break;
             case "triggers":
             case "reloadtriggers":
                 await MessageHandler.ReloadDiscordTriggers();
