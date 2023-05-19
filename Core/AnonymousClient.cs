@@ -6,6 +6,7 @@ namespace Tack.Core;
 internal sealed class AnonymousClient : Singleton
 {
     public IrcClient Client { get; }
+    public int Reconnects { get; private set; } = 0;
 
     public AnonymousClient()
     {
@@ -14,5 +15,11 @@ internal sealed class AnonymousClient : Singleton
             options.Anonymous = true;
             options.Logger = new LoggerFactory().AddSerilog(Log.Logger).CreateLogger<AnonymousClient>();
         });
+
+        Client.OnReconnect += () =>
+        {
+            Reconnects++;
+            return ValueTask.CompletedTask;
+        };
     }
 }
