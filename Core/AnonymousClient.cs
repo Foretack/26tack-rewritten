@@ -14,7 +14,10 @@ internal sealed class AnonymousClient : Singleton
         {
             options.Anonymous = true;
             options.Logger = new LoggerFactory().AddSerilog(Log.Logger).CreateLogger<AnonymousClient>();
-        });
+        })
+        {
+            ReconnectionDelay = TimeSpan.FromMinutes(1)
+        };
 
         Client.OnReconnect += () =>
         {
