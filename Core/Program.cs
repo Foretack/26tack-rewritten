@@ -1,6 +1,5 @@
 ﻿global using Serilog;
 global using static Tack.AppConfigLoader;
-using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -27,6 +26,7 @@ public static class Program
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
             .WriteTo.Discord(AppConfig.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
+            .Enrich.WithMemoryUsage()
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());

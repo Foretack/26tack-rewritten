@@ -63,7 +63,7 @@ internal sealed class DiscordSink : ILogEventSink
                             new
                             {
                                 name = "Properties:",
-                                value = string.Join('\n', logEvent.Properties)
+                                value = FormatProperties(logEvent)
                             }
                         }
                     }
@@ -89,7 +89,7 @@ internal sealed class DiscordSink : ILogEventSink
                         new
                         {
                             name = "Properties:",
-                            value = string.Join('\n', logEvent.Properties)
+                            value = FormatProperties(logEvent)
                         }
                     }
                 }
@@ -130,6 +130,19 @@ internal sealed class DiscordSink : ILogEventSink
             default:
                 break;
         }
+    }
+
+    private static string FormatProperties(LogEvent logEvent)
+    {
+        var sb = new StringBuilder();
+        _ = sb.AppendLine("```yaml");
+        foreach (KeyValuePair<string, LogEventPropertyValue> entry in logEvent.Properties)
+        {
+            _ = sb.AppendLine($"{entry.Key}: {entry.Value}");
+        }
+
+        _ = sb.AppendLine("```");
+        return sb.ToString();
     }
 
     private async Task SendWebhook()

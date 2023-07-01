@@ -67,11 +67,13 @@ internal static class ExternalApiHandler
         string url = $"https://api.ivr.fi/v2/twitch/user?id={string.Join(',', ids)}";
         HttpResponseMessage get = await requests.GetAsync(url);
 
-        if (get.IsSuccessStatusCode)
-            Log.Debug("GET {StatusCode} {Url}", get.StatusCode, url);
-        else
+        if (!get.IsSuccessStatusCode)
+        {
             Log.Warning("GET {StatusCode} {Url}", get.StatusCode, url);
+            return Array.Empty<IvrUser>();
+        }
 
+        Log.Debug("GET {StatusCode} {Url}", get.StatusCode, url);
         IvrUser[]? users = await get.Content.ReadFromJsonAsync<IvrUser[]>(_jsonOptions)
             ?? throw new NoNullAllowedException("Users is null");
 
