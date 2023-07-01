@@ -95,7 +95,6 @@ internal sealed class DiscordSink : ILogEventSink
                 }
             }
         };
-
         StringContent content_ = new(JsonSerializer.Serialize(discordMessage_), Encoding.UTF8, "application/json");
         _logQueue.Enqueue(content_);
     }

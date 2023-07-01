@@ -1,7 +1,6 @@
 ﻿global using Serilog;
 global using static Tack.AppConfigLoader;
 using Serilog.Core;
-using Serilog.Enrichers.ClassName;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Tack.Database;
@@ -28,7 +27,6 @@ public static class Program
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
             .WriteTo.Discord(AppConfig.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .Enrich.WithMemoryUsage()
-            .Enrich.WithClassName()
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
