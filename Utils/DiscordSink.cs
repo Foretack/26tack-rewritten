@@ -59,11 +59,17 @@ internal sealed class DiscordSink : ILogEventSink
                             {
                                 name = "StackTrace:",
                                 value = FormatMessage(logEvent.Exception.StackTrace ?? string.Empty, 1000)
+                            },
+                            new
+                            {
+                                name = "Properties:",
+                                value = string.Join('\n', logEvent.Properties)
                             }
                         }
                     }
                 }
             };
+
             StringContent content = new(JsonSerializer.Serialize(discordMessage), Encoding.UTF8, "application/json");
             _logQueue.Enqueue(content);
             return;
@@ -77,7 +83,15 @@ internal sealed class DiscordSink : ILogEventSink
                 {
                     title = _title,
                     description = logEvent.RenderMessage(_formatProvider),
-                    color = _color
+                    color = _color,
+                    fields = new[]
+                    {
+                        new
+                        {
+                            name = "Properties:",
+                            value = string.Join('\n', logEvent.Properties)
+                        }
+                    }
                 }
             }
         };
