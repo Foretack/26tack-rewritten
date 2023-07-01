@@ -26,13 +26,4 @@
     <PackageReference Include="TwitchLib.Api" Version="3.9.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="MiniTwitch.Common">
-      <HintPath>MiniTwitch.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="MiniTwitch.Irc">
-      <HintPath>MiniTwitch.Irc.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
