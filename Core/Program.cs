@@ -27,11 +27,6 @@ public static class Program
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
             .WriteTo.Discord(AppConfig.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
             .Enrich.WithUnfragmentedHeapSize(SizeFormatting.Megabytes)
-            .Enrich.WithPrivateMemorySize(SizeFormatting.Megabytes)
-            .Enrich.WithPagedMemorySize(SizeFormatting.Megabytes)
-            .Enrich.WithPeakPagedMemorySize(SizeFormatting.Megabytes)
-            .Enrich.WithVirtualMemorySize(SizeFormatting.Gigabytes)
-            .Enrich.WithPeakVirtualMemorySize(SizeFormatting.Gigabytes)
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
