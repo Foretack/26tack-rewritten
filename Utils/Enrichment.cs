@@ -133,17 +133,17 @@ public static class EnrichmentExtensions
         return cfg.With(new PeakVirtualMemorySizeEnricher(formatting));
     }
 
-    public static float FormatSize(this long size,  SizeFormatting formatting)
+    public static float FormatSize(this long size, SizeFormatting formatting)
     {
         int divisor = (int)Math.Pow(10, (int)formatting);
-        return size / divisor;
+        return size / (float)divisor;
     }
 }
 
 public enum SizeFormatting
 {
     Bytes,
-    Kilobytes,
-    Megabytes,
-    Gigabytes
+    Kilobytes = 3,
+    Megabytes = 6,
+    Gigabytes = 9
 }
