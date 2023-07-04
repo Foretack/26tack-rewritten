@@ -30,8 +30,8 @@ public static class Program
             .Enrich.WithPrivateMemorySize(SizeFormatting.Megabytes)
             .Enrich.WithPagedMemorySize(SizeFormatting.Megabytes)
             .Enrich.WithPeakPagedMemorySize(SizeFormatting.Megabytes)
-            .Enrich.WithVirtualMemorySize(SizeFormatting.Megabytes)
-            .Enrich.WithPeakVirtualMemorySize(SizeFormatting.Megabytes)
+            .Enrich.WithVirtualMemorySize(SizeFormatting.Gigabytes)
+            .Enrich.WithPeakVirtualMemorySize(SizeFormatting.Gigabytes)
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
