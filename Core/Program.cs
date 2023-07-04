@@ -26,7 +26,12 @@ public static class Program
             .MinimumLevel.ControlledBy(LogSwitch)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} | {Level}]{NewLine} {Message:lj}{NewLine}{Exception}{NewLine}", theme: AnsiConsoleTheme.Code)
             .WriteTo.Discord(AppConfig.LoggingWebhookUrl, restrictedToMinimumLevel: LogEventLevel.Debug)
-            .Enrich.WithMemoryUsage()
+            .Enrich.WithUnfragmentedHeapSize(SizeFormatting.Megabytes)
+            .Enrich.WithPrivateMemorySize(SizeFormatting.Megabytes)
+            .Enrich.WithPagedMemorySize(SizeFormatting.Megabytes)
+            .Enrich.WithPeakPagedMemorySize(SizeFormatting.Megabytes)
+            .Enrich.WithVirtualMemorySize(SizeFormatting.Megabytes)
+            .Enrich.WithPeakVirtualMemorySize(SizeFormatting.Megabytes)
             .CreateLogger();
 
         SingleOf.Set<DbQueries>(new());
