@@ -133,9 +133,9 @@ public static class EnrichmentExtensions
         return cfg.With(new PeakVirtualMemorySizeEnricher(formatting));
     }
 
-    public static double FormatSize(this long size,  SizeFormatting formatting)
+    public static float FormatSize(this long size,  SizeFormatting formatting)
     {
-        return Math.Pow(size, -(int)formatting);
+        return (float)Math.Pow(size, -(int)formatting);
     }
 }
 
