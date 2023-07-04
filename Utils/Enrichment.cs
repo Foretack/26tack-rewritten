@@ -135,7 +135,8 @@ public static class EnrichmentExtensions
 
     public static float FormatSize(this long size,  SizeFormatting formatting)
     {
-        return (float)Math.Pow(size, -(int)formatting);
+        int divisor = (int)Math.Pow(10, (int)formatting);
+        return size / divisor;
     }
 }
 
