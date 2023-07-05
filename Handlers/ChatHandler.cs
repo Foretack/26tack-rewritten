@@ -69,6 +69,7 @@ public static class ChatHandler
         else
             level = CommandPermission.Everyone;
 
+        ForContext("Permission", level).Verbose("{User} has permission to run the command: {Command}", message.Author.Name, command.Info.Name);
         return level >= command.Info.Permission;
     }
 }
