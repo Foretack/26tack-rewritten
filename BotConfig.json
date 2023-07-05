@@ -1,0 +1,18 @@
+{
+	"Local": {
+		"Username": "",
+		"Token": "",
+		"RedisAddress": "",
+		"RedisPass": "",
+		"DbConnectionString": "",
+		"WebhookUrl": ""
+	},
+	"Hosted": {
+		"Username": "",
+		"Token": "",
+		"RedisAddress": "",
+		"RedisPass": "",
+		"DbConnectionString": "",
+		"WebhookUrl": ""
+	}
+}
