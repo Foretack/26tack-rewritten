@@ -1,18 +1,22 @@
 {
 	"Local": {
+		"Prefix": "",
 		"Username": "",
 		"Token": "",
 		"RedisAddress": "",
 		"RedisPass": "",
 		"DbConnectionString": "",
-		"WebhookUrl": ""
+		"WebhookUrl": "",
+		"DefaultLogLevel": 1
 	},
 	"Hosted": {
+		"Prefix": "",
 		"Username": "",
 		"Token": "",
 		"RedisAddress": "",
 		"RedisPass": "",
 		"DbConnectionString": "",
-		"WebhookUrl": ""
+		"WebhookUrl": "",
+		"DefaultLogLevel": 2
 	}
 }

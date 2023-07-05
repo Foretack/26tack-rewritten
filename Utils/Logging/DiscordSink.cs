@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bot.Workflows;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -40,7 +41,7 @@ public class DiscordSink : ILogEventSink
                         _logger.Warning("[{ClassName}] Sending log: {Status}", response.StatusCode);
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(2));
+                await Task.Delay(TimeSpan.FromSeconds(1.5));
             }
         }, TaskCreationOptions.LongRunning);
 
@@ -107,7 +108,7 @@ public class DiscordSink : ILogEventSink
                     title,
                     description = log.RenderMessage(),
                     color,
-                    fields = log.Level > _propsLevel ? null : new[]
+                    fields = LoggerSetup.LogSwitch.MinimumLevel > _propsLevel ? null : new[]
                     {
                         new
                         {

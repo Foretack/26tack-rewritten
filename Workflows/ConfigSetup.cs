@@ -18,7 +18,6 @@ public class ConfigSetup : IWorkflow
         string mode = OperatingSystem.IsLinux() ? "Hosted" : "Local";
         config.Bind(mode, section);
         Config = section;
-        Information("Loaded {Mode} config", mode);
 
         return ValueTask.FromResult(WorkflowState.Completed);
     }

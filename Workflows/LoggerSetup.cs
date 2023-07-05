@@ -1,19 +1,24 @@
-﻿global using static Serilog.Log;
-global using Serilog;
-using MiniTwitch.Irc;
-using Serilog.Formatting.Compact;
-using Bot.Interfaces;
+﻿global using Serilog;
+global using static Serilog.Log;
 using Bot.Enums;
-using Serilog.Enrichers.ClassName;
+using Bot.Interfaces;
 using Bot.Utils.Logging;
+using MiniTwitch.Irc;
+using Serilog.Core;
+using Serilog.Enrichers.ClassName;
+using Serilog.Events;
+using Serilog.Formatting.Compact;
 
 namespace Bot.Workflows;
 
 public class LoggerSetup : IWorkflow
 {
+    public static LoggingLevelSwitch LogSwitch { get; private set; } = new((LogEventLevel)Config.DefaultLogLevel);
+
     public ValueTask<WorkflowState> Run()
     {
-        Logger = new LoggerConfiguration()
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.ControlledBy(LogSwitch)
             .Enrich.WithProperty("MiniTwitch.Irc", typeof(IrcClient).Assembly.GetName().Version)
             .Enrich.WithClassName()
             .Enrich.WithHeapSize()
