@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Drawing;
+﻿using System.Collections.Concurrent;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -24,18 +22,18 @@ public class DiscordSink : ILogEventSink
     private readonly LogEventLevel _propsLevel;
     private readonly Task _caller;
 
-    public DiscordSink(string webhookUrl, LogEventLevel restrictedToMinimumLevel, LogEventLevel propsRestrictedToMinimumLevel)
+    public DiscordSink(string webhookUrl, LogEventLevel restrictedToMinimumLevel, LogEventLevel propsRestrictedToMaximumLevel)
     {
         _webhookUrl = webhookUrl;
         _logLevel = restrictedToMinimumLevel;
-        _propsLevel = propsRestrictedToMinimumLevel;
+        _propsLevel = propsRestrictedToMaximumLevel;
         _caller = Task.Factory.StartNew(async () =>
         {
             while (true)
             {
                 if (_logQueue.TryDequeue(out object? logEvent) && logEvent is not null)
                 {
-                    HttpResponseMessage response = await _client.PostAsJsonAsync(webhookUrl, logEvent);
+                    HttpResponseMessage response = await _client.PostAsJsonAsync(_webhookUrl, logEvent, _sOptions);
                     if (response.IsSuccessStatusCode)
                         _logger.Verbose("[{ClassName}] Sending log: {Status}", response.StatusCode);
                     else
@@ -45,6 +43,8 @@ public class DiscordSink : ILogEventSink
                 await Task.Delay(TimeSpan.FromSeconds(2));
             }
         }, TaskCreationOptions.LongRunning);
+
+        GC.KeepAlive(_caller);
     }
 
     public void Emit(LogEvent logEvent)
@@ -52,12 +52,15 @@ public class DiscordSink : ILogEventSink
         if (!ShouldLogEvent(logEvent))
             return;
 
-
+        if (logEvent.Exception is not null)
+            _logQueue.Enqueue(CreatExceptionLogObject(logEvent));
+        else
+            _logQueue.Enqueue(CreateLogObject(logEvent));
     }
 
     public object CreatExceptionLogObject(LogEvent log)
     {
-        var (title, color) = GetEmbedData(log.Level);
+        (string title, int color) = GetEmbedData(log.Level);
         var discordMessage = new
         {
             embeds = new[]
@@ -94,7 +97,7 @@ public class DiscordSink : ILogEventSink
 
     public object CreateLogObject(LogEvent log)
     {
-        var (title, color) = GetEmbedData(log.Level);
+        (string title, int color) = GetEmbedData(log.Level);
         var discordMessage = new
         {
             embeds = new[]
@@ -104,7 +107,7 @@ public class DiscordSink : ILogEventSink
                     title,
                     description = log.RenderMessage(),
                     color,
-                    fields = log.Level < _propsLevel ? null : new[]
+                    fields = log.Level > _propsLevel ? null : new[]
                     {
                         new
                         {
@@ -142,7 +145,7 @@ public class DiscordSink : ILogEventSink
         return sb.ToString();
     }
 
-    private (string title, int color) GetEmbedData(LogEventLevel level) => level switch
+    private static (string title, int color) GetEmbedData(LogEventLevel level) => level switch
     {
         LogEventLevel.Verbose => ("📢 Verbose", 10197915),
         LogEventLevel.Debug => ("🔍 Debug", 16777215),
