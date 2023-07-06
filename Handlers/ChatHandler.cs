@@ -1,5 +1,5 @@
-﻿using Bot.Enums;
-using Bot.Interfaces;
+﻿using Bot.Interfaces;
+using Bot.Utils;
 using MiniTwitch.Irc.Models;
 
 namespace Bot.Handlers;
@@ -19,7 +19,7 @@ public static class ChatHandler
     private static void LoadCommands()
     {
         Type interfaceType = typeof(IChatCommand);
-        foreach(Type type in interfaceType.Assembly.GetTypes().Where(t => interfaceType.IsAssignableFrom(t) && !t.IsInterface))
+        foreach (Type type in interfaceType.Assembly.GetTypes().Where(t => interfaceType.IsAssignableFrom(t) && !t.IsInterface))
         {
             if (Activator.CreateInstance(type) is IChatCommand command)
             {
@@ -28,14 +28,17 @@ public static class ChatHandler
             }
         }
 
-        Information("ChatHandler loaded {CommandCount} commands", _commands.Count);
+        Information("ChatHandler dynamically loaded {CommandCount} commands", _commands.Count);
     }
 
     private static ValueTask OnMessage(Privmsg arg)
     {
         ReadOnlySpan<char> content = arg.Content;
-        if (content.Length > Config.Prefix.Length + 1 && content.StartsWith(Config.Prefix, StringComparison.CurrentCulture))
+        if (ChannelsById[arg.Channel.Id].Priority >= 50 && content.Length > Config.Prefix.Length + 1
+            && content.StartsWith(Config.Prefix, StringComparison.CurrentCulture))
+        {
             return HandleCommand(arg);
+        }
 
         return default;
     }
@@ -46,30 +49,10 @@ public static class ChatHandler
         foreach (KeyValuePair<string, IChatCommand> kvp in _commands)
         {
             ReadOnlySpan<char> key = kvp.Key;
-            if (content[Config.Prefix.Length..].StartsWith(key) && message.Permits(kvp.Value))
+            if (content[Config.Prefix.Length..].StartsWith(key) && message.Permits(kvp.Value) && !message.IsOnCooldown(kvp.Value))
                 return kvp.Value.Run(message);
         }
 
         return default;
-    }
-
-    private static bool Permits(this Privmsg message, IChatCommand command)
-    {
-        CommandPermission level;
-        if (WhiteListedUserIds.Contains(message.Author.Id))
-            level = CommandPermission.Whitelisted;
-        else if (message.Author.IsMod)
-            level = CommandPermission.Moderators;
-        else if (message.Author.IsVip)
-            level = CommandPermission.VIPs;
-        else if (message.Author.IsSubscriber)
-            level = CommandPermission.Subscribers;
-        else if (BlackListedUserIds.Contains(message.Author.Id))
-            level = CommandPermission.None;
-        else
-            level = CommandPermission.Everyone;
-
-        ForContext("Permission", level).Verbose("{User} has permission to run the command: {Command}", message.Author.Name, command.Info.Name);
-        return level >= command.Info.Permission;
     }
 }

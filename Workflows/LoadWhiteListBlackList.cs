@@ -7,15 +7,15 @@ namespace Bot.Workflows;
 
 internal class LoadWhiteListBlackList : IWorkflow
 {
-    public static IReadOnlyList<long> WhiteListedUserIds { get; private set; } = default!;
-    public static IReadOnlyList<long> BlackListedUserIds { get; private set; } = default!;
+    public static HashSet<long> WhiteListedUserIds { get; private set; } = default!;
+    public static HashSet<long> BlackListedUserIds { get; private set; } = default!;
     private static readonly ILogger _logger = ForContext<LoadWhiteListBlackList>();
 
     public async ValueTask<WorkflowState> Run()
     {
         try
         {
-            WhiteListedUserIds = (await Postgres.QueryAsync<UserDto>("select * from whitelisted_users")).Select(x => x.Id).ToList();
+            WhiteListedUserIds = (await Postgres.QueryAsync<UserDto>("select * from whitelisted_users")).Select(x => x.Id).ToHashSet();
         }
         catch (Exception ex)
         {
@@ -25,7 +25,7 @@ internal class LoadWhiteListBlackList : IWorkflow
 
         try
         {
-            BlackListedUserIds = (await Postgres.QueryAsync<UserDto>("select * from blacklisted_users")).Select(x => x.Id).ToList();
+            BlackListedUserIds = (await Postgres.QueryAsync<UserDto>("select * from blacklisted_users")).Select(x => x.Id).ToHashSet();
         }
         catch (Exception ex)
         {
