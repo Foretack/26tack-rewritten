@@ -27,4 +27,8 @@
         <Content Include="BotConfig.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Modules\" />
+    </ItemGroup>
+
 </Project>

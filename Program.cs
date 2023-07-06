@@ -13,6 +13,7 @@ public static class Program
            .Add<LoggerSetup>()
            .Add<RedisSetup>()
            .Add<NpgsqlSetup>()
+           .Add<LoadInMemorySettings>()
            .Add<MainClientSetup>()
            .Add<AnonClientSetup>()
            .Add<ChannelsSetup>()
