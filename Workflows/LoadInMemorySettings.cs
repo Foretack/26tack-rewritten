@@ -1,6 +1,7 @@
 ﻿using Bot.Enums;
 using Bot.Interfaces;
 using Bot.Models;
+using Serilog.Events;
 
 namespace Bot.Workflows;
 
@@ -12,7 +13,7 @@ internal class LoadInMemorySettings : IWorkflow
     {
         try
         {
-            Settings = await Cache.FetchObjectAsync("bot:settings", () => Task.FromResult(new InMemorySettings()
+            Settings = await Cache.FetchObjectAsync(Config.SettingsKey, () => Task.FromResult(new InMemorySettings()
             {
                 EnabledModules = new()
             }));
@@ -23,6 +24,8 @@ internal class LoadInMemorySettings : IWorkflow
             return WorkflowState.Failed;
         }
 
+        ForContext<LoadInMemorySettings>().Information("[{ClassName}] Loaded app settings");
+        LoggerSetup.LogSwitch.MinimumLevel = (LogEventLevel)Settings.LogLevel;
         return WorkflowState.Completed;
     }
 }

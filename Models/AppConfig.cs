@@ -16,5 +16,7 @@ public class AppConfig
     public string WebhookUrl { get; init; }
 
     public int DefaultLogLevel { get; init; }
+
+    public string SettingsKey { get; init; }
 }
 #pragma warning restore CS8618

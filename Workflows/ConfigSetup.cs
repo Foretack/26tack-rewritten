@@ -14,7 +14,7 @@ public class ConfigSetup : IWorkflow
     {
         var builder = new ConfigurationBuilder();
         IConfigurationRoot config = builder.AddJsonFile("BotConfig.json").Build();
-        var section = new AppConfig();
+        var section = new AppConfig() { SettingsKey = config.GetSection("InMemorySettingsKey").Value ?? "bot:settings" };
         string mode = OperatingSystem.IsLinux() ? "Hosted" : "Local";
         config.Bind(mode, section);
         Config = section;

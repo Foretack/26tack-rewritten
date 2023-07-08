@@ -16,6 +16,7 @@ public static class Program
            .Add<LoadInMemorySettings>()
            .Add<MainClientSetup>()
            .Add<AnonClientSetup>()
+           .Add<LoadModules>()
            .Add<ChannelsSetup>()
            .Add<LoadWhiteListBlackList>()
            .Add<InitHandlers>();
@@ -34,7 +35,7 @@ public static class Program
 
             if (Enum.TryParse(input, true, out LogEventLevel level))
             {
-                LoggerSetup.LogSwitch.MinimumLevel = level;
+                await Settings.ChangeLogLevel((int)level);
                 Console.WriteLine($"Switching logging level to: {level}");
             }
         }
