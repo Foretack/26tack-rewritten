@@ -52,7 +52,7 @@ internal sealed class FeedsReader : IModule
 
             Log.Debug("Reading feed {title}", feedReadResult.Title);
             IEnumerable<FeedItem> items = feedReadResult.Items
-                .Where(x => !string.IsNullOrEmpty(x.PublishingDateString))
+                .Where(x => x.PublishingDateString.Length > 10)
                 .OrderBy(x => (x.PublishingDate ?? DateTime.MinValue).Ticks);
             foreach (FeedItem item in items)
             {
