@@ -54,7 +54,7 @@ internal sealed class FeedsReader : IModule
             IEnumerable<FeedItem> items = feedReadResult.Items
                 .OrderBy(x => (x.PublishingDate ?? (DateTime.TryParse(x.PublishingDateString, out var date) 
                     ? date 
-                    : throw new Exception($"Failed to parse date of post in {feedReadResult.Title}"))).Ticks);
+                    : throw new Exception($"Failed to parse date of post in {feedReadResult.Title}: {x.PublishingDateString}"))).Ticks);
 
             foreach (FeedItem item in items)
             {
